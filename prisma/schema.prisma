@@ -13,10 +13,99 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  CUSTOMER
+  STORE_OWNER
+}
+
 model Store {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  bannerImage String?
+  id               Int       @id @default(autoincrement())
+  name             String    @unique
+  logo             String
+  bannerImage      String?
+  description      String
+  offerDescription String?
+  city             String
+  address          String
+  mapLink          String
+  ownerId          Int       @unique
+  owner            User      @relation("StoreOwner", fields: [ownerId], references: [id])
+  products         Product[]
+  orderItems      OrderItem[]
+}
+
+model Product {
+  id          Int              @id @default(autoincrement())
+  name        String
   description String
-  city String
+  price       Decimal          @db.Decimal(10, 2)
+  storeId     Int
+  store       Store            @relation(fields: [storeId], references: [id])
+  variants    ProductVariant[]
+  orderItems  OrderItem[]
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  url       String
+  variantId Int
+  product   ProductVariant @relation(fields: [variantId], references: [id])
+}
+
+model ProductVariant {
+  id        Int         @id @default(autoincrement())
+  color     String
+  sizes     VariantSize[]
+  variantImage String
+  images      ProductImage[]
+  productId Int
+  product   Product     @relation(fields: [productId], references: [id])
+}
+
+model VariantSize {
+  id        Int            @id @default(autoincrement())
+  size      String
+  stock     Int
+  variantId Int
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+  role     UserRole @default(CUSTOMER)
+  orders   Order[]
+  store    Store[]   @relation("StoreOwner")
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  orderStatus    OrderStatus
+  price     Decimal @db.Decimal(10, 2)
+  storeId   Int
+  store     Store @relation(fields: [storeId],references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
