@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
         });
 
         return NextResponse.json(store, { status: 201 });
-    } catch (error) {
-        console.error('Failed to create store:', error);
+    } catch (error: any) {
+        console.error('Failed to create store:', error.message || error);
         return NextResponse.json({ error: 'Failed to create store' }, { status: 500 });
     }
 }

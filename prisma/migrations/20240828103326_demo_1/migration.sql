@@ -21,6 +21,9 @@ ADD COLUMN     "mapLink" TEXT NOT NULL,
 ADD COLUMN     "offerDescription" TEXT,
 ADD COLUMN     "ownerId" INTEGER NOT NULL;
 
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "age" INTEGER;
+
 -- CreateTable
 CREATE TABLE "Product" (
     "id" SERIAL NOT NULL,
