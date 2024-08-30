@@ -41,10 +41,6 @@ import { Box, Button, ListItem, Paper, Select, styled, TableCell, TextField, Typ
   export const StyledPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
     marginBottom: theme.spacing(2),
-    // border: `1px solid ${theme.palette.divider}`,
-    // '&:hover': {
-    //   borderColor: "black",
-    // },
   }));
   
   export  const AddressText = styled(Typography)(({ theme }) => ({

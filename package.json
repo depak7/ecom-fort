@@ -17,19 +17,22 @@
     "@mui/material-nextjs": "^5.16.6",
     "@prisma/client": "^5.18.0",
     "@vercel/blob": "^0.23.4",
+    "bcrypt": "^5.1.1",
     "cloudinary": "^2.4.0",
+    "ecom-fort": "file:",
     "next": "14.2.5",
     "next-cloudinary": "^6.10.1",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
-    "prisma": "^5.18.0",
+    "prisma": "^5.19.0",
     "typescript": "^5"
   }
 }
