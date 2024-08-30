@@ -1,28 +1,24 @@
-/*
-  Warnings:
-
-  - A unique constraint covering the columns `[ownerId]` on the table `Store` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `address` to the `Store` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `logo` to the `Store` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `mapLink` to the `Store` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `ownerId` to the `Store` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('CUSTOMER', 'STORE_OWNER');
 
 -- CreateEnum
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED');
 
--- AlterTable
-ALTER TABLE "Store" ADD COLUMN     "address" TEXT NOT NULL,
-ADD COLUMN     "logo" TEXT NOT NULL,
-ADD COLUMN     "mapLink" TEXT NOT NULL,
-ADD COLUMN     "offerDescription" TEXT,
-ADD COLUMN     "ownerId" INTEGER NOT NULL;
+-- CreateTable
+CREATE TABLE "Store" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "logo" TEXT NOT NULL,
+    "bannerImage" TEXT,
+    "description" TEXT NOT NULL,
+    "offerDescription" TEXT,
+    "city" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "mapLink" TEXT NOT NULL,
+    "ownerId" TEXT NOT NULL,
 
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "age" INTEGER;
+    CONSTRAINT "Store_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Product" (
@@ -66,7 +62,7 @@ CREATE TABLE "VariantSize" (
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -78,7 +74,7 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Order" (
     "id" SERIAL NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -99,10 +95,13 @@ CREATE TABLE "OrderItem" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "Store_name_key" ON "Store"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Store_ownerId_key" ON "Store"("ownerId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "Store" ADD CONSTRAINT "Store_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

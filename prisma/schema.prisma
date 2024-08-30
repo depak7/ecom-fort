@@ -28,7 +28,7 @@ model Store {
   city             String
   address          String
   mapLink          String
-  ownerId          Int       @unique
+  ownerId          String     @unique
   owner            User      @relation("StoreOwner", fields: [ownerId], references: [id])
   products         Product[]
   orderItems      OrderItem[]
@@ -71,7 +71,7 @@ model VariantSize {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
+  id    String   @id @default(uuid())
   email    String   @unique
   name     String
   password String
@@ -82,7 +82,7 @@ model User {
 
 model Order {
   id        Int         @id @default(autoincrement())
-  userId    Int
+  userId    String
   user      User        @relation(fields: [userId], references: [id])
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt

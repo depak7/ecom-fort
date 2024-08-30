@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/database/index';
-import bcrypt from 'bcrypt';
+import { createUser } from '@/database/operations';
+
 
 export async function POST(req: NextRequest) {
-    
 
     try {
-        const { email, name, password, role } = await req.json();
+        const requestBody = await req.json();
+        console.log("requestBody", requestBody)
+
+        const { email, name, password, role } = requestBody;
 
         //validation
         if(!email || !name || !password || !role) {
+            console.log("Missing required fields")
             return NextResponse.json(
                 { code:400, message: "Missing required fields"},
                 { status: 400 }
@@ -20,26 +24,19 @@ export async function POST(req: NextRequest) {
         const checkUserExists = await prisma.user.findUnique({where: {email}});
 
         if(checkUserExists){
+            console.log("User already exists")
             return NextResponse.json(
                 {code:400, message: "User already exists"},
                 {status: 400}
             )
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await prisma.user.create({
-            data: {
-                email,
-                username: name,
-                password: hashedPassword,
-                user_type: role
-            }
-        })
+        const newUser = await createUser(email, name, password, role); 
         console.log("User created successfully:", newUser);
 
         return NextResponse.json({
             code: 200,
-            message: "User created successfully",
-            user: newUser
+            message: newUser.message,
+            user: newUser.user
         })
 
     } catch (error:any) {
