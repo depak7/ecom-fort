@@ -1,6 +1,3 @@
-
-
-
 import ProductGrid from "@/components/users/landing/showcase/ProductGrid";
 import StoreGrid from "@/components/users/landing/showcase/StoreGrid";
 import TitleCard from "@/components/users/landing/showcase/TitleCard";
