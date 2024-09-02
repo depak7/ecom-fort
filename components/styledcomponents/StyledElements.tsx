@@ -69,3 +69,29 @@ import { Box, Button, ListItem, Paper, Select, styled, TableCell, TextField, Typ
     fontWeight:700
   }));
   
+  export const OutlinedButton = styled(Button)(({ theme }) => ({
+    borderRadius: '50px',
+    boxShadow: 'none',
+    padding: theme.spacing(1.5, 2),
+    color: 'black',
+    backgroundColor: 'white',
+    border: '2px solid black',
+    fontWeight: 'bold',
+    '&:hover': {
+      backgroundColor: 'white',
+      borderColor: 'black',
+    },
+    '&:active': {
+      boxShadow: 'none',
+      backgroundColor: 'white',
+      borderColor: 'black',
+    },
+  }));
+
+export const TypographyButton = styled(Typography)(({ theme }) => ({
+  marginX: theme.spacing(2),
+  cursor: 'pointer',
+  '&:hover': {
+    textDecoration: 'underline',
+  },
+}))

@@ -1,7 +1,6 @@
 import ProductGrid from "@/components/users/landing/showcase/ProductGrid";
 import StoreGrid from "@/components/users/landing/showcase/StoreGrid";
 import TitleCard from "@/components/users/landing/showcase/TitleCard";
-import { getAllStores } from "./actions/store/action";
 
 import nikeLogo from "@/components/assets/users/Nike.png";
 import pumaLogo from "@/components/assets/users/puma.png";
@@ -27,7 +26,6 @@ export default async function Home() {
     <TitleCard/>
     <StoreGrid stores={stores}/>
     <ProductGrid/>
-
     </>
     
    

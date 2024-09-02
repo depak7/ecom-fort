@@ -13,9 +13,20 @@ import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import StoreCard from "@/components/users/stores/StoreCard";
 import { getAllStores } from "../actions/store/action";
 
+interface Store {
+  id: string;
+  name: string;
+  logo: string;
+  city: string;
+  address: string;
+  description: string;
+}
+
+
 
 export default async function AvailableStores() {
-  const stores = await getAllStores();
+
+  const { stores } = await getAllStores();
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
@@ -59,9 +70,15 @@ export default async function AvailableStores() {
       </Box>
 
       <Grid container spacing={3}>
-        {stores.map((store) => (
+        {stores?.map((store:Store) => (
           <Grid item xs={12} sm={6} md={4} key={store.id} padding={3}>
-            <StoreCard store={store}/>
+            <StoreCard  store={{
+                id: parseInt(store.id),
+                name: store.name,
+                logo: store.logo,
+                location: `${store.city}, ${store.address}`,
+                description: store.description,
+              }}/>
           </Grid>
         ))}
       </Grid>

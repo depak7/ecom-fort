@@ -11,7 +11,7 @@ const generateUniqueId = async (): Promise<string> => {
       uniqueId += characters.charAt(Math.floor(Math.random() * characters.length));
     }
 
-    // Check if the generated ID already exists
+
     const existingRecord = await prisma.user.findUnique({
       where: { id: uniqueId }
     });
