@@ -125,7 +125,7 @@ model VariantSize {
 
 model Cart {
   id     String     @id @default(uuid())
-  userId String
+  userId String      @unique
   user   User       @relation(fields: [userId], references: [id])
   items  CartItem[]
 }

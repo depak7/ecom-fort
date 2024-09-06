@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/database/index';
-import { createUser } from '@/database/operations';
+import { registerUser } from '@/app/actions/user/action';
 
 
 export async function POST(req: NextRequest) {
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
                 {status: 400}
             )
         }
-        const newUser = await createUser(email, name, password, role); 
+        const newUser = await registerUser(email, name, password, role); 
         console.log("User created successfully:", newUser);
 
         return NextResponse.json({
