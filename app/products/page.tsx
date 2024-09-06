@@ -15,7 +15,7 @@ export default async function () {
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
       <Typography
-        variant="h4"
+        variant="h6"
         component="h1"
         gutterBottom
         align="center"
@@ -30,21 +30,21 @@ export default async function () {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 2,
+          mb: 2
         }}
       >
-        <Typography variant="h5" component="h2" fontWeight="bold">
+        <Typography variant="body1" component="h6" fontWeight="bold">
           SHOP OUR PRODUCTS
         </Typography>
         <Box display="flex" gap={2}>
           <Box display="flex" alignItems="center">
-            <Typography variant="h6">Filters</Typography>
+            <Typography variant="body2">Filters</Typography>
             <IconButton sx={{ color: "black" }} aria-label="filter">
               <TuneOutlinedIcon />
             </IconButton>
           </Box>
           <Box display="flex" alignItems="center">
-            <Typography variant="h6">Sort By</Typography>
+            <Typography variant="body2">Sort By</Typography>
             <IconButton sx={{ color: "black" }} aria-label="sort">
               <ExpandMoreOutlinedIcon />
             </IconButton>
@@ -54,7 +54,7 @@ export default async function () {
 
       <Grid container spacing={3}>
         {products.products?.map((product) => (
-          <Grid item xs={12} sm={6} md={3} key={product.id}>
+          <Grid item xs={12} sm={6} md={3} xl={3} key={product.id}>
             <ProductCard
               key={product.id}
               product={{

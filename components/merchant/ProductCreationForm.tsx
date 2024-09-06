@@ -136,7 +136,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     label="Product Name"
                     variant="outlined"
                     onChange={handleInputChange}
-                    sx={{ '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'text.primary' } } }}
+                  
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -148,7 +148,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     variant="outlined"
                     onChange={handleInputChange}
                     InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-                    sx={{ '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'text.primary' } } }}
+
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -160,9 +160,21 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     multiline
                     rows={4}
                     variant="outlined"
-                    sx={{ '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'text.primary' } } }}
+                   
                   />
                 </Grid>
+                <Grid item xs={12}>
+                <StyledTextField
+                    required
+                    fullWidth
+                    name="category"
+                    label="category"
+                    variant="outlined"
+                    onChange={handleInputChange}
+                    InputProps={{ inputProps: { min: 0, step: 0.01 } }}
+
+                  />
+                  </Grid>
                 <Grid item xs={12}>
                   <StyledTextField
                     required
@@ -173,7 +185,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     variant="outlined"
                     onChange={handleInputChange}
                     InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-                    sx={{ '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'text.primary' } } }}
+                   
                   />
                 </Grid>
 
@@ -195,7 +207,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                               newVariants[variantIndex].color = e.target.value
                               setVariants(newVariants)
                             }}
-                            sx={{ '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'text.primary' } } }}
+                           
                           />
                         </Grid>
                         <Grid item xs={12}>
@@ -259,7 +271,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                                   newVariants[variantIndex].sizes[sizeIndex].size = e.target.value
                                   setVariants(newVariants)
                                 }}
-                                sx={{ flex: 1, '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'text.primary' } } }}
+                               
                               />
                               <StyledTextField
                                 required
@@ -272,7 +284,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                                   setVariants(newVariants)
                                 }}
                                 InputProps={{ inputProps: { min: 0 } }}
-                                sx={{ flex: 1, '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'text.primary' } } }}
+                              
                               />
                               <IconButton onClick={() => removeSize(variantIndex, sizeIndex)} sx={{ color: 'error.main' }}>
                                 <DeleteIcon />

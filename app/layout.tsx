@@ -5,6 +5,7 @@ import "./globals.css";
 import NavBar from "@/components/users/landing/appbar/NavBar";
 import { Toolbar } from "@mui/material";
 import {Providers} from "@/Provider";
+import { Toaster } from "sonner";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -23,12 +24,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
        <Providers>
+     
       <AppRouterCacheProvider>
       <NavBar/>
       <Toolbar/>
         {children}
         </AppRouterCacheProvider>
         </Providers>
+        <Toaster  richColors position="top-right"/>
+      
         </body>
     </html>
   );

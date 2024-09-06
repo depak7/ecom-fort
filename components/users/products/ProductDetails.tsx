@@ -21,7 +21,6 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { BaseButton } from "../buttons/BaseButton";
 import { ProductResponse } from "@/app/actions/products/types";
-import { BorderAll } from "@mui/icons-material";
 
 export default function ProductDetails({ product }: ProductResponse) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);

@@ -77,6 +77,7 @@ import { Box, Button, ListItem, Paper, Select, styled, TableCell, TextField, Typ
     backgroundColor: 'white',
     border: '2px solid black',
     fontWeight: 'bold',
+ 
     '&:hover': {
       backgroundColor: 'white',
       borderColor: 'black',

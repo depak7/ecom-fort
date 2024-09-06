@@ -5,7 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import SearchIcon from "@mui/icons-material/Search";
@@ -13,9 +13,11 @@ import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import Image from "next/image";
 import logo from "@/components/assets/users/logo.png";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; 
 import { TypographyButton } from "@/components/styledcomponents/StyledElements";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 interface HideOnScrollProps {
   children: React.ReactElement;
@@ -33,6 +35,15 @@ function HideOnScroll({ children }: HideOnScrollProps) {
 
 export default function NavBar() {
   const router = useRouter();
+
+  const{ data:session,status}=useSession();
+  const [isUserLoggedIn,setUserLoggedIn]=useState<boolean>(false);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      setUserLoggedIn(true);
+    }
+  }, [status]);
 
   const handleNavigation = (link: string) => {
     router.push(`/${link}`);
@@ -94,8 +105,17 @@ export default function NavBar() {
             <TypographyButton variant="body2" sx={{ mx: 2 }}>
               Help
             </TypographyButton>
-            <TypographyButton variant="body2" onClick={()=>handleNavigation('signin')} sx={{ mx: 2 }}>
-              Sign In
+            <TypographyButton variant="body2" onClick={()=>{
+              if(!isUserLoggedIn)
+              {
+                handleNavigation('signin')
+              }
+              else{
+                signOut()
+              }
+              
+              }} sx={{ mx: 2 }}>
+              {isUserLoggedIn?'Signout':"SignIn"}
             </TypographyButton>
           </Box>
         </Toolbar>

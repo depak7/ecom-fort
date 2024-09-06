@@ -3,11 +3,10 @@
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
 import {
   Box,
-  Button,
-  TextField,
+
   Typography,
   Container,
   InputAdornment,
@@ -15,15 +14,18 @@ import {
   Divider,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import GitHubIcon from '@mui/icons-material/GitHub';
+
 import GoogleIcon from '@mui/icons-material/Google';
 import { OutlinedButton, StyledTextField, TypographyButton } from '@/components/styledcomponents/StyledElements';
 import { BaseButton } from '@/components/users/buttons/BaseButton';
+import UseCustomToast from '@/components/ui/useCustomToast';
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const  {errorToast,successToast
+  }=UseCustomToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,8 +37,10 @@ export default function SignIn() {
     });
 
     if (result?.error) {
+      errorToast("username or password invalid")
       console.error(result.error);
     } else {
+      successToast('login Successfull')
       router.push('/');
     }
   };

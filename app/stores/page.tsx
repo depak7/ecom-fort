@@ -31,7 +31,7 @@ export default async function AvailableStores() {
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
       <Typography
-        variant="h4"
+        variant="h6"
         component="h1"
         gutterBottom
         align="center"
@@ -50,18 +50,18 @@ export default async function AvailableStores() {
           mb: 2,
         }}
       >
-        <Typography variant="h5" component="h2" fontWeight={"bold"}>
+        <Typography variant="body1" component="h2" fontWeight={"bold"}>
           SHOP BY STORES
         </Typography>
         <Box display={"flex"} gap={2}>
           <Box display={"flex"} alignItems={"center"}>
-            <Typography variant="h6">Filters</Typography>
+            <Typography variant="body2">Filters</Typography>
             <IconButton sx={{ color: "black" }} aria-label="filter">
               <TuneOutlinedIcon />
             </IconButton>
           </Box>
           <Box display={"flex"} alignItems={"center"}>
-            <Typography variant="h6">Sort By</Typography>
+            <Typography variant="body2">Sort By</Typography>
             <IconButton sx={{ color: "black" }} aria-label="filter">
               <ExpandMoreOutlinedIcon />
             </IconButton>
