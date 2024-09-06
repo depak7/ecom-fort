@@ -1,8 +1,6 @@
 'use server'
 
 import { prisma } from "@/database";
-import { revalidatePath } from 'next/cache'
-
 
 export async function addToCart(
      userId: string,
@@ -64,7 +62,7 @@ export async function addToCart(
         });
         console.log(`Created new cart item: cartId=${cart.id}, productId=${productId}, productVariantId=${variantId}, quantity=${quantity}`);
     }
-    revalidatePath('/cart')
+  
     return {
         message: 'Item added to cart successfully',
         data: {
