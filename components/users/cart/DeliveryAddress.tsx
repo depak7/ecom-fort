@@ -1,6 +1,8 @@
-"use client"
+'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+
 import {
   Box,
   Typography,
@@ -8,75 +10,86 @@ import {
   RadioGroup,
   FormControlLabel,
   Button,
-  InputAdornment,
   Grid,
+  Skeleton,
+  IconButton,
+  Backdrop,
+  CircularProgress,
+
 } from '@mui/material';
 import CheckoutProgress from './CheckoutProgress';
-import { AddressText, InputFieldButton, StyledPaper, StyledTextField } from '@/components/styledcomponents/StyledElements';
+
+import CloseIcon from '@mui/icons-material/Close'; 
+
+import { AddressText, StyledPaper, StyledTextField } from '@/components/styledcomponents/StyledElements';
 import { BaseButton } from '../buttons/BaseButton';
 import { useRouter } from 'next/navigation';
+import { addAddress, editAddress, deleteAddress, getUserAddresses } from '@/app/actions/cart/action';
 
 interface Address {
-  id: string;
+  id: number;
   name: string;
   street: string;
   city: string;
   state: string;
-  zip: string;
+  postalCode: string;
   country: string;
-  phone: string;
-  email: string;
+  phoneNumber: string;
+  alternatePhoneNumber?: string;
+  isDefault: boolean;
 }
 
-const addresses: Address[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    street: '123 Main Street, Apt 4B',
-    city: 'Los Angeles',
-    state: 'CA',
-    zip: '90001',
-    country: 'United States',
-    phone: '+1-310-555-1234',
-    email: 'john.doe@example.com',
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    street: '456 Elm Avenue, Suite 250',
-    city: 'Chicago',
-    state: 'IL',
-    zip: '60611',
-    country: 'United States',
-    phone: '+1-312-555-6789',
-    email: 'jane.smith@example.com',
-  },
-];
-
-export default function DeliveryAddress() {
-  const [selectedAddress, setSelectedAddress] = useState(addresses[0].id);
-  const [newZipcode, setNewZipcode] = useState('');
+export default function DeliveryAddress({ userId }: { userId: string }) {
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
   const [newAddress, setNewAddress] = useState<Partial<Address>>({});
+  const [isLoading, setIsLoading] = useState(true); 
+  const[isAddressChangeLoading,setAddressChangeLoading]=useState<boolean>(false);
 
-  const router = useRouter(); 
 
-const handleProceedToCheckout = () => {
-    router.push("/cart/address/payment");  
+
+  const defaultAddress = addresses.find(addr => addr.isDefault)?.id || null;
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      setIsLoading(true); 
+      const { addresses } = await getUserAddresses(userId);
+      setAddresses(addresses || []);
+      setIsLoading(false);
+    };
+    fetchAddresses();
+  }, [userId]);
+
+  const handleProceedToCheckout = () => {
+    router.push("/cart/address/place-order");  
   };
 
-
-  const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedAddress(event.target.value);
+  const handleAddressChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAddressChangeLoading(true);
+    const selectedAddressId = Number(event.target.value);
+    setSelectedAddress(selectedAddressId);
+    try {
+      const result = await editAddress(selectedAddressId, { isDefault: true });
+      if (result.success) {
+        setAddresses(addresses.map(addr => ({
+          ...addr,
+          isDefault: addr.id === selectedAddressId
+        })));
+        
+      } else {
+        console.error(result.error);
+      }
+      setAddressChangeLoading(false);
+    } catch (error) {
+      console.error('Error setting default address:', error);
+      setAddressChangeLoading(false);
+    }
   };
+  
 
-  const handleNewZipcodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewZipcode(event.target.value);
-  };
-
-  const handleCheckZipcode = () => {
-    console.log('Checking zipcode:', newZipcode);
-  };
 
   const handleAddNewAddress = () => {
     setIsAddingNewAddress(true);
@@ -86,168 +99,225 @@ const handleProceedToCheckout = () => {
     setNewAddress({ ...newAddress, [field]: event.target.value });
   };
 
-  const handleSaveNewAddress = () => {
-    console.log('Saving new address:', newAddress);
+  const handleSaveNewAddress = async () => {
+    if (newAddress.name && newAddress.street && newAddress.city && newAddress.state && newAddress.postalCode && newAddress.country && newAddress.phoneNumber) {
+      const result = await addAddress(userId, {
+        ...newAddress as Required<Omit<Address, 'id'>>,
+        isDefault: addresses.length === 0, 
+        alternatePhoneNumber: newAddress.alternatePhoneNumber || '',
+      });
+      if (result.success) {
+        if (result.address) { 
+          setAddresses([...addresses, result.address]);
+        }
+        setIsAddingNewAddress(false);
+        setNewAddress({});
+      } else {
+        console.error(result.error);
+      }
+    }
+  };
+
+  const handleEditAddress = async (addressId: number) => {
+    const addressToEdit = addresses.find(addr => addr.id === addressId);
+    if (addressToEdit) {
+      setNewAddress(addressToEdit);
+      setIsAddingNewAddress(true);
+    }
+  };
+
+  const handleUpdateAddress = async () => {
+    if (newAddress.id) {
+      const result = await editAddress(newAddress.id, newAddress);
+      if (result.success) {
+        if (result.address) {
+          setAddresses(addresses.map(addr => addr.id === newAddress.id ? result.address : addr));
+        }
+        setIsAddingNewAddress(false);
+        setNewAddress({});
+      } else {
+        console.error(result.error);
+      }
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: number) => {
+    const result = await deleteAddress(addressId);
+    setAddressChangeLoading(true);
+    if (result.success) {
+      setAddresses(addresses.filter(addr => addr.id !== addressId));
+      if (selectedAddress === addressId) {
+        setSelectedAddress(addresses[0]?.id || null);
+      }
+    } else {
+      console.error(result.error);
+
+    }
+    setAddressChangeLoading(false);
+  };
+
+  const AddressSkeleton = () => (
+    <StyledPaper>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Skeleton variant="circular" width={20} height={20} sx={{ mr: 1 }} />
+        <Skeleton variant="text" width="60%" height={28} />
+      </Box>
+      <Box sx={{ ml: 4 }}>
+        <Skeleton variant="text" width="80%" />
+        <Skeleton variant="text" width="70%" />
+        <Skeleton variant="text" width="50%" />
+        <Skeleton variant="text" width="40%" />
+        <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+          <Skeleton variant="rectangular" width={60} height={36} />
+          <Skeleton variant="rectangular" width={60} height={36} />
+        </Box>
+      </Box>
+    </StyledPaper>
+  );
+
+  const handleCloseDialog = () => {
     setIsAddingNewAddress(false);
     setNewAddress({});
   };
 
   return (
     <Box sx={{ maxWidth: 1000, margin: 'auto', padding: 2 }}>
+          <Backdrop open={isAddressChangeLoading} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <CircularProgress color="primary" />
+      </Backdrop>
       <CheckoutProgress />
       <Typography variant="h6" fontWeight={700} gutterBottom>
         Delivery Address
       </Typography>
-      <Box sx={{  p: 2, gap: 2,border:"1px solid" }}>
+      <Box sx={{ p: 2, gap: 2, border: "1px solid" }}>
         <Typography fontWeight={700} variant="subtitle1" gutterBottom>
           Select address
         </Typography>
         <RadioGroup
-          value={selectedAddress}
+         value={selectedAddress || defaultAddress} 
           onChange={handleAddressChange}
         >
-          {addresses.map((address) => (
-            <StyledPaper key={address.id}>
-              <FormControlLabel
-                value={address.id}
-                control={<Radio />}
-                label={
-                  <Box>
-                    <Typography variant="subtitle1" sx={{fontWeight:700,ml:4}}>{address.name}</Typography>
-                    <AddressText variant="body2">{address.street}</AddressText>
-                    <AddressText variant="body2">{`${address.city}, ${address.state} ${address.zip}`}</AddressText>
-                    <AddressText variant="body2">{address.country}</AddressText>
-                    <AddressText variant="body2">{`Phone: ${address.phone}`}</AddressText>
-                    <AddressText variant="body2">{`Email: ${address.email}`}</AddressText>
-                  </Box>
-                }
-              />
-            </StyledPaper>
-          ))}
+          {isLoading ? (
+            [...Array(2)].map((_, index) => (
+              <AddressSkeleton key={index} />
+            ))
+          ) : (
+            addresses.map((address) => (
+              <StyledPaper key={address.id}>
+                <FormControlLabel
+                  value={address.id}
+                  control={<Radio />}
+                  label={
+                    <Box>
+                      <Typography variant="subtitle1" sx={{fontWeight:700,ml:4}}>{address.name}</Typography>
+                      <AddressText>{address.street}</AddressText>
+                      <AddressText>{`${address.city}, ${address.state} ${address.postalCode}`}</AddressText>
+                      <AddressText>{address.country}</AddressText>
+                      <AddressText>{`Phone: ${address.phoneNumber}`}</AddressText>
+                      {address.alternatePhoneNumber && <AddressText>{`Alternate Phone: ${address.alternatePhoneNumber}`}</AddressText>}
+                      <Box sx={{ mt: 1 }}>
+                        <Button onClick={() => handleEditAddress(address.id)}>Edit</Button>
+                        <Button onClick={() => handleDeleteAddress(address.id)}>Delete</Button>
+                      </Box>
+                    </Box>
+                  }
+                />
+              </StyledPaper>
+            ))
+          )}
         </RadioGroup>
-        <Button
-            variant="text"
-            sx={{
-              mt: 2,
-              color: "black",
-              "&:hover": {
-                textDecoration: "underline",
-              },
-            }}
-           
-          >
-            View all address
-          </Button>
+        
         <Box>
           {isAddingNewAddress && (
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Name"
-                  value={newAddress.name || ''}
-                  onChange={handleNewAddressChange('name')}
-                />
+            <Box sx={{ position: 'relative' }}>
+              <IconButton
+                onClick={handleCloseDialog}
+                sx={{ position: 'absolute', right: 8, color: 'red' }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="Name"
+                    value={newAddress.name || ''}
+                    onChange={handleNewAddressChange('name')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="Street"
+                    value={newAddress.street || ''}
+                    onChange={handleNewAddressChange('street')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="City"
+                    value={newAddress.city || ''}
+                    onChange={handleNewAddressChange('city')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="State"
+                    value={newAddress.state || ''}
+                    onChange={handleNewAddressChange('state')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="Postal Code"
+                    value={newAddress.postalCode || ''}
+                    onChange={handleNewAddressChange('postalCode')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="Country"
+                    value={newAddress.country || ''}
+                    onChange={handleNewAddressChange('country')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="Phone Number"
+                    value={newAddress.phoneNumber || ''}
+                    onChange={handleNewAddressChange('phoneNumber')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <StyledTextField
+                    placeholder="Alternate Phone Number"
+                    value={newAddress.alternatePhoneNumber || ''}
+                    onChange={handleNewAddressChange('alternatePhoneNumber')}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <BaseButton onClick={newAddress.id ? handleUpdateAddress : handleSaveNewAddress}>
+                    {newAddress.id ? 'Update Address' : 'Save New Address'}
+                  </BaseButton>
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Street"
-                  value={newAddress.street || ''}
-                  onChange={handleNewAddressChange('street')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="City"
-                  value={newAddress.city || ''}
-                  onChange={handleNewAddressChange('city')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="State"
-                  value={newAddress.state || ''}
-                  onChange={handleNewAddressChange('state')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Pin Code"
-                  value={newAddress.zip || ''}
-                  onChange={handleNewAddressChange('zip')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Country"
-                  value={newAddress.country || ''}
-                  onChange={handleNewAddressChange('country')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Phone"
-                  value={newAddress.phone || ''}
-                  onChange={handleNewAddressChange('phone')}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <StyledTextField
-                  fullWidth
-                  label="Email"
-                  value={newAddress.email || ''}
-                  onChange={handleNewAddressChange('email')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <BaseButton  onClick={handleSaveNewAddress}>
-                  Save New Address
-                </BaseButton>
-              </Grid>
-            </Grid>
+            </Box>
           )}
         </Box>
         {!isAddingNewAddress && (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-       
-          <Button
-            variant="text"
-            sx={{
-              mt: 2,
-              color: "black",
-              "&:hover": {
-                textDecoration: "underline",
-              },
-            }}
-            onClick={handleAddNewAddress}
-          >
-            Add Address
-          </Button>
-          <StyledTextField
-            placeholder="Enter pincode here"
-            variant="outlined"
-            size="small"
-            value={newZipcode}
-            onChange={handleNewZipcodeChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <InputFieldButton onClick={handleCheckZipcode}>Check</InputFieldButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>)}
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <BaseButton
+              style={{
+                marginTop: '16px',
+              }}
+              onClick={handleAddNewAddress}
+            >
+              Add Address
+            </BaseButton>
+          </Box>
+        )}
       </Box>
       <Box sx={{display:"flex",justifyContent:"flex-end" ,mt:2}}>
-        <BaseButton onClick={handleProceedToCheckout}> Proceed to Checkout</BaseButton>
+        <BaseButton onClick={handleProceedToCheckout}>Proceed to Checkout</BaseButton>
       </Box>
     </Box>
-  );
+  )
 }

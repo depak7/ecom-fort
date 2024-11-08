@@ -1,27 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/database/index'; 
+import { createStore } from "@/app/actions/store/action";
+import { NextRequest } from "next/server";
 
-export async function POST(req: NextRequest) {
-    try {
-        const body = await req.json();
-        const { name, description, bannerImageUrl, city } = body;
 
-        if (!name || !description || !bannerImageUrl || !city) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-        }
 
-        const store = await prisma.store.create({
-            data: {
-                name,
-                description,
-                bannerImage: bannerImageUrl,
-                city, 
-            }
-        });
+export async function POST(req:NextRequest){
 
-        return NextResponse.json(store, { status: 201 });
-    } catch (error) {
-        console.error('Failed to create store:', error);
-        return NextResponse.json({ error: 'Failed to create store' }, { status: 500 });
-    }
+    const formData=await req.formData();
+
+    const res=await createStore(formData);
+
 }

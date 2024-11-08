@@ -1,31 +1,26 @@
-"use client";
+"use client"
 
 import { Grid, Box, Typography, IconButton } from "@mui/material";
-import Image, { StaticImageData } from "next/image";
 import { ArrowForwardIos, ArrowBackIos } from "@mui/icons-material";
 import React, { useState } from "react";
-
-import { BaseButton } from "../../buttons/BaseButton";
 import Link from "next/link";
-
-
+import StoreCard from "../../stores/StoreCard";
+import { BaseButton } from "../../buttons/BaseButton";
 
 interface Store {
-  id: number;
+  id: string;
   name: string;
-  logo: string | StaticImageData;
-  location: string;
+  logo: string | null;
+  city: string;
+  address:string;
   description: string;
 }
 
-interface IProps {
-  stores: Store[];
+interface StoreGridProps {
+  stores: Store[]; // Expecting an array of stores
 }
 
- 
-
-export default function StoreGrid({stores}:IProps) {
-
+export default function StoreGrid({ stores }: StoreGridProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const visibleStores = 3;
 
@@ -50,35 +45,9 @@ export default function StoreGrid({stores}:IProps) {
       <Grid container spacing={2} justifyContent="center">
         {stores
           .slice(currentIndex, currentIndex + visibleStores)
-          .map((store, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-             <Box
-                sx={{
-                  overflow: "hidden",
-                  position: "relative",
-                  width: "280px", 
-                  height: "300px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                 
-                }}
-              >
-                <Image
-                  src={store.logo || ""}
-                  alt={store.name}
-                  layout="fill"
-                  objectFit="contain" 
-                />
-              </Box>
-                <Box display={"flex"} gap={1} justifyContent={"center"} sx={{ border:"1px solid"}}  >
-                  <Typography variant="body1">
-                    {store.name},
-                  </Typography>
-                  <Typography  variant="body1">
-                    {store.location}
-                  </Typography>
-                </Box>
+          .map((store) => (
+            <Grid item xs={12} sm={6} md={3} key={store.id}>
+              <StoreCard store={store} />
             </Grid>
           ))}
       </Grid>

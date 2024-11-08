@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import Image from "next/image";
 import {
   Box,
@@ -12,44 +12,45 @@ import {
   AccordionSummary,
   AccordionDetails,
   Rating,
-  TextField,
   Select,
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-
-import ProductImage1 from "@/components/assets/users/productImage-1.png";
-import ProductImage2 from "@/components/assets/users/productImage-2.png";
-import ProductImage3 from "@/components/assets/users/productImage-3.png";
-import ProductImage4 from "@/components/assets/users/productImage-4.png";
-import ProductImage5 from "@/components/assets/users/productImage-5.png";
-import ProductImagecolor1 from "@/components/assets/users/productImage-color-1.png";
-import ProductImagecolor2 from "@/components/assets/users/productImage-color-2.png";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { BaseButton } from "../buttons/BaseButton";
+import { ProductResponse } from "@/app/actions/products/types";
+import {
+  OutlinedButton,
+  StyledTextField,
+} from "@/components/styledcomponents/StyledElements";
+import { toggleWishlistItem } from "@/app/actions/wishlist/action";
+import UseCustomToast from "@/components/ui/useCustomToast";
+import { addToCart } from "@/app/actions/cart/action";
 
-const productImages = [
-  ProductImage1,
-  ProductImage2,
-  ProductImage3,
-  ProductImage4,
-  ProductImage5,
-  ProductImage1,
-  ProductImagecolor1,
-  ProductImagecolor2,
-];
+export default function ProductDetails({
+  product,
+  isWishlisted,
+  userId,
+}: ProductResponse) {
+  const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+  const [inWishlist, setInWishlist] = useState(isWishlisted);
+  const [isPending, setIsPending] = useState(false);
 
-const sizes = ["7 UK", "8 UK", "9 UK", "10 UK"];
-
-export default function ProductDetails() {
-  const [selectedImage, setSelectedImage] = useState(productImages[0]);
-  const [selectedColor, setSelectedColor] = useState(productImages[5]);
-  const [selectedSize, setSelectedSize] = useState("8 UK");
+  const [selectedSize, setSelectedSize] = useState(
+    selectedVariant.sizes[0].size
+  );
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [mainImage, setMainImage] = useState<string>(
+    selectedVariant.images[0].url
+  );
   const [reviewText, setReviewText] = useState("");
-  const [reviewRating, setReviewRating] = useState<number | null>();
-  const [quantity, setQuantity] = useState("1");
+  const [reviewRating, setReviewRating] = useState<number | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [selectedSizeId, setSelectedSizeId] = useState<number | null>( selectedVariant.sizes[0].id); 
+
+
+  const { errorToast, successToast } = UseCustomToast();
 
   const handleShowReviewForm = () => {
     setShowReviewForm(!showReviewForm);
@@ -69,20 +70,60 @@ export default function ProductDetails() {
   ) => {
     if (newSize !== null) {
       setSelectedSize(newSize);
+      const selectedSizeObj = selectedVariant.sizes.find(size => size.size === newSize);
+      setSelectedSizeId(selectedSizeObj ? selectedSizeObj.id : null); 
     }
   };
 
   const handleQuantityChange = (event: SelectChangeEvent) => {
-    setQuantity(event.target.value);
+    setQuantity(Number(event.target.value));
+  };
+
+  const handleWishlistToggle = useCallback(async () => {
+    if (!userId) {
+      console.log("User not logged in");
+      return;
+    }
+
+    setIsPending(true);
+
+    try {
+      const result = await toggleWishlistItem(
+        userId,
+        product.id,
+        selectedVariant.id
+      );
+      if (result.success) {
+        setInWishlist((prev) => !prev);
+      } else {
+        console.error("Failed to update wishlist:", result.error);
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+    } finally {
+      setIsPending(false);
+    }
+  }, [userId, product.id, selectedVariant.id]);
+
+  const handleAddtoCart = async () => {
+    if (!userId) {
+      errorToast("please login to add products to cart");
+      return;
+    }
+    try {
+      const res = await addToCart(userId, product.id, quantity,selectedVariant.id,selectedSizeId?selectedSizeId:0);
+      res.success?successToast("Product added to cart successfully!"): errorToast("Soory something went wrong")
+       
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      errorToast("Soory something went wrong")
+    }
   };
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Nike Air Max Plus Shoes
-      </Typography>
-      <Typography variant="subtitle1" gutterBottom>
-        Men's Shoes
+        {product.name}
       </Typography>
 
       <Box
@@ -93,30 +134,23 @@ export default function ProductDetails() {
         }}
       >
         <Box sx={{ flex: 1 }}>
-          <Image
-            src={selectedImage}
-            alt="Nike Air Max Plus"
-            width={500}
-            height={500}
-            layout="responsive"
-          />
+          <Image src={mainImage} alt={product.name} width={500} height={500} />
           <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-            {productImages.slice(0, 5).map((img, index) => (
+            {selectedVariant.images.map((img, index) => (
               <Box
-                key={index}
+                key={img.id}
                 sx={{
                   width: 60,
                   height: 60,
-                  border:
-                    img === selectedImage
-                      ? "2px solid black"
-                      : "1px solid #ccc",
+                  border: img.url == mainImage ? "2px solid black" : "none",
                   cursor: "pointer",
                 }}
-                onClick={() => setSelectedImage(img)}
+                onClick={() => {
+                  setMainImage(img.url);
+                }}
               >
                 <Image
-                  src={img}
+                  src={img.url}
                   alt={`Thumbnail ${index + 1}`}
                   width={60}
                   height={60}
@@ -128,7 +162,7 @@ export default function ProductDetails() {
 
         <Box sx={{ flex: 1 }}>
           <Typography variant="h5" component="p" fontWeight={700} gutterBottom>
-            MRP : ₹ 8,995.00
+            MRP : ₹ {product.price}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
             incl. of taxes
@@ -138,20 +172,21 @@ export default function ProductDetails() {
           </Typography>
           <Box>
             <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              {productImages.slice(5, 8).map((img, index) => (
+              {product.variants.map((variant) => (
                 <Box
-                  key={index}
+                  key={variant.id}
                   sx={{
                     width: 60,
                     height: 60,
-                    border: img === selectedColor ? "2px solid black" : "none",
+                    border:
+                      variant === selectedVariant ? "2px solid black" : "none",
                     cursor: "pointer",
                   }}
-                  onClick={() => setSelectedColor(img)}
+                  onClick={() => setSelectedVariant(variant)}
                 >
                   <Image
-                    src={img}
-                    alt={`Thumbnail ${index + 1}`}
+                    src={variant.variantImage}
+                    alt={`Color ${variant.color}`}
                     width={60}
                     height={60}
                   />
@@ -170,9 +205,13 @@ export default function ProductDetails() {
               onChange={handleSizeChange}
               aria-label="shoe size"
             >
-              {sizes.map((size) => (
-                <ToggleButton key={size} value={size} aria-label={size}>
-                  {size}
+              {selectedVariant.sizes.map((size) => (
+                <ToggleButton
+                  key={size.id}
+                  value={size.size}
+                  aria-label={size.size}
+                >
+                  {size.size}
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
@@ -182,7 +221,8 @@ export default function ProductDetails() {
               Quantity :
             </Typography>
             <Select
-              value={quantity}
+              value={quantity.toString()}
+              type="number"
               onChange={handleQuantityChange}
               sx={{
                 width: 80,
@@ -194,7 +234,7 @@ export default function ProductDetails() {
               }}
             >
               {[1, 2, 3, 4, 5].map((q) => (
-                <MenuItem key={q} value={q}>
+                <MenuItem key={q} value={q.toString()}>
                   {q}
                 </MenuItem>
               ))}
@@ -202,25 +242,17 @@ export default function ProductDetails() {
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, my: 3 }}>
-            <Button
+            <OutlinedButton
               variant="contained"
-              endIcon={<FavoriteBorderIcon />}
-              sx={{
-                borderRadius: "50px",
-                boxShadow: "none",
-                py: 1.5,
-                color: "black",
-                bgcolor: "white",
-                border: "2px solid black",
-                fontWeight: "bold",
-                "&:hover": {
-                  bgcolor: "white",
-                },
-              }}
+              onClick={handleWishlistToggle}
+              disabled={isPending}
+              endIcon={
+                <FavoriteIcon sx={{ color: inWishlist ? "red" : "inherit" }} />
+              }
             >
-              Favourite
-            </Button>
-            <BaseButton sx={{ borderRadius: "50px" }}>Add to Bag</BaseButton>
+              {inWishlist ? "Remove from Favorites" : "Add to Favorites"}
+            </OutlinedButton>
+            <BaseButton sx={{ borderRadius: "50px" }} onClick={handleAddtoCart}>Add to Bag</BaseButton>
           </Box>
           <Accordion sx={{ mt: 4, boxShadow: "none" }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -246,7 +278,7 @@ export default function ProductDetails() {
                     gap: 2,
                   }}
                 >
-                  <TextField
+                  <StyledTextField
                     label="Write a Review"
                     multiline
                     rows={4}

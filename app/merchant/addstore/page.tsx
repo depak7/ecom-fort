@@ -1,9 +1,9 @@
-import AddStoreForm from "@/components/merchant/AddStoreForm"
+import  CreateStoreForm  from "@/components/merchant/CreateStoreForm";
 
 export default function(){
     return(
     <>
-       <AddStoreForm/>
+       <CreateStoreForm/>
     </>
     )
  
