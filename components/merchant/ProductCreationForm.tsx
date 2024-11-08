@@ -255,7 +255,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                                 '&:hover': { borderColor: 'text.primary', bgcolor: 'action.hover' }
                               }}
                             >
-                              Upload Additional Images
+                              Upload  Images
                             </Button>
                           </label>
                         </Grid>
@@ -348,16 +348,16 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
               Product Preview
             </Typography>
 
-            <ProductCard   product={{
-     
-        name: previewData.name || 'N/A',
-        category: 'Some Category', 
-        price: previewData.price || '0.00',
-        store: storeName,
+            <ProductCard product={{
+                id: 'preview', 
+                name: previewData.name || 'N/A',
+                category: 'Some Category', 
+                price: previewData.price || '0.00',
+                store: storeName,
        
-        image: previewData.image|| '/placeholder-image.png',
-      }}
-    />
+                image: previewData.image|| '/placeholder-image.png',
+              }}
+            />
           </Paper>
         </Grid>
       </Grid>

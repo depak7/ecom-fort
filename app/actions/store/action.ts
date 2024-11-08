@@ -155,3 +155,39 @@ export async function updateStore(storeId: string, formData: FormData) {
     return { success: false, error: 'Failed to update store' }
   }
 }
+
+export async function checkUserHasStore(userId: string) {
+  try {
+    const store = await prisma.store.findFirst({
+      where: {
+        ownerId: userId,
+      },
+      select: {
+        id: true,
+        name:true
+      },
+    })
+
+    return { 
+      success: true, 
+      hasStore: !!store, 
+      storeName:store?store.name:"",
+      storeId: store ? store.id : null 
+    }
+  } catch (error) {
+    console.error('Failed to check if user has store:', error)
+    return { success: false, error: 'Failed to check if user has store' }
+  }
+}
+
+
+export async function getStoreDetailsByStoreId(storeId:string){
+
+  const storeDetails=await prisma.store.findUnique(
+    {
+      where:{
+      id:storeId
+      }
+    }
+  )
+}

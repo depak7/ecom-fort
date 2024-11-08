@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import Image from "next/image";
 import {
   Box,
@@ -12,18 +12,31 @@ import {
   AccordionSummary,
   AccordionDetails,
   Rating,
-  TextField,
   Select,
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { BaseButton } from "../buttons/BaseButton";
 import { ProductResponse } from "@/app/actions/products/types";
+import {
+  OutlinedButton,
+  StyledTextField,
+} from "@/components/styledcomponents/StyledElements";
+import { toggleWishlistItem } from "@/app/actions/wishlist/action";
+import UseCustomToast from "@/components/ui/useCustomToast";
+import { addToCart } from "@/app/actions/cart/action";
 
-export default function ProductDetails({ product }: ProductResponse) {
+export default function ProductDetails({
+  product,
+  isWishlisted,
+  userId,
+}: ProductResponse) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+  const [inWishlist, setInWishlist] = useState(isWishlisted);
+  const [isPending, setIsPending] = useState(false);
+
   const [selectedSize, setSelectedSize] = useState(
     selectedVariant.sizes[0].size
   );
@@ -33,7 +46,11 @@ export default function ProductDetails({ product }: ProductResponse) {
   );
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState<number | null>(null);
-  const [quantity, setQuantity] = useState("1");
+  const [quantity, setQuantity] = useState<number>(1);
+  const [selectedSizeId, setSelectedSizeId] = useState<number | null>( selectedVariant.sizes[0].id); 
+
+
+  const { errorToast, successToast } = UseCustomToast();
 
   const handleShowReviewForm = () => {
     setShowReviewForm(!showReviewForm);
@@ -53,11 +70,54 @@ export default function ProductDetails({ product }: ProductResponse) {
   ) => {
     if (newSize !== null) {
       setSelectedSize(newSize);
+      const selectedSizeObj = selectedVariant.sizes.find(size => size.size === newSize);
+      setSelectedSizeId(selectedSizeObj ? selectedSizeObj.id : null); 
     }
   };
 
   const handleQuantityChange = (event: SelectChangeEvent) => {
-    setQuantity(event.target.value);
+    setQuantity(Number(event.target.value));
+  };
+
+  const handleWishlistToggle = useCallback(async () => {
+    if (!userId) {
+      console.log("User not logged in");
+      return;
+    }
+
+    setIsPending(true);
+
+    try {
+      const result = await toggleWishlistItem(
+        userId,
+        product.id,
+        selectedVariant.id
+      );
+      if (result.success) {
+        setInWishlist((prev) => !prev);
+      } else {
+        console.error("Failed to update wishlist:", result.error);
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+    } finally {
+      setIsPending(false);
+    }
+  }, [userId, product.id, selectedVariant.id]);
+
+  const handleAddtoCart = async () => {
+    if (!userId) {
+      errorToast("please login to add products to cart");
+      return;
+    }
+    try {
+      const res = await addToCart(userId, product.id, quantity,selectedVariant.id,selectedSizeId?selectedSizeId:0);
+      res.success?successToast("Product added to cart successfully!"): errorToast("Soory something went wrong")
+       
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      errorToast("Soory something went wrong")
+    }
   };
 
   return (
@@ -161,7 +221,8 @@ export default function ProductDetails({ product }: ProductResponse) {
               Quantity :
             </Typography>
             <Select
-              value={quantity}
+              value={quantity.toString()}
+              type="number"
               onChange={handleQuantityChange}
               sx={{
                 width: 80,
@@ -181,25 +242,17 @@ export default function ProductDetails({ product }: ProductResponse) {
           </Box>
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, my: 3 }}>
-            <Button
+            <OutlinedButton
               variant="contained"
-              endIcon={<FavoriteBorderIcon />}
-              sx={{
-                borderRadius: "50px",
-                boxShadow: "none",
-                py: 1.5,
-                color: "black",
-                bgcolor: "white",
-                border: "2px solid black",
-                fontWeight: "bold",
-                "&:hover": {
-                  bgcolor: "white",
-                },
-              }}
+              onClick={handleWishlistToggle}
+              disabled={isPending}
+              endIcon={
+                <FavoriteIcon sx={{ color: inWishlist ? "red" : "inherit" }} />
+              }
             >
-              Favourite
-            </Button>
-            <BaseButton sx={{ borderRadius: "50px" }}>Add to Bag</BaseButton>
+              {inWishlist ? "Remove from Favorites" : "Add to Favorites"}
+            </OutlinedButton>
+            <BaseButton sx={{ borderRadius: "50px" }} onClick={handleAddtoCart}>Add to Bag</BaseButton>
           </Box>
           <Accordion sx={{ mt: 4, boxShadow: "none" }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -225,7 +278,7 @@ export default function ProductDetails({ product }: ProductResponse) {
                     gap: 2,
                   }}
                 >
-                  <TextField
+                  <StyledTextField
                     label="Write a Review"
                     multiline
                     rows={4}

@@ -10,6 +10,8 @@ export interface ProductResponse {
       };
       variants: Variant[];
     };
+    isWishlisted?: boolean;
+    userId?: string;
   }
   
   interface Variant {

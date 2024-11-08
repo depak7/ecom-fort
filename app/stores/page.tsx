@@ -73,10 +73,11 @@ export default async function AvailableStores() {
         {stores?.map((store:Store) => (
           <Grid item xs={12} sm={6} md={4} key={store.id} padding={3}>
             <StoreCard  store={{
-                id: parseInt(store.id),
+                id: store.id,
                 name: store.name,
                 logo: store.logo,
-                location: `${store.city}, ${store.address}`,
+                city: store.city,
+                address:store.address,
                 description: store.description,
               }}/>
           </Grid>

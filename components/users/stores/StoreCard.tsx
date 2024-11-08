@@ -4,10 +4,11 @@ import Link from "next/link";
 
 
 interface IProps{
-   store:{ id: number;
+   store:{ id: string;
     name: string;
     logo: string | null;
-    location: string;
+    city: string;
+    address:string;
     description:string
    }
   }
@@ -44,7 +45,7 @@ export default function StoreCard({store}:IProps){
           </Typography>
         </CardContent>
         <CardActions sx={{ justifyContent: "flex-end", mt: "auto" }}>
-          <Link href="/products" passHref>
+          <Link href={`/stores/${store.id}/${store.name}`} passHref>
           <Button
             size="medium"
             variant="contained"

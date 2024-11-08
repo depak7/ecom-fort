@@ -8,6 +8,7 @@ import {Providers} from "@/Provider";
 import { Toaster } from "sonner";
 
 
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -24,7 +25,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
        <Providers>
-     
       <AppRouterCacheProvider>
       <NavBar/>
       <Toolbar/>
@@ -32,7 +32,6 @@ export default function RootLayout({
         </AppRouterCacheProvider>
         </Providers>
         <Toaster  richColors position="top-right"/>
-      
         </body>
     </html>
   );

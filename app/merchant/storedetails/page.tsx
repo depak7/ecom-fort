@@ -1,9 +1,12 @@
-"use client";
+import { Box } from "@mui/material";
+import StoreDashboard from "@/components/merchant/storeinfo/StoreOverview";
+import StoreDetailsNavBar from "@/components/merchant/storeinfo/StoreDetailsNavbar";
+import { checkUserHasStore, getStoreById } from "@/app/actions/store/action";
 
-import { useState, useEffect } from 'react';
-import { getStoreById } from "@/app/actions/store/action";
-import { Box, Typography } from "@mui/material";
-import StoreDescriptionCard from "@/components/merchant/StoreDescriptionCard";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { getProductsByStoreIdForMerchant } from "@/app/actions/products/action";
+import MerchantProductCard from "@/components/merchant/storeinfo/AdminProductCard";
 
 interface Store {
   address: string;
@@ -18,36 +21,51 @@ interface Store {
   ownerId: string;
 }
 
-export default function StorePage() {
-  const [store, setStore] = useState<Store | null>(null);
-  const [error, setError] = useState<string | null>(null);
+const defaultStoreData: Store = {
+  address: "",
+  id: "",
+  name: "",
+  logo: "",
+  bannerImage: null,
+  description: "",
+  offerDescription: null,
+  city: "",
+  mapLink: "",
+  ownerId: "",
+};
 
-  useEffect(() => {
-    async function fetchStore() {
-      try {
-        const result = await getStoreById("0ad8d17b-6b88-4b4d-a13c-584a6e280a04");
-        if (result.success && result.store) {
-          setStore(result.store);
-        } else {
-          setError("Error loading store details");
-        }
-      } catch (err) {
-        setError("An error occurred while fetching store data");
-      }
-    }
+export default async function StorePage() {
+  
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
-    fetchStore();
-  }, []); 
+  let storeId;
+  let storeName;
+  
 
-  if (error) return <Typography>{error}</Typography>;
-  if (!store) return <Typography>Loading...</Typography>;
+  if(userId)
+  {
+    const storedetails=await checkUserHasStore(userId)
+    storeId=storedetails.storeId;
+    storeName=storedetails.storeName;
+  }
+
+
+
+    const { store } = await getStoreById(storeId || "");
+    const {products}=await getProductsByStoreIdForMerchant(storeId || "")
+
+
+ 
+
+
 
   return (
-    <Box sx={{}}>
-      <StoreDescriptionCard store={store} />
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Products
-      </Typography>
+    <Box >
+      <StoreDetailsNavBar storeName={storeName || ""} />
+      <StoreDashboard initialStoreData={store || defaultStoreData} />
+      <MerchantProductCard products={products || []} />
+
     </Box>
   );
 }

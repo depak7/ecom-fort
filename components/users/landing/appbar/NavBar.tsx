@@ -5,6 +5,8 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import Box from "@mui/material/Box";
+import AddBusinessOutlinedIcon from "@mui/icons-material/AddBusinessOutlined";
+import StoreMallDirectoryIcon from '@mui/icons-material/StoreMallDirectory';
 
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
@@ -12,12 +14,14 @@ import SearchIcon from "@mui/icons-material/Search";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import Image from "next/image";
-import logo from "@/components/assets/users/logo.png";
+import logo from "@/components/assets/users/ecom-fort.png";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { TypographyButton } from "@/components/styledcomponents/StyledElements";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
+import { Button } from "@mui/material";
+import { checkUserHasStore } from "@/app/actions/store/action";
 
 interface HideOnScrollProps {
   children: React.ReactElement;
@@ -36,13 +40,26 @@ function HideOnScroll({ children }: HideOnScrollProps) {
 export default function NavBar() {
   const router = useRouter();
 
-  const{ data:session,status}=useSession();
-  const [isUserLoggedIn,setUserLoggedIn]=useState<boolean>(false);
+  const { data: session, status } = useSession();
+  const [isUserLoggedIn, setUserLoggedIn] = useState<boolean>(false);
+  const [storeid, setStoreId] = useState<String>();
+  const [hasStore, setHasStore] = useState<boolean>();
+
+  const userId = session?.user.id;
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      setUserLoggedIn(true);
-    }
+    const checkAuth = async () => {
+      if (status === "authenticated") {
+        setUserLoggedIn(true);
+        if (userId) {
+          const res = await checkUserHasStore(userId);
+
+          setStoreId(res.storeId || "");
+          setHasStore(res.hasStore);
+        }
+      }
+    };
+    checkAuth();
   }, [status]);
 
   const handleNavigation = (link: string) => {
@@ -51,24 +68,27 @@ export default function NavBar() {
 
   return (
     <HideOnScroll>
-      <AppBar sx={{ bgcolor: "white", boxShadow: "none" }}>
+      <AppBar sx={{ bgcolor: "black", boxShadow: "none" }}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
           <Box display="flex" alignItems="center">
-            <Image src={logo} alt="logo" width={80} height={40} />
+            <Image src={logo} alt="logo" width={150} height={40} />
           </Box>
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               bgcolor: "#F5F5F5",
-              borderRadius: 15,
               padding: "0 8px",
               maxWidth: 300,
               flexGrow: 1,
               marginLeft: 2,
             }}
           >
-            <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
+            <IconButton
+              type="submit"
+              sx={{ p: "10px", color: "black" }}
+              aria-label="search"
+            >
               <SearchIcon />
             </IconButton>
             <InputBase
@@ -79,44 +99,83 @@ export default function NavBar() {
           </Box>
 
           <Box display="flex" alignItems="center">
-            <IconButton aria-label="favorite" sx={{ color: "black" }}>
-              <FavoriteBorderRoundedIcon />
+            <IconButton
+              aria-label="favorite"
+              onClick={() => handleNavigation("wishlists")}
+            >
+              <FavoriteBorderRoundedIcon sx={{ color: "white" }} />
             </IconButton>
 
             <IconButton
               aria-label="cart"
-              sx={{ color: "black" }}
               onClick={() => handleNavigation("cart")}
             >
-              <LocalMallOutlinedIcon />
+              <LocalMallOutlinedIcon sx={{ color: "white" }} />
             </IconButton>
           </Box>
-          <Box display="flex" alignItems="center" sx={{ color: "black" }}>
+          <Box display="flex" alignItems="center">
+            {hasStore?<StoreMallDirectoryIcon/>: <AddBusinessOutlinedIcon />}
+           
             <TypographyButton
               variant="body2"
               sx={{
-                mx: 2,
+                mr: 2,
+                ml: 1,
               }}
-              onClick={() => handleNavigation("merchant/addstore")}
+              onClick={() => {
+                if(hasStore)
+                {
+                  handleNavigation("merchant/storedetails")
+
+                }
+                else{
+                  handleNavigation("merchant/addstore")
+                }
+                }
+            
+            }
             >
-              Create Store
+              {hasStore?"Visit Store":"Add Store"}
             </TypographyButton>
 
-            <TypographyButton variant="body2" sx={{ mx: 2 }}>
-              Help
-            </TypographyButton>
-            <TypographyButton variant="body2" onClick={()=>{
-              if(!isUserLoggedIn)
-              {
-                handleNavigation('signin')
-              }
-              else{
-                signOut()
-              }
-              
-              }} sx={{ mx: 2 }}>
-              {isUserLoggedIn?'Signout':"SignIn"}
-            </TypographyButton>
+            {!isUserLoggedIn && (
+              <Button
+                variant="contained"
+                sx={{
+                  mx: 1,
+                  bgcolor: "#D3F2FF",
+                  color: "black",
+                  "&:hover": {
+                    bgcolor: "#D3F2FF",
+                    color: "black",
+                  },
+                }}
+              >
+                Signup
+              </Button>
+            )}
+
+            <Button
+              variant="contained"
+              onClick={() => {
+                if (!isUserLoggedIn) {
+                  handleNavigation("signin");
+                } else {
+                  signOut();
+                }
+              }}
+              sx={{
+                mx: 1,
+                bgcolor: "white",
+                color: "black",
+                "&:hover": {
+                  bgcolor: "white",
+                  color: "black",
+                },
+              }}
+            >
+              {isUserLoggedIn ? "Logout" : "Login"}
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>

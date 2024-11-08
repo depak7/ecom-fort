@@ -5,17 +5,16 @@ import { ArrowForwardIos, ArrowBackIos } from "@mui/icons-material";
 
 import ProductCard from "@/components/users/products/ProductCard";
 import { useState } from "react";
-import { StaticImageData } from "next/image";
 
 interface ProductProps {
   product: {
-    id?: string;
+    id: string;
     name: string;
     category: string;
     price: string;
     store: string;
     storeId?: string;
-    image: StaticImageData | string;
+    image: string;
   }[];
 }
 

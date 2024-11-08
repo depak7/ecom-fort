@@ -1,17 +1,18 @@
 import React from "react";
-
 import { Box, Typography, Grid, IconButton } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
-
 import ProductCard from "@/components/users/products/ProductCard";
 import { getAllProducts } from "../actions/products/action";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth"; 
 
+export default async function ProductList() {
 
-
-export default async function () {
-  const products = await getAllProducts();
-
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  const products=userId? await getAllProducts(userId):await getAllProducts();
+  console.log(products)
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
       <Typography
@@ -62,10 +63,12 @@ export default async function () {
                 name: product.name,
                 price: product.price.toString(), 
                 store: product.store.name,
-                storeId:product.storeId,
-                category:"shirt",
+                storeId: product.storeId,
+                category: "shirt",
                 image: product.variants[0]?.variantImage || "", 
               }}
+              isWishlisted={product.isWishlisted || false}
+              userId={userId}
             />
           </Grid>
         ))}

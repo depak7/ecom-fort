@@ -24,8 +24,7 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const  {errorToast,successToast
-  }=UseCustomToast();
+  const  {errorToast,successToast}=UseCustomToast();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

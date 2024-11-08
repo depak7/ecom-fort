@@ -1,7 +1,9 @@
 import { getProductById, getSimilarProductsByCategory } from "@/app/actions/products/action";
 import ProductDetails from "@/components/users/products/ProductDetails";
 import SimilarProducts from "@/components/users/products/SimilarProducts";
+import { authOptions } from "@/lib/auth";
 import { Box } from "@mui/material";
+import { getServerSession } from "next-auth";
 
 interface ProductPageProps {
   params: {
@@ -12,7 +14,12 @@ interface ProductPageProps {
 export default async function Page({ params }: ProductPageProps) {
   const { id } = params;
 
-  const response = await getProductById(id);
+  const session = await getServerSession(authOptions);
+
+  const userId = session?.user?.id;
+
+  const response =userId?await getProductById(id,userId):await getProductById(id)
+
 
   const similarProduct = await getSimilarProductsByCategory(response.product?.category || "clothes");
 
@@ -32,7 +39,7 @@ export default async function Page({ params }: ProductPageProps) {
 
   return (
     <Box>
-      <ProductDetails product={response.product} />
+      <ProductDetails product={response.product}  isWishlisted={response.product.isWishlisted || false}  userId={userId?userId:""}/>
       <SimilarProducts product={similarProducts} />
     </Box>
   );
@@ -40,6 +47,7 @@ export default async function Page({ params }: ProductPageProps) {
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const response = await getProductById(params.id);
+  
 
   return {
     title: response?.product?.name || 'Product Page',

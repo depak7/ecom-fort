@@ -36,6 +36,7 @@ model User {
   store     Store[]    @relation("StoreOwner")
   carts     Cart[]
   wishlists Wishlist[]
+  addresses Address[]
 }
 
 
@@ -159,4 +160,19 @@ model WishlistItem {
   product    Product  @relation(fields: [productId], references: [id])
   productVariantId Int
   variant   ProductVariant @relation(fields: [productVariantId],references: [id])
+}
+
+model Address {
+  id           Int     @id @default(autoincrement())
+  name         String
+  phoneNumber  String
+  alternatePhoneNumber String
+  street       String
+  city         String
+  state        String
+  postalCode   String
+  country      String
+  isDefault    Boolean @default(false)
+  userId       String
+  user         User    @relation(fields: [userId], references: [id])
 }
