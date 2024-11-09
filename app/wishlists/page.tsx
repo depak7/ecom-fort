@@ -7,7 +7,8 @@ import { getServerSession } from "next-auth";
 import { getWishlistedItems } from "../actions/wishlist/action";
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { BaseButton } from "@/components/users/buttons/BaseButton";
-import login from '@/components/assets/users/login (1).png'
+import login from '@/components/assets/users/login-ecom.png'
+
 
 export default async function WishlistPage() {
   const session = await getServerSession(authOptions);

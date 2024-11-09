@@ -2,7 +2,7 @@ import DeliveryAddress from "@/components/users/cart/DeliveryAddress";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 
-export default async function(){
+export default async function Cart(){
 
 
     const session = await getServerSession(authOptions);

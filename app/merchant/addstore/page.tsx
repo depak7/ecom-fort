@@ -1,6 +1,6 @@
 import  CreateStoreForm  from "@/components/merchant/CreateStoreForm";
 
-export default function(){
+export default function AddStore(){
     return(
     <>
        <CreateStoreForm/>

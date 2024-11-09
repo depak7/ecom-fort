@@ -1,9 +1,9 @@
 import { Grid, Typography } from "@mui/material";
 import Image from "next/image";
 import bannerimg from '@/components/assets/users/bannerimg.png'
-import Box from "next-auth/providers/box";
 
-export default function(){
+
+export default function StoreBanner(){
 
 
     return( 

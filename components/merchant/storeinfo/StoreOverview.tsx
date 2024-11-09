@@ -28,16 +28,16 @@ import EditIcon from '@mui/icons-material/Edit'
 import { BaseButton } from '@/components/users/buttons/BaseButton'
 
 interface StoreData {
-  name: string;
-  address: string;
-  id: string;
-  description: string;
-  city: string;
-  mapLink: string;
-  logo: string;
-  bannerImage: string | null;
-  offerDescription: string | null;
-  ownerId: string;
+  name: string
+  address: string
+  id: string
+  description: string
+  city: string
+  mapLink: string
+  logo: string
+  bannerImage: string | null
+  offerDescription: string | null
+  ownerId: string
 }
 
 export default function StoreOverview({ initialStoreData }: { initialStoreData: StoreData }) {
@@ -66,20 +66,26 @@ export default function StoreOverview({ initialStoreData }: { initialStoreData: 
     setIsLoading(true)
     setError(null)
 
-    // try {
-    //   const result = await updateStore(editedData)
-    //   if (result.success) {
-    //     setStoreData(editedData)
-    //     setSuccess(true)
-    //     handleEditDialogClose()
-    //   } else {
-    //     setError(result.error || 'An error occurred while updating the store')
-    //   }
-    // } catch (err) {
-    //   setError('An unexpected error occurred')
-    // } finally {
-    //   setIsLoading(false)
-    // }
+    try {
+      // Uncomment and implement the updateStore function when ready
+      // const result = await updateStore(editedData)
+      // if (result.success) {
+      //   setStoreData(editedData)
+      //   setSuccess(true)
+      //   handleEditDialogClose()
+      // } else {
+      //   setError(result.error || 'An error occurred while updating the store')
+      // }
+      
+      // Temporary success simulation
+      setStoreData(editedData)
+      setSuccess(true)
+      handleEditDialogClose()
+    } catch (err) {
+      setError('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -152,7 +158,7 @@ export default function StoreOverview({ initialStoreData }: { initialStoreData: 
         <DialogTitle>Edit Store Information</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Make changes to your store information here. Click save when you're done.
+            Make changes to your store information here. Click save when you&apos;re done.
           </DialogContentText>
           <TextField
             margin="dense"

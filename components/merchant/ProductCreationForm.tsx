@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
+import React, { useState } from "react";
 
 import {
   Box,
@@ -13,120 +13,163 @@ import {
   Snackbar,
   Alert,
   IconButton,
+  MenuItem,
+  Select,
+  InputLabel,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { createProduct } from "@/app/actions/products/action";
+import {
+  OutlinedButton,
+  StyledTextField,
+} from "../styledcomponents/StyledElements";
+import { BaseButton } from "../users/buttons/BaseButton";
+import ProductCard from "../users/products/ProductCard";
 
-} from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import { createProduct } from '@/app/actions/products/action' 
-import { OutlinedButton, StyledTextField } from '../styledcomponents/StyledElements'
-import { BaseButton } from '../users/buttons/BaseButton'
-import ProductCard from '../users/products/ProductCard'
+const allowedSizes = ["S-38", "XS-39", "M-40", "L-42", "XL-44", "XXL-46"];
 
-export default function ProductCreationForm({ storeId, storeName }: { storeId: string; storeName: string }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [variants, setVariants] = useState([{ color: '', sizes: [{ size: '', stock: 0 }] }])
+export default function ProductCreationForm({
+  storeId,
+  storeName,
+}: {
+  storeId: string;
+  storeName: string;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [variants, setVariants] = useState([
+    { color: "", sizes: [{ size: "", stock: 0 }] },
+  ]);
   const [previewData, setPreviewData] = useState({
-    name: '',
-    price: '',
+    name: "",
+    price: "",
     image: null as string | null,
-
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-  
-    const form = e.currentTarget
-    const formData = new FormData(form)
-  
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
     // Append variants data
     variants.forEach((variant, index) => {
-      formData.append(`color-${index}`, variant.color)
-      
-      const variantImageInput = form.querySelector(`#variantImage-${index}`) as HTMLInputElement
-      if (variantImageInput && variantImageInput.files && variantImageInput.files[0]) {
-        formData.append(`variantImage-${index}`, variantImageInput.files[0])
+      formData.append(`color-${index}`, variant.color);
+
+      const variantImageInput = form.querySelector(
+        `#variantImage-${index}`
+      ) as HTMLInputElement;
+      if (
+        variantImageInput &&
+        variantImageInput.files &&
+        variantImageInput.files[0]
+      ) {
+        formData.append(`variantImage-${index}`, variantImageInput.files[0]);
       }
-      
-      const additionalImagesInput = form.querySelector(`#additionalImages-${index}`) as HTMLInputElement
+
+      const additionalImagesInput = form.querySelector(
+        `#additionalImages-${index}`
+      ) as HTMLInputElement;
       if (additionalImagesInput && additionalImagesInput.files) {
         for (let i = 0; i < additionalImagesInput.files.length; i++) {
-          formData.append(`additionalImages-${index}`, additionalImagesInput.files[i])
+          formData.append(
+            `additionalImages-${index}`,
+            additionalImagesInput.files[i]
+          );
         }
       }
-      
+
       variant.sizes.forEach((size, sizeIndex) => {
-        formData.append(`size-${index}-${sizeIndex}`, size.size)
-        formData.append(`stock-${index}-${sizeIndex}`, size.stock.toString())
-      })
-    })
-  
-    formData.append('storeId', storeId)
+        formData.append(`size-${index}-${sizeIndex}`, size.size);
+        formData.append(`stock-${index}-${sizeIndex}`, size.stock.toString());
+      });
+    });
+
+    formData.append("storeId", storeId);
     try {
-      const result = await createProduct(formData)
-      console.log(result)
+      const result = await createProduct(formData);
+      console.log(result);
       if (result.success) {
-        setSuccess(true)
-        form.reset()
-        setVariants([{ color: '', sizes: [{ size: '', stock: 0 }] }])
-        setPreviewData({ name: '', price: '', image: null })
+        setSuccess(true);
+        form.reset();
+        setVariants([{ color: "", sizes: [{ size: "", stock: 0 }] }]);
+        setPreviewData({ name: "", price: "", image: null });
       } else {
-        setError(result.error || 'An error occurred while creating the product')
+        setError(
+          result.error || "An error occurred while creating the product"
+        );
       }
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError("An unexpected error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const addVariant = () => {
-    setVariants([...variants, { color: '', sizes: [{ size: '', stock: 0 }] }])
-  }
+    setVariants([...variants, { color: "", sizes: [{ size: "", stock: 0 }] }]);
+  };
 
   const removeVariant = (index: number) => {
-    setVariants(variants.filter((_, i) => i !== index))
-  }
+    setVariants(variants.filter((_, i) => i !== index));
+  };
 
   const addSize = (variantIndex: number) => {
-    const newVariants = [...variants]
-    newVariants[variantIndex].sizes.push({ size: '', stock: 0 })
-    setVariants(newVariants)
-  }
+    const newVariants = [...variants];
+    newVariants[variantIndex].sizes.push({ size: "", stock: 0 });
+    setVariants(newVariants);
+  };
 
   const removeSize = (variantIndex: number, sizeIndex: number) => {
-    const newVariants = [...variants]
-    newVariants[variantIndex].sizes = newVariants[variantIndex].sizes.filter((_, i) => i !== sizeIndex)
-    setVariants(newVariants)
-  }
+    const newVariants = [...variants];
+    newVariants[variantIndex].sizes = newVariants[variantIndex].sizes.filter(
+      (_, i) => i !== sizeIndex
+    );
+    setVariants(newVariants);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setPreviewData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setPreviewData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (event) => {
-        setPreviewData(prev => ({ ...prev, image: event.target?.result as string }))
-      }
-      reader.readAsDataURL(e.target.files[0])
+        setPreviewData((prev) => ({
+          ...prev,
+          image: event.target?.result as string,
+        }));
+      };
+      reader.readAsDataURL(e.target.files[0]);
     }
-  }
+  };
 
   return (
     <Container maxWidth="lg">
-      <Grid container spacing={4} sx={{  }}>
+      <Grid container spacing={4} sx={{}}>
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 4, bgcolor: 'background.paper' }}>
-            <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ color: 'text.primary' }}>
+          <Paper elevation={3} sx={{ p: 4, bgcolor: "background.paper" }}>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              align="center"
+              sx={{ color: "text.primary" }}
+            >
               Add New Product
             </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              noValidate
+              sx={{ mt: 3 }}
+            >
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <StyledTextField
@@ -136,7 +179,6 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     label="Product Name"
                     variant="outlined"
                     onChange={handleInputChange}
-                  
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -148,7 +190,6 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     variant="outlined"
                     onChange={handleInputChange}
                     InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -160,11 +201,10 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     multiline
                     rows={4}
                     variant="outlined"
-                   
                   />
                 </Grid>
                 <Grid item xs={12}>
-                <StyledTextField
+                  <StyledTextField
                     required
                     fullWidth
                     name="category"
@@ -172,9 +212,8 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     variant="outlined"
                     onChange={handleInputChange}
                     InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-
                   />
-                  </Grid>
+                </Grid>
                 <Grid item xs={12}>
                   <StyledTextField
                     required
@@ -185,14 +224,20 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                     variant="outlined"
                     onChange={handleInputChange}
                     InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-                   
                   />
                 </Grid>
 
                 {variants.map((variant, variantIndex) => (
                   <Grid item xs={12} key={variantIndex}>
-                    <Paper elevation={2} sx={{ p: 2, bgcolor: 'background.default' }}>
-                      <Typography variant="h6" gutterBottom sx={{ color: 'text.primary' }}>
+                    <Paper
+                      elevation={2}
+                      sx={{ p: 2, bgcolor: "background.default" }}
+                    >
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        sx={{ color: "text.primary" }}
+                      >
                         Variant {variantIndex + 1}
                       </Typography>
                       <Grid container spacing={2}>
@@ -203,11 +248,10 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                             label="Color"
                             value={variant.color}
                             onChange={(e) => {
-                              const newVariants = [...variants]
-                              newVariants[variantIndex].color = e.target.value
-                              setVariants(newVariants)
+                              const newVariants = [...variants];
+                              newVariants[variantIndex].color = e.target.value;
+                              setVariants(newVariants);
                             }}
-                           
                           />
                         </Grid>
                         <Grid item xs={12}>
@@ -216,7 +260,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                             name={`variantImage-${variantIndex}`}
                             accept="image/*"
                             required
-                            style={{ display: 'none' }}
+                            style={{ display: "none" }}
                             id={`variantImage-${variantIndex}`}
                             onChange={handleImageChange}
                           />
@@ -226,9 +270,12 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                               component="span"
                               fullWidth
                               sx={{
-                                color: 'text.primary',
-                                borderColor: 'text.primary',
-                                '&:hover': { borderColor: 'text.primary', bgcolor: 'action.hover' }
+                                color: "text.primary",
+                                borderColor: "text.primary",
+                                "&:hover": {
+                                  borderColor: "text.primary",
+                                  bgcolor: "action.hover",
+                                },
                               }}
                             >
                               Upload Variant Image
@@ -241,7 +288,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                             name={`additionalImages-${variantIndex}`}
                             accept="image/*"
                             multiple
-                            style={{ display: 'none' }}
+                            style={{ display: "none" }}
                             id={`additionalImages-${variantIndex}`}
                           />
                           <label htmlFor={`additionalImages-${variantIndex}`}>
@@ -250,43 +297,72 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                               component="span"
                               fullWidth
                               sx={{
-                                color: 'text.primary',
-                                borderColor: 'text.primary',
-                                '&:hover': { borderColor: 'text.primary', bgcolor: 'action.hover' }
+                                color: "text.primary",
+                                borderColor: "text.primary",
+                                "&:hover": {
+                                  borderColor: "text.primary",
+                                  bgcolor: "action.hover",
+                                },
                               }}
                             >
-                              Upload  Images
+                              Upload Images
                             </Button>
                           </label>
                         </Grid>
                         {variant.sizes.map((size, sizeIndex) => (
                           <Grid item xs={12} sm={6} key={sizeIndex}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <StyledTextField
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <>
+                              <Typography variant="subtitle2" fontWeight={500}>Select Size</Typography>
+                              <Select
                                 required
-                                label="Size"
                                 value={size.size}
                                 onChange={(e) => {
-                                  const newVariants = [...variants]
-                                  newVariants[variantIndex].sizes[sizeIndex].size = e.target.value
-                                  setVariants(newVariants)
+                                  const newVariants = [...variants];
+                                  newVariants[variantIndex].sizes[
+                                    sizeIndex
+                                  ].size = e.target.value;
+                                  setVariants(newVariants);
                                 }}
-                               
-                              />
+                                fullWidth
+                              >
+                                {allowedSizes.map((allowedSize) => (
+                                  <MenuItem
+                                    key={allowedSize}
+                                    value={allowedSize}
+                                  >
+                                    {allowedSize}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                              </>
+                             
                               <StyledTextField
                                 required
                                 label="Stock"
                                 type="number"
                                 value={size.stock}
                                 onChange={(e) => {
-                                  const newVariants = [...variants]
-                                  newVariants[variantIndex].sizes[sizeIndex].stock = parseInt(e.target.value, 10)
-                                  setVariants(newVariants)
+                                  const newVariants = [...variants];
+                                  newVariants[variantIndex].sizes[
+                                    sizeIndex
+                                  ].stock = parseInt(e.target.value, 10);
+                                  setVariants(newVariants);
                                 }}
                                 InputProps={{ inputProps: { min: 0 } }}
-                              
                               />
-                              <IconButton onClick={() => removeSize(variantIndex, sizeIndex)} sx={{ color: 'error.main' }}>
+                              <IconButton
+                                onClick={() =>
+                                  removeSize(variantIndex, sizeIndex)
+                                }
+                                sx={{ color: "error.main" }}
+                              >
                                 <DeleteIcon />
                               </IconButton>
                             </Box>
@@ -296,7 +372,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                           <OutlinedButton
                             startIcon={<AddIcon />}
                             onClick={() => addSize(variantIndex)}
-                            sx={{ color: 'text.primary' }}
+                            sx={{ color: "text.primary" }}
                           >
                             Add Size
                           </OutlinedButton>
@@ -306,7 +382,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                         <Button
                           startIcon={<DeleteIcon />}
                           onClick={() => removeVariant(variantIndex)}
-                          sx={{ mt: 2, color: 'error.main' }}
+                          sx={{ mt: 2, color: "error.main" }}
                         >
                           Remove Variant
                         </Button>
@@ -318,7 +394,7 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                   <OutlinedButton
                     startIcon={<AddIcon />}
                     onClick={addVariant}
-                    sx={{ color: 'text.primary' }}
+                    sx={{ color: "text.primary" }}
                   >
                     Add Variant
                   </OutlinedButton>
@@ -331,31 +407,41 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
                 sx={{
                   mt: 3,
                   mb: 2,
-                  bgcolor: 'text.primary',
-                  color: 'background.paper',
-                  '&:hover': { bgcolor: 'text.secondary' }
+                  bgcolor: "text.primary",
+                  color: "background.paper",
+                  "&:hover": { bgcolor: "text.secondary" },
                 }}
                 disabled={isLoading}
               >
-                {isLoading ? <CircularProgress size={24} /> : 'Create Product'}
+                {isLoading ? <CircularProgress size={24} /> : "Create Product"}
               </BaseButton>
             </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 4, bgcolor: 'background.paper', height: '100%' }}>
-            <Typography variant="h5" component="h2" gutterBottom align="center" sx={{ color: 'text.primary',fontWeight:700 }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 4, bgcolor: "background.paper", height: "100%" }}
+          >
+            <Typography
+              variant="h5"
+              component="h2"
+              gutterBottom
+              align="center"
+              sx={{ color: "text.primary", fontWeight: 700 }}
+            >
               Product Preview
             </Typography>
 
-            <ProductCard product={{
-                id: 'preview', 
-                name: previewData.name || 'N/A',
-                category: 'Some Category', 
-                price: previewData.price || '0.00',
+            <ProductCard
+              product={{
+                id: "preview",
+                name: previewData.name || "N/A",
+                category: "Some Category",
+                price: previewData.price || "0.00",
                 store: storeName,
-       
-                image: previewData.image|| '/placeholder-image.png',
+
+                image: previewData.image || "/placeholder-image.png",
               }}
             />
           </Paper>
@@ -380,5 +466,5 @@ export default function ProductCreationForm({ storeId, storeName }: { storeId: s
         </Alert>
       </Snackbar>
     </Container>
-  )
+  );
 }

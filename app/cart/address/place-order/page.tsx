@@ -9,7 +9,7 @@ import OrderPreview from '@/components/users/cart/OrderPreview'
 
 
 
-export default async function() {
+export default async function PlaceOrder() {
 
 
   const session = await getServerSession(authOptions);

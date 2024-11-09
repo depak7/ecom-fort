@@ -193,6 +193,17 @@ export default function CreateStoreForm() {
                   <TextField
                     required
                     fullWidth
+                    name="phoneNumber"
+                    label="whatsapp number to receive order details"
+                    variant="outlined"
+                    type="string"
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
                     name="mapLink"
                     label="Map Link"
                     variant="outlined"

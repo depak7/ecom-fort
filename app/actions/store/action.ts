@@ -16,6 +16,7 @@ export async function createStore(formData: FormData) {
     const city = formData.get('city') as string
     const address = formData.get('address') as string
     const mapLink = formData.get('mapLink') as string
+    const phoneNumber=formData.get('phoneNumber') as string
     const ownerId = formData.get('ownerId') as string
 
    
@@ -33,6 +34,7 @@ export async function createStore(formData: FormData) {
         logo: url, 
         description,
         city,
+        phoneNumber,
         address,
         mapLink,
         ownerId,
@@ -85,6 +87,7 @@ export async function getStoreById(storeId: string) {
         name: true,
         logo: true,
         description: true,
+        phoneNumber:true,
         city: true,
         address: true,
         mapLink: true,
