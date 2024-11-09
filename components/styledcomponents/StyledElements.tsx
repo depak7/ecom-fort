@@ -70,13 +70,13 @@ import { Box, Button, ListItem, Paper, Select, styled, TableCell, TextField, Typ
   }));
   
   export const OutlinedButton = styled(Button)(({ theme }) => ({
-    borderRadius: '50px',
+    borderRadius: '5px',
     boxShadow: 'none',
-    padding: theme.spacing(1.5, 2),
+    padding: theme.spacing(1),
     color: 'black',
     backgroundColor: 'white',
-    border: '2px solid black',
-    fontWeight: 'bold',
+    border: '1px solid black',
+
  
     '&:hover': {
       backgroundColor: 'white',

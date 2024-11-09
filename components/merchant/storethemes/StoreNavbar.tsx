@@ -1,42 +1,36 @@
 "use client"
 
+import React, { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 import {
   AppBar,
   Box,
   IconButton,
   Toolbar,
   Typography,
-} from "@mui/material";
+} from "@mui/material"
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined"
+import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined"
 
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
-import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+export default function StoreNavbar() {
+  const params = useParams()
+  const [storeName, setStoreName] = useState<string>("")
 
-export default function () {
-
-const params=useParams();
-const[storeName,setStoreName]=useState<string>("");
-
-
-useEffect(()=>{
-  const decodedStoreName = (params.store_name as string).replace(/%20/g, ' ');
-    setStoreName(decodedStoreName);
-})
-
-
-
+  useEffect(() => {
+    const decodedStoreName = (params.store_name as string)?.replace(/%20/g, ' ') || ""
+    setStoreName(decodedStoreName)
+  }, [params.store_name])
 
   return (
     <AppBar position="sticky" sx={{ bgcolor: "white" }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography
           variant="h4"
-          fontFamily={"fantasy"}
+          fontFamily="fantasy"
           sx={{ color: "black" }}
           fontWeight={700}
         >
-       {storeName}
+          {storeName}
         </Typography>
  
         <Box display="flex" gap={2}>
@@ -59,5 +53,5 @@ useEffect(()=>{
         </Box>
       </Toolbar>
     </AppBar>
-  );
+  )
 }

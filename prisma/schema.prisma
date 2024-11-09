@@ -54,6 +54,7 @@ model Store {
   owner            User        @relation("StoreOwner", fields: [ownerId], references: [id])
   products         Product[]
   orderItems       OrderItem[]
+  phoneNumber     String?
 }
 
 model ProductImage {

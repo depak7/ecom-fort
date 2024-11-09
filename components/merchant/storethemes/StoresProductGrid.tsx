@@ -1,12 +1,15 @@
+
+
 import { getProductsByStoreId } from "@/app/actions/products/action";
 
 import ProductCard from "@/components/users/products/ProductCard";
 import { Box, Grid} from "@mui/material";
 
 
-export default async function () {
+export default async function StoresProductGrid ({storeId}:{storeId:string}) {
 
-  const { products } = await getProductsByStoreId('SXZBM25R3V4');
+  const { products } = await getProductsByStoreId(storeId);
+
 
   return (
     <Box >
