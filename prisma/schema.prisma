@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -39,7 +40,6 @@ model User {
   addresses Address[]
 }
 
-
 model Store {
   id               String      @id @default(uuid())
   name             String      @unique
@@ -54,7 +54,7 @@ model Store {
   owner            User        @relation("StoreOwner", fields: [ownerId], references: [id])
   products         Product[]
   orderItems       OrderItem[]
-  phoneNumber     String?
+  phoneNumber      String?
 }
 
 model ProductImage {
@@ -86,7 +86,6 @@ model OrderItem {
   store       Store       @relation(fields: [storeId], references: [id])
 }
 
-
 model Product {
   id            String           @id @default(uuid())
   name          String
@@ -103,14 +102,14 @@ model Product {
 }
 
 model ProductVariant {
-  id           Int            @id @default(autoincrement())
-  color        String
-  sizes        VariantSize[]
-  variantImage String
-  images       ProductImage[]
-  productId    String
-  product      Product        @relation(fields: [productId], references: [id])
-  cartItems    CartItem[]
+  id            Int            @id @default(autoincrement())
+  color         String
+  sizes         VariantSize[]
+  variantImage  String
+  images        ProductImage[]
+  productId     String
+  product       Product        @relation(fields: [productId], references: [id])
+  cartItems     CartItem[]
   wishlistItems WishlistItem[]
 }
 
@@ -122,8 +121,6 @@ model VariantSize {
   variant   ProductVariant @relation(fields: [variantId], references: [id])
   cartItems CartItem[]
 }
-
-
 
 model Cart {
   id     String     @id @default(uuid())
@@ -140,10 +137,10 @@ model CartItem {
   product          Product         @relation(fields: [productId], references: [id])
   productVariantId Int?
   productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
-  variantSizeId Int?
-  variantSize   VariantSize? @relation(fields: [variantSizeId], references: [id])
-  quantity      Int
-  price         Decimal      @db.Decimal(10, 2)
+  variantSizeId    Int?
+  variantSize      VariantSize?    @relation(fields: [variantSizeId], references: [id])
+  quantity         Int
+  price            Decimal         @db.Decimal(10, 2)
 }
 
 model Wishlist {
@@ -154,26 +151,26 @@ model Wishlist {
 }
 
 model WishlistItem {
-  id         Int      @id @default(autoincrement())
-  wishlistId String
-  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id])
+  id               Int            @id @default(autoincrement())
+  wishlistId       String
+  wishlist         Wishlist       @relation(fields: [wishlistId], references: [id])
+  productId        String
+  product          Product        @relation(fields: [productId], references: [id])
   productVariantId Int
-  variant   ProductVariant @relation(fields: [productVariantId],references: [id])
+  variant          ProductVariant @relation(fields: [productVariantId], references: [id])
 }
 
 model Address {
-  id           Int     @id @default(autoincrement())
-  name         String
-  phoneNumber  String
+  id                   Int     @id @default(autoincrement())
+  name                 String
+  phoneNumber          String
   alternatePhoneNumber String
-  street       String
-  city         String
-  state        String
-  postalCode   String
-  country      String
-  isDefault    Boolean @default(false)
-  userId       String
-  user         User    @relation(fields: [userId], references: [id])
+  street               String
+  city                 String
+  state                String
+  postalCode           String
+  country              String
+  isDefault            Boolean @default(false)
+  userId               String
+  user                 User    @relation(fields: [userId], references: [id])
 }
