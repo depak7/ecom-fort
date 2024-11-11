@@ -1,14 +1,19 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "./auth";
+import { getServerSession } from "next-auth/next"
+import { NextResponse } from "next/server"
+import type { NextRequestWithAuth } from "next-auth/middleware"
+import { authOptions } from "@/lib/auth"
 
-export function withAuth(handler: any) {
-  return async (req: any, res: any) => {
-    const session = await getServerSession(req, res, authOptions);
+export async function withAuth(handler: Function) {
+  return async (request: NextRequestWithAuth) => {
+    const session = await getServerSession(authOptions)
 
     if (!session) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
     }
 
-    return handler(req, res, session);
-  };
+    return handler(request, session)
+  }
 }
