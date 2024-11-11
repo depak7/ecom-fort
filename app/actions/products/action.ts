@@ -13,6 +13,21 @@ async function uploadImage(file: File) {
   return blob.url;
 }
 
+// Define the interface for the variant data
+interface VariantData {
+  color: string;
+  variantImage: string;
+  images: {
+    create: { url: string }[];
+  };
+  sizes: {
+    create: { size: string; stock: number }[];
+  };
+}
+
+// Update the variantsData declaration to use the interface
+const variantsData: VariantData[] = [];
+
 // export async function createProduct(formData: FormData) {
 //   try {
 //     const name = formData.get("name") as string;
@@ -154,7 +169,7 @@ export async function createProduct(formData: FormData) {
 }
 
 async function processVariantData(formData: FormData) {
-  const variantsData = [];
+  const variantsData: VariantData[] = [];
   let variantIndex = 0;
 
   while (formData.has(`color-${variantIndex}`)) {
@@ -193,7 +208,7 @@ async function processVariantData(formData: FormData) {
 }
 
 function processSizes(formData: FormData, variantIndex: number) {
-  const sizes = [];
+  const sizes: { size: string; stock: number }[] = [];
   let sizeIndex = 0;
 
   while (formData.has(`size-${variantIndex}-${sizeIndex}`)) {

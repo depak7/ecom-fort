@@ -120,7 +120,7 @@ export async function updateStore(storeId: string, formData: FormData) {
     const offerDescription = formData.get('offerDescription') as string | null
 
  
-    let logoUrl = null
+    let logoUrl: string | null = null
     if (logo) {
       const { url } = await put(`stores/${name}-${Date.now()}.${logo.type.split('/')[1]}`, logo, {
         access: 'public',
@@ -129,7 +129,7 @@ export async function updateStore(storeId: string, formData: FormData) {
     }
 
  
-    let bannerImageUrl = null
+    let bannerImageUrl :string | null=null
     if (bannerImage) {
       const { url } = await put(`stores/${name}-banner-${Date.now()}.${bannerImage.type.split('/')[1]}`, bannerImage, {
         access: 'public',
