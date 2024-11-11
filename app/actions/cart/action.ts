@@ -125,7 +125,7 @@ export async function getCartItems(userId: string) {
       return { items: [], totalQuantity: 0, totalPrice: 0 };
     }
 
-    const items = cart.items.map((item) => ({
+    const items = cart.items.map((item:any) => ({
       id: item.id,
       quantity: item.quantity,
       price: item.price,
@@ -142,7 +142,7 @@ export async function getCartItems(userId: string) {
         ? {
             id: item.productVariant.id,
             image: item.productVariant.images[0]?.url || null,
-            availableSizes: item.productVariant.sizes.map((size) => ({
+            availableSizes: item.productVariant.sizes.map((size:any) => ({
               name: size.size,
               id: size.id,
             })),
