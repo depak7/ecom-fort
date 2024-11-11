@@ -157,7 +157,7 @@ export async function getCartItems(userId: string) {
       isWishlisted: item.product.wishlistItems.length > 0,
     }));
 
-    const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalQuantity = items.reduce((sum:number, item) => sum + item.quantity, 0);
     const totalPrice = items.reduce(
       (sum, item) => sum + item.quantity * item.price.toNumber(),
       0
