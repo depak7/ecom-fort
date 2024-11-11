@@ -1,6 +1,6 @@
 'use server'
 
-import { prisma } from '@/database/index'
+import  prisma from '@/database/index'
 import { revalidatePath } from 'next/cache'
 import { put } from '@vercel/blob'
 import { generateUniqueStoreId } from '@/database/uniqueID'

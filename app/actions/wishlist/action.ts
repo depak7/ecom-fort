@@ -2,7 +2,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/database/index'
+import  prisma  from '@/database/index'
 
 
 export async function toggleWishlistItem(userId: string, productId: string, productVariantId?: number) {
