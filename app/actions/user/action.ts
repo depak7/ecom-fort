@@ -1,6 +1,6 @@
 'use server'
 
-import { prisma } from "@/database/index";
+import  prisma  from "@/database/index";
 import { generateUniqueId } from "@/database/uniqueID";
 import bcrypt from "bcryptjs";
 

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next"
 import { NextResponse } from "next/server"
 import type { NextRequestWithAuth } from "next-auth/middleware"
-import { authOptions } from "@/lib/auth"
+import { authOptions } from "./auth"
 
 export async function withAuth(handler: Function) {
   return async (request: NextRequestWithAuth) => {
