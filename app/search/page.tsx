@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   Box, 
   Typography, 
@@ -112,7 +113,7 @@ export default function SearchResults() {
                   No stores found
                 </Typography>
                 <Typography variant="body1" color="text.secondary" paragraph>
-                  We couldn't find any stores matching "{query}".
+                  We couldn&apos;t find any stores matching &quot;{query}&quot;.
                 </Typography>
                 <BaseButton component={Link} href="/" variant="contained">
                   Return to Home
@@ -153,7 +154,7 @@ export default function SearchResults() {
                   No products found
                 </Typography>
                 <Typography variant="body1" color="text.secondary" paragraph>
-                  We couldn't find any products matching "{query}".
+                  We couldn&apos;t find any products matching &quot;{query}&quot;.
                 </Typography>
                 <BaseButton component={Link} href="/" variant="contained">
                   Return to Home
