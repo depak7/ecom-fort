@@ -51,10 +51,19 @@ export async function createStore(formData: FormData) {
   }
 }
 
+// actions/store/action.ts
 
-export async function getAllStores() {
+export async function getAllStores(sortBy?: string) {
   try {
+    let orderBy = {};
+    if (sortBy === 'name') {
+      orderBy = { name: 'asc' };
+    } else if (sortBy === 'city') {
+      orderBy = { city: 'asc' };
+    }
+
     const stores = await prisma.store.findMany({
+      orderBy,
       select: {
         id: true,
         name: true,

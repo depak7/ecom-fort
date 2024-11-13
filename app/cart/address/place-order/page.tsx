@@ -14,9 +14,9 @@ export default async function PlaceOrder() {
 
   const session = await getServerSession(authOptions);
 
-const userId = session?.user.id;
+  const userId = session?.user.id;
 
-const { stores,totalPrice,totalQuantity} = await getCartItemsByStore(userId ? userId : "null");
+  const {stores,totalPrice,totalQuantity} = await getCartItemsByStore(userId ? userId : "null");
 
 
 

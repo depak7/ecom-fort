@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import prisma from "@/database/index";
+import { getStoreById } from "../store/action";
 
 export async function addToCart(
   userId: string,
@@ -413,10 +414,14 @@ export async function getCartItemsByStore(userId: string) {
 
     const storesMap = new Map()
 
-    cart.items.forEach((item) => {
+    for (const item of cart.items) {
       const storeId = item.product.store.id
+
+      const storeDetails = await getStoreById(storeId)
+
       const storeData = storesMap.get(storeId) || {
         id: storeId,
+        phoneNumber: storeDetails.store?.phoneNumber || "",
         name: item.product.store.name,
         items: [],
       }
@@ -450,19 +455,19 @@ export async function getCartItemsByStore(userId: string) {
       })
 
       storesMap.set(storeId, storeData)
-    })
+    }
 
     const stores = Array.from(storesMap.values())
 
     const totalQuantity = stores.reduce(
-      (sum, store) => sum + store.items.reduce((storeSum:any, item:any) => storeSum + item.quantity, 0),
+      (sum, store) => sum + store.items.reduce((storeSum: number, item: any) => storeSum + item.quantity, 0),
       0
     )
 
     const totalPrice = stores.reduce(
       (sum, store) =>
         sum +
-        store.items.reduce((storeSum:any, item:any) => storeSum + item.quantity * item.price.toNumber(), 0),
+        store.items.reduce((storeSum: number, item: any) => storeSum + item.quantity * item.price.toNumber(), 0),
       0
     )
 

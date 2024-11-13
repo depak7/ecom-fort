@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -7,15 +8,14 @@ import InputBase from "@mui/material/InputBase";
 import Box from "@mui/material/Box";
 import AddBusinessOutlinedIcon from "@mui/icons-material/AddBusinessOutlined";
 import StoreMallDirectoryIcon from '@mui/icons-material/StoreMallDirectory';
-
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from '@mui/icons-material/Clear';
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import Image from "next/image";
 import logo from "@/components/assets/users/ecom-fort.png";
-import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TypographyButton } from "@/components/styledcomponents/StyledElements";
 import { useSession } from "next-auth/react";
@@ -39,7 +39,7 @@ function HideOnScroll({ children }: HideOnScrollProps) {
 
 export default function NavBar() {
   const router = useRouter();
-
+  const [searchQuery, setSearchQuery] = useState('')
   const { data: session, status } = useSession();
   const [isUserLoggedIn, setUserLoggedIn] = useState<boolean>(false);
   const [storeid, setStoreId] = useState<String>();
@@ -53,14 +53,21 @@ export default function NavBar() {
         setUserLoggedIn(true);
         if (userId) {
           const res = await checkUserHasStore(userId);
-
           setStoreId(res.storeId || "");
           setHasStore(res.hasStore);
         }
       }
     };
     checkAuth();
-  }, [status]);
+  }, [status, userId]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery("")
+    }
+  }
 
   const handleNavigation = (link: string) => {
     router.push(`/${link}`);
@@ -74,6 +81,8 @@ export default function NavBar() {
             <Image src={logo} alt="logo" width={150} height={40} />
           </Box>
           <Box
+            component="form"
+            onSubmit={handleSearch}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -82,6 +91,7 @@ export default function NavBar() {
               maxWidth: 300,
               flexGrow: 1,
               marginLeft: 2,
+              position: "relative",
             }}
           >
             <IconButton
@@ -94,7 +104,26 @@ export default function NavBar() {
             <InputBase
               placeholder="Search…"
               inputProps={{ "aria-label": "search" }}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(e);
+                }
+              }}
               sx={{ width: "100%" }}
+              endAdornment={
+                searchQuery && (
+                  <IconButton
+                    size="small"
+                    aria-label="clear"
+                    onClick={() => setSearchQuery('')}
+                    sx={{ color: 'black' }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                )
+              }
             />
           </Box>
 
@@ -113,30 +142,28 @@ export default function NavBar() {
               <LocalMallOutlinedIcon sx={{ color: "white" }} />
             </IconButton>
           </Box>
-          <Box display="flex" alignItems="center">
-            {hasStore?<StoreMallDirectoryIcon/>: <AddBusinessOutlinedIcon />}
-           
-            <TypographyButton
-              variant="body2"
-              sx={{
-                mr: 2,
-                ml: 1,
-              }}
-              onClick={() => {
-                if(hasStore)
-                {
-                  handleNavigation("merchant/storedetails")
-
-                }
-                else{
-                  handleNavigation("merchant/addstore")
-                }
-                }
-            
-            }
-            >
-              {hasStore?"Visit Store":"Add Store"}
-            </TypographyButton>
+          <Box display="flex" alignItems="center">      
+            {isUserLoggedIn && (
+              <>
+               {hasStore ? <StoreMallDirectoryIcon /> : <AddBusinessOutlinedIcon />}
+              <TypographyButton
+                variant="body2"
+                sx={{
+                  mr: 2,
+                  ml: 1,
+                }}
+                onClick={() => {
+                  if (hasStore) {
+                    handleNavigation("merchant/storedetails");
+                  } else {
+                    handleNavigation("merchant/addstore");
+                  }
+                }}
+              >
+                {hasStore ? "Visit Store" : "Add Store"}
+              </TypographyButton>
+              </>
+            )}
 
             {!isUserLoggedIn && (
               <Button
@@ -149,6 +176,9 @@ export default function NavBar() {
                     bgcolor: "#D3F2FF",
                     color: "black",
                   },
+                }}
+                onClick={() => {
+                  handleNavigation('signup')
                 }}
               >
                 Signup

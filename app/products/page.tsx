@@ -12,7 +12,7 @@ export default async function ProductList() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   const products=userId? await getAllProducts(userId):await getAllProducts();
-  console.log(products)
+
   return (
     <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
       <Typography
