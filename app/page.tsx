@@ -13,8 +13,8 @@ interface Store {
 }
 
 export default async function Home() {
-  const res=await getAllStores()
-  const stores: Store[] = (res.stores) || []; // Fallback to an empty array if undefined
+  const res=await getAllStores('')
+  const stores: Store[] = (res.stores) || []; 
 
   return (
     <>

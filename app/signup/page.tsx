@@ -134,14 +134,7 @@ export default function SignUp() {
           >
             Sign Up
           </BaseButton>
-          <Divider sx={{ my: 2 }}>OR</Divider>
-          <OutlinedButton
-            fullWidth
-            startIcon={<GoogleIcon />}
-            onClick={() => signIn('google')}
-          >
-            Continue with Google
-          </OutlinedButton>
+        
         </Box>
       </Box>
     </Container>

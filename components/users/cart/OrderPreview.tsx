@@ -20,14 +20,14 @@ import {
 
 import CloseIcon from '@mui/icons-material/Close'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { WhatsApp, ShoppingCart } from '@mui/icons-material'
 
 import { removeFromCart } from '@/app/actions/cart/action'
-import { WhatsApp } from '@mui/icons-material'
 
 interface CartItem {
   id: number
   quantity: number
-  price: number | string // Updated to allow for string prices
+  price: number | string
   product: {
     id: string
     name: string
@@ -49,7 +49,7 @@ interface Store {
   id: string
   name: string
   items: CartItem[]
-  whatsappNumber: string
+  PhoneNumber: string
 }
 
 interface ShoppingCartProps {
@@ -61,7 +61,7 @@ interface ShoppingCartProps {
 
 export default function OrderPreview({ stores, userId, totalQuantity, totalPrice }: ShoppingCartProps) {
   const [cartStores, setCartStores] = useState<Store[]>(stores)
-
+ 
   useEffect(() => {
     setCartStores(stores)
   }, [stores])
@@ -100,19 +100,18 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
     
     store.items.forEach((item) => {
       const imageUrl = item.variant.image || '/placeholder.svg';
-      message += `${item.product.name} (Size: ${item.size.name}) x${item.quantity} - $${formatPrice(item.price)}\n`;
+      message += `${item.product.name} (Size: ${item.size.name}) x${item.quantity} - ₹${formatPrice(item.price)}\n`;
       message += `Image: ${imageUrl}\n`;  
     });
   
     const storeTotal = store.items.reduce((sum, item) => sum + item.quantity * parseFloat(formatPrice(item.price)), 0);
-    message += `\nTotal: ${storeTotal.toFixed(2)}`;
+    message += `\nTotal: ₹${storeTotal.toFixed(2)}`;
     
     return encodeURIComponent(message);
   };
   
-
   const handleSendWhatsApp = (store: Store) => {
-    const whatsappUrl = `https://wa.me/7708579330?text=${formatWhatsAppMessage(store)}`
+    const whatsappUrl = `https://wa.me/${store.PhoneNumber}?text=${formatWhatsAppMessage(store)}`
     window.open(whatsappUrl, '_blank')
   }
 
@@ -169,7 +168,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
                         </Box>
                       </TableCell>
                       <TableCell align="center">{product.quantity}</TableCell>
-                      <TableCell align="right">${formatPrice(product.price)}</TableCell>
+                      <TableCell align="right">₹{formatPrice(product.price)}</TableCell>
                       <TableCell>
                         <IconButton
                           size="small"
@@ -195,14 +194,29 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
           </AccordionDetails>
         </Accordion>
       ))}
-      <Box sx={{ mt: 2, textAlign: 'right' }}>
-        <Typography variant="h6">
-          Total Quantity: {totalQuantity}
-        </Typography>
-        <Typography variant="h6">
-          Total Price: ${formatPrice(totalPrice)}
-        </Typography>
-      </Box>
+      <Paper elevation={0} sx={{ mt: 4, p: 3, borderRadius: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <ShoppingCart sx={{ fontSize: 40, mr: 2 }} />
+            <Box>
+              <Typography variant="h6" fontWeight={700}>
+                Total Items
+              </Typography>
+              <Typography variant="h4" fontWeight={700} >
+                {totalQuantity}
+              </Typography>
+            </Box>
+          </Box>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="h6" fontWeight={700}>
+              Total Amount
+            </Typography>
+            <Typography variant="h6" fontWeight={700} >
+              ₹{formatPrice(totalPrice)}
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
     </Box>
   )
 }

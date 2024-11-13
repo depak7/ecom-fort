@@ -7,8 +7,8 @@ import Link from "next/link"
 import { BaseButton } from "../../buttons/BaseButton"
 import { ChevronLeft, ChevronRight } from "@mui/icons-material"
 
-import leftImage from "@/components/assets/users/banner-1.webp"
-import rightImage from "@/components/assets/users/banner-2.webp"
+import leftImage from "@/components/assets/users/tc-1.png"
+import rightImage from "@/components/assets/users/tc-2.png"
 
 const carouselImages = [
   { src: leftImage, alt: "Clothing" },
@@ -63,11 +63,11 @@ export default function TitleCard() {
           aspectRatio: isMobile ? "1 / 1" : isTablet ? "2 / 1" : "4 / 1.20",
         }}
       >
-        <Image
+       <Image
           src={carouselImages[currentSlide].src}
           alt={carouselImages[currentSlide].alt}
           fill
-          style={{ objectFit: "cover" }}
+          style={{ objectFit: "fill"}} 
           priority
         />
         {!isMobile && (

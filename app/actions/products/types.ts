@@ -36,3 +36,18 @@ export interface ProductResponse {
     variantId: number;
   }
   
+
+  export interface ProductResponseforSearch {
+    product: {
+      id: string;
+      name: string;
+      description: string;
+      price: any;
+      storeId: string;
+      store: {
+        name: string;
+      };
+      variants: Variant[];
+    };
+
+  }
