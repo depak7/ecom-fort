@@ -41,14 +41,14 @@ export default function StoreGrid({ stores }: StoreGridProps) {
       <Typography variant="h5" fontWeight="bold" mb={2}>
         SHOP BY STORES
       </Typography>
-
       <Grid container spacing={2} justifyContent="center">
         {stores
           .slice(currentIndex, currentIndex + visibleStores)
           .map((store) => (
-            <Grid item xs={12} sm={6} md={3} key={store.id}>
+            <Grid item xs={6} sm={6} md={3} key={store.id}>
               <StoreCard store={store} />
             </Grid>
+            
           ))}
       </Grid>
 

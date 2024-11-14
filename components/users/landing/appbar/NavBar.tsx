@@ -6,12 +6,14 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import MenuIcon from "@mui/icons-material/Menu";
 import AddBusinessOutlinedIcon from "@mui/icons-material/AddBusinessOutlined";
-import StoreMallDirectoryIcon from '@mui/icons-material/StoreMallDirectory';
+import StoreMallDirectoryIcon from "@mui/icons-material/StoreMallDirectory";
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from '@mui/icons-material/Clear';
+import ClearIcon from "@mui/icons-material/Clear";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import Image from "next/image";
@@ -20,8 +22,10 @@ import { useRouter } from "next/navigation";
 import { TypographyButton } from "@/components/styledcomponents/StyledElements";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
-import { Button } from "@mui/material";
+import { Button, useMediaQuery } from "@mui/material";
 import { checkUserHasStore } from "@/app/actions/store/action";
+import LoginIcon from '@mui/icons-material/Login';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 interface HideOnScrollProps {
   children: React.ReactElement;
@@ -29,7 +33,6 @@ interface HideOnScrollProps {
 
 function HideOnScroll({ children }: HideOnScrollProps) {
   const trigger = useScrollTrigger();
-
   return (
     <Slide appear={false} direction="down" in={!trigger}>
       {children}
@@ -39,13 +42,15 @@ function HideOnScroll({ children }: HideOnScrollProps) {
 
 export default function NavBar() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: session, status } = useSession();
   const [isUserLoggedIn, setUserLoggedIn] = useState<boolean>(false);
-  const [storeid, setStoreId] = useState<String>();
+  const [storeId, setStoreId] = useState<String>();
   const [hasStore, setHasStore] = useState<boolean>();
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   const userId = session?.user.id;
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -62,15 +67,16 @@ export default function NavBar() {
   }, [status, userId]);
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery("")
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
     }
-  }
+  };
 
   const handleNavigation = (link: string) => {
     router.push(`/${link}`);
+    setDrawerOpen(false); // Close drawer after navigation
   };
 
   return (
@@ -78,7 +84,12 @@ export default function NavBar() {
       <AppBar sx={{ bgcolor: "black", boxShadow: "none" }}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
           <Box display="flex" alignItems="center">
-            <Image src={logo} alt="logo" width={150} height={40} />
+            <Image
+              src={logo}
+              alt="logo"
+              width={isMobile ? 100 : 150}
+              height={isMobile ? 30 : 40}
+            />
           </Box>
           <Box
             component="form"
@@ -87,8 +98,9 @@ export default function NavBar() {
               display: "flex",
               alignItems: "center",
               bgcolor: "#F5F5F5",
-              padding: "0 8px",
-              maxWidth: 300,
+              padding: isMobile ? "0 2px" : "0 8px",
+              maxWidth: isMobile ? 80 : 300,
+              height: isMobile ? 30 : 50,
               flexGrow: 1,
               marginLeft: 2,
               position: "relative",
@@ -96,29 +108,23 @@ export default function NavBar() {
           >
             <IconButton
               type="submit"
-              sx={{ p: "10px", color: "black" }}
-              aria-label="search"
+              sx={{ p: isMobile ? "2px" : "10px", color: "black" }}
             >
-              <SearchIcon />
+              <SearchIcon fontSize="small" />
             </IconButton>
             <InputBase
-              placeholder="Search…"
+              placeholder={isMobile ? "search" : "Search…"}
               inputProps={{ "aria-label": "search" }}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleSearch(e);
-                }
-              }}
               sx={{ width: "100%" }}
               endAdornment={
                 searchQuery && (
                   <IconButton
                     size="small"
                     aria-label="clear"
-                    onClick={() => setSearchQuery('')}
-                    sx={{ color: 'black' }}
+                    onClick={() => setSearchQuery("")}
+                    sx={{ color: "black" }}
                   >
                     <ClearIcon fontSize="small" />
                   </IconButton>
@@ -126,32 +132,116 @@ export default function NavBar() {
               }
             />
           </Box>
-
-          <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" justifyContent={"space-between"}>
             <IconButton
               aria-label="favorite"
               onClick={() => handleNavigation("wishlists")}
             >
               <FavoriteBorderRoundedIcon sx={{ color: "white" }} />
             </IconButton>
-
             <IconButton
               aria-label="cart"
               onClick={() => handleNavigation("cart")}
             >
               <LocalMallOutlinedIcon sx={{ color: "white" }} />
             </IconButton>
-          </Box>
-          <Box display="flex" alignItems="center">      
+            </Box>
+            {!isMobile && (
+              <Box display="flex" alignItems="center">
+                {isUserLoggedIn && (
+                  <>
+                    {hasStore ? (
+                      <StoreMallDirectoryIcon />
+                    ) : (
+                      <AddBusinessOutlinedIcon />
+                    )}
+                    <TypographyButton
+                      variant="body2"
+                      sx={{
+                        mr: 2,
+                        ml: 0.5,
+                      }}
+                      onClick={() => {
+                        if (hasStore) {
+                          handleNavigation("merchant/storedetails");
+                        } else {
+                          handleNavigation("merchant/addstore");
+                        }
+                      }}
+                    >
+                      {hasStore ? "Visit Store" : "Add Store"}
+                    </TypographyButton>
+                  </>
+                )}
+                {!isUserLoggedIn && (
+                  <Button
+                    variant="contained"
+                    sx={{
+                      mx: 1,
+                      bgcolor: "#D3F2FF",
+                      color: "black",
+                      "&:hover": {
+                        bgcolor: "#D3F2FF",
+                        color: "black",
+                      },
+                    }}
+                    onClick={() => {
+                      handleNavigation("signup");
+                    }}
+                  >
+                    Signup
+                  </Button>
+                )}
+
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    if (!isUserLoggedIn) {
+                      handleNavigation("signin");
+                    } else {
+                      signOut();
+                    }
+                  }}
+                  sx={{
+                    mx: 1,
+                    bgcolor: "white",
+                    color: "black",
+                    "&:hover": {
+                      bgcolor: "white",
+                      color: "black",
+                    },
+                  }}
+                >
+                  {isUserLoggedIn ? "Logout" : "Login"}
+                </Button>
+              </Box>
+            )}
+
+            {isMobile && (
+              <IconButton aria-label="menu" onClick={() => setDrawerOpen(true)}>
+                <MenuIcon sx={{ color: "white" }} />
+              </IconButton>
+            )}
+      
+        </Toolbar>
+
+        {/* Drawer for Mobile Menu */}
+        <Drawer
+          anchor="right"
+          open={isDrawerOpen}
+          onClose={() => setDrawerOpen(false)}
+        >
+          <Box
+            sx={{
+              width: 150, 
+              display: "flex",
+              flexDirection: "column",
+              p: 2,
+            }}
+          >
             {isUserLoggedIn && (
-              <>
-               {hasStore ? <StoreMallDirectoryIcon /> : <AddBusinessOutlinedIcon />}
-              <TypographyButton
-                variant="body2"
-                sx={{
-                  mr: 2,
-                  ml: 1,
-                }}
+              
+              <Button
                 onClick={() => {
                   if (hasStore) {
                     handleNavigation("merchant/storedetails");
@@ -159,55 +249,32 @@ export default function NavBar() {
                     handleNavigation("merchant/addstore");
                   }
                 }}
+                startIcon={hasStore ? (
+                  <StoreMallDirectoryIcon />
+                ) : (
+                  <AddBusinessOutlinedIcon />
+                )}
+                sx={{ color:"black",justifyContent: "flex-start" }}
               >
                 {hasStore ? "Visit Store" : "Add Store"}
-              </TypographyButton>
-              </>
-            )}
-
-            {!isUserLoggedIn && (
-              <Button
-                variant="contained"
-                sx={{
-                  mx: 1,
-                  bgcolor: "#D3F2FF",
-                  color: "black",
-                  "&:hover": {
-                    bgcolor: "#D3F2FF",
-                    color: "black",
-                  },
-                }}
-                onClick={() => {
-                  handleNavigation('signup')
-                }}
-              >
-                Signup
               </Button>
             )}
 
             <Button
-              variant="contained"
               onClick={() => {
-                if (!isUserLoggedIn) {
-                  handleNavigation("signin");
-                } else {
+                if (isUserLoggedIn) {
                   signOut();
+                } else {
+                  handleNavigation("signin");
                 }
               }}
-              sx={{
-                mx: 1,
-                bgcolor: "white",
-                color: "black",
-                "&:hover": {
-                  bgcolor: "white",
-                  color: "black",
-                },
-              }}
+              startIcon={isUserLoggedIn?<ExitToAppIcon/>:<LoginIcon/>}
+              sx={{color:"black", justifyContent: "flex-start" }}
             >
               {isUserLoggedIn ? "Logout" : "Login"}
             </Button>
           </Box>
-        </Toolbar>
+        </Drawer>
       </AppBar>
     </HideOnScroll>
   );
