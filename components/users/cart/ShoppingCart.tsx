@@ -1,22 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Box,
   Typography,
   MenuItem,
-  Button,
   Paper,
   SelectChangeEvent,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
 import { OutlinedButton, StyledSelect } from "@/components/styledcomponents/StyledElements";
 import { BaseButton } from "../buttons/BaseButton";
-
 import { useRouter } from "next/navigation";
 import {
   removeFromCart,
@@ -59,7 +57,8 @@ export default function ShoppingCart({ items, userId }: ShoppingCartProps) {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>(items);
   const [isPending, setIsPending] = useState(false);
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     setCartItems(items);
@@ -151,88 +150,100 @@ export default function ShoppingCart({ items, userId }: ShoppingCartProps) {
   };
 
   return (
-    <Box>
+    <Box sx={{ px: isMobile ? 2 : 4 }}>
       {cartItems.map((item) => (
         <Paper
           key={item.id}
           elevation={0}
-          sx={{ border: "1px solid black", p: 2, mb: 2 }}
+          sx={{ 
+            border: "1px solid black", 
+            p: isMobile ? 2 : 3, 
+            mb: 2,
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'center' : 'flex-start',
+            gap: 2
+          }}
         >
-          <Box
-            sx={{ display: "flex", alignItems: "flex-start", gap: 2, mt: 2 }}
-          >
-            <Image
-              src={item.variant.image || "/placeholder.svg"}
-              alt={item.product.name}
-              width={150}
-              height={150}
-            />
-            <Box sx={{ flexGrow: 1, gap: 2 }}>
-              <Typography variant="h6">{item.product.name}</Typography>
-              <Typography variant="body2">
-                {item.product.category?.toUpperCase()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {item.store.name}
-              </Typography>
-              <Typography variant="h6" sx={{ mt: 1 }}>
-                MRP :<span style={{ color: "black" }}> ₹ {item.price}</span>
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                incl. of all taxes
-              </Typography>
-              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                <StyledSelect
-                  value={item.size.id}
-                  onChange={handleCartChange(item.id, true)}
-                  size="small"
-                  sx={{
-                    minWidth: 80,
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "black",
-                    },
-                  }}
-                >
-                  {item.variant.availableSizes.map((size) => (
-                    <MenuItem key={size.id} value={size.id}>
-                      Size: {size.name.toUpperCase()}
-                    </MenuItem>
-                  ))}
-                </StyledSelect>
-                <StyledSelect
-                  value={item.quantity}
-                  onChange={handleCartChange(item.id, false)}
-                  displayEmpty
-                  size="small"
-                >
-                  {[1, 2, 3, 4, 5].map((qty) => (
-                    <MenuItem key={qty} value={qty}>
-                      Qty: {qty}
-                    </MenuItem>
-                  ))}
-                </StyledSelect>
-              </Box>
-              <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 2, my: 3 }}
+          <Image
+            src={item.variant.image || "/placeholder.svg"}
+            alt={item.product.name}
+            width={isMobile ? 100 : 150}
+            height={isMobile ? 100 : 150}
+          />
+          <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
+            <Typography variant={isMobile ? "subtitle1" : "h6"}>{item.product.name}</Typography>
+            <Typography variant="body2">
+              {item.product.category?.toUpperCase()}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {item.store.name}
+            </Typography>
+            <Typography variant={isMobile ? "subtitle1" : "h6"} sx={{ mt: 1 }}>
+              MRP: <span style={{ color: "black" }}>₹ {item.price}</span>
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              incl. of all taxes
+            </Typography>
+            <Box sx={{ display: "flex", gap: 2, mt: 2, flexWrap: 'wrap' }}>
+              <StyledSelect
+                value={item.size.id}
+                onChange={handleCartChange(item.id, true)}
+                size="small"
+                sx={{
+                  minWidth: 80,
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "black",
+                  },
+                }}
               >
-              <OutlinedButton
-              variant="contained"
-              onClick={()=>handleWishlistToggle(item.product.id,item.variant.id)}
-              disabled={isPending}
-              endIcon={
-                <FavoriteIcon sx={{ color:item.isWishlisted ? "red" : "inherit" }} />
-              }
+                {item.variant.availableSizes.map((size) => (
+                  <MenuItem key={size.id} value={size.id}>
+                    Size: {size.name.toUpperCase()}
+                  </MenuItem>
+                ))}
+              </StyledSelect>
+              <StyledSelect
+                value={item.quantity}
+                onChange={handleCartChange(item.id, false)}
+                displayEmpty
+                size="small"
+              >
+                {[1, 2, 3, 4, 5].map((qty) => (
+                  <MenuItem key={qty} value={qty}>
+                    Qty: {qty}
+                  </MenuItem>
+                ))}
+              </StyledSelect>
+            </Box>
+            <Box
+              sx={{ 
+                display: "flex", 
+                flexDirection: isMobile ? "column" : "row", 
+                gap: 2, 
+                my: 3,
+                width: '100%'
+              }}
             >
-              {item.isWishlisted ? "Remove from Favorites" : "Add to Favorites"}
-            </OutlinedButton>
-                <BaseButton
-                  sx={{ borderRadius: "50px" }}
-                  endIcon={<DeleteOutlineIcon />}
-                  onClick={() => handleRemoveItem(item.id)}
-                >
-                  Remove
-                </BaseButton>
-              </Box>
+              <OutlinedButton
+                variant="contained"
+                onClick={() => handleWishlistToggle(item.product.id, item.variant.id)}
+                disabled={isPending}
+                endIcon={
+                  <FavoriteIcon sx={{ color: item.isWishlisted ? "red" : "inherit" }} />
+                }
+                fullWidth={isMobile}
+              >
+                {item.isWishlisted ? "Remove from Favorites" : "Add to Favorites"}
+              </OutlinedButton>
+              <BaseButton
+                sx={{ borderRadius: "50px" }}
+                endIcon={<DeleteOutlineIcon />}
+                onClick={() => handleRemoveItem(item.id)}
+                fullWidth={isMobile}
+              >
+                Remove
+              </BaseButton>
             </Box>
           </Box>
         </Paper>

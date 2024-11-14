@@ -12,11 +12,14 @@ import {
   CardMedia,
   IconButton,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
 import { toggleWishlistItem } from "@/app/actions/wishlist/action";
+
 
 export interface ProductProps {
   product: {
@@ -41,6 +44,8 @@ export default function ProductCard({
   const pathname = usePathname();
   const [inWishlist, setInWishlist] = useState(isWishlisted);
   const [isPending, setIsPending] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const isMerchantAddProduct = pathname === "/merchant/addproduct";
 
@@ -51,29 +56,33 @@ export default function ProductCard({
     router.push(`/products/${formattedName}/${product.id}`);
   };
 
-  const handleWishlistToggle = useCallback(async (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent the card click event from firing
+  const handleWishlistToggle = useCallback(
+    async (event: React.MouseEvent) => {
+      event.stopPropagation(); 
 
-    if (!userId) {
-      console.log("User not logged in");
-      return;
-    }
-
-    setIsPending(true);
-
-    try {
-      const result = await toggleWishlistItem(userId, product.id, 1);
-      if (result.success) {
-        setInWishlist((prev) => !prev);
-      } else {
-        console.error("Failed to update wishlist:", result.error);
+      if (!userId) {
+        console.log("User not logged in");
+        return;
       }
-    } catch (error) {
-      console.error("Error updating wishlist:", error);
-    } finally {
-      setIsPending(false);
-    }
-  }, [userId, product.id]);
+
+      setIsPending(true);
+
+      try {
+        const result = await toggleWishlistItem(userId, product.id);
+        console.log(result)
+        if (result.success) {
+          setInWishlist((prev) => !prev);
+        } else {
+          console.error("Failed to update wishlist:", result.error);
+        }
+      } catch (error) {
+        console.error("Error updating wishlist:", error);
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [userId, product.id]
+  );
 
   return (
     <Card
@@ -84,17 +93,23 @@ export default function ProductCard({
         border: "1px solid black",
         boxShadow: "none",
         cursor: isMerchantAddProduct ? "default" : "pointer",
+        maxWidth: isMobile ? "100%" : "none",
       }}
       onClick={handleCardClick}
     >
       <CardMedia
         sx={{
           position: "relative",
-          height: 320,
+          height: isMobile ? 200 : 320,
           width: "100%",
         }}
       >
-        <Image src={product.image} alt={product.name} layout="fill" />
+        <Image
+          src={product.image}
+          alt={product.name}
+          layout="fill"
+          objectFit="cover"
+        />
 
         <IconButton
           sx={{
@@ -106,40 +121,59 @@ export default function ProductCard({
             "&:hover": {
               backgroundColor: "rgba(255, 255, 255, 0.9)",
             },
+            padding: isMobile ? "4px" : "8px",
           }}
           disabled={isMerchantAddProduct || isPending}
           aria-label={inWishlist ? "remove from wishlist" : "add to wishlist"}
           onClick={handleWishlistToggle}
         >
-          {inWishlist ? <FavoriteIcon /> : <FavoriteBorderOutlinedIcon />}
+          {inWishlist ? (
+            <FavoriteIcon fontSize={isMobile ? "small" : "medium"} />
+          ) : (
+            <FavoriteBorderOutlinedIcon
+              fontSize={isMobile ? "small" : "medium"}
+            />
+          )}
         </IconButton>
       </CardMedia>
-      <CardContent sx={{ flexGrow: 1, pt: 2 }}>
-        <Typography gutterBottom variant="h6" component="div" noWrap>
+      <CardContent sx={{ flexGrow: 1, pt: 2, px: isMobile ? 1 : 2 }}>
+        <Typography
+          gutterBottom
+          variant={isMobile ? "subtitle2" : "h6"}
+          component="div"
+          noWrap
+          fontWeight={700}
+        >
           {product.name}
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body1" fontWeight={"bold"}>
-            Store :
-          </Typography>
-          <Typography variant="body2" fontWeight={"bold"}>
-            {product.store}
-          </Typography>
-        </Box>
-        <Typography variant="body1" sx={{ mt: 1, fontWeight: "bold" }}>
-          MRP : ₹ {product.price}
-        </Typography>
-        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-          Incl. Of Taxes
+
+        <Typography  fontWeight={700} variant={isMobile ? "body2" : "body1"}>
+          Store : {product.store}
         </Typography>
 
         <Typography
+          variant={isMobile ? "body2" : "body1"}
+          fontWeight={700}
+          sx={{ mt: 1, fontWeight: "bold" }}
+        >
+          MRP : ₹ {product.price}
+        </Typography>
+        <Typography
           variant="caption"
           display="block"
-          sx={{ fontSize: "0.7rem" }}
+          sx={{ mt: 1, fontSize: isMobile ? "0.6rem" : "0.75rem" }}
         >
-          (Your delivery fee will be determined by the store you choose.)
+          Incl. Of Taxes
         </Typography>
+        {!isMobile && (
+          <Typography
+            variant="caption"
+            display="block"
+            sx={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
+          >
+            (Your delivery fee will be determined by the store you choose.)
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );

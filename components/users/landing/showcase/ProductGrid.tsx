@@ -23,7 +23,7 @@ export default async function ProductGrid() {
 
       <Grid container spacing={3} justifyContent="center">
         {productsResponse.products?.slice(0, visibleProducts).map((product: any) => (
-          <Grid item xs={12} sm={6} md={3} key={product.id}>
+          <Grid item xs={6} sm={6} md={3} key={product.id}>
             <ProductCard
               product={{
                 id: product.id,

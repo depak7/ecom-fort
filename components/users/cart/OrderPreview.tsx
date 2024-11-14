@@ -49,7 +49,7 @@ interface Store {
   id: string
   name: string
   items: CartItem[]
-  PhoneNumber: string
+  phoneNumber: string
 }
 
 interface ShoppingCartProps {
@@ -111,7 +111,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
   };
   
   const handleSendWhatsApp = (store: Store) => {
-    const whatsappUrl = `https://wa.me/${store.PhoneNumber}?text=${formatWhatsAppMessage(store)}`
+    const whatsappUrl = `https://wa.me/91${store.phoneNumber}?text=${formatWhatsAppMessage(store)}`
     window.open(whatsappUrl, '_blank')
   }
 
@@ -194,29 +194,50 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
           </AccordionDetails>
         </Accordion>
       ))}
-      <Paper elevation={0} sx={{ mt: 4, p: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <ShoppingCart sx={{ fontSize: 40, mr: 2 }} />
-            <Box>
-              <Typography variant="h6" fontWeight={700}>
-                Total Items
-              </Typography>
-              <Typography variant="h4" fontWeight={700} >
-                {totalQuantity}
-              </Typography>
-            </Box>
-          </Box>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="h6" fontWeight={700}>
-              Total Amount
-            </Typography>
-            <Typography variant="h6" fontWeight={700} >
-              ₹{formatPrice(totalPrice)}
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
+    <Paper elevation={0} sx={{ mt: 4, p: 3, borderRadius: 2 }}>
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexDirection: { xs: 'column', sm: 'row' }, // Stack on small screens
+      textAlign: { xs: 'center', sm: 'left' }, // Center text for smaller screens
+      gap: { xs: 2, sm: 0 }, // Add spacing between items for mobile
+    }}
+  >
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: { xs: 'center', sm: 'flex-start' }, // Center items on mobile
+      }}
+    >
+      <ShoppingCart sx={{ fontSize: 40, mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }} />
+      <Box>
+        <Typography variant="h6" fontWeight={700}>
+          Total Items
+        </Typography>
+        <Typography variant="h4" fontWeight={700}>
+          {totalQuantity}
+        </Typography>
+      </Box>
+    </Box>
+    <Box
+      sx={{
+        textAlign: { xs: 'center', sm: 'right' },
+        mt: { xs: 2, sm: 0 }, // Add margin for mobile
+      }}
+    >
+      <Typography variant="h6" fontWeight={700}>
+        Total Amount
+      </Typography>
+      <Typography variant="h6" fontWeight={700}>
+        ₹{formatPrice(totalPrice)}
+      </Typography>
+    </Box>
+  </Box>
+</Paper>
+
     </Box>
   )
 }

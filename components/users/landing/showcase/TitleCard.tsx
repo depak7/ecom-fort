@@ -117,7 +117,7 @@ export default function TitleCard() {
       </Box>
 
       <Box sx={{ marginTop: { xs: 2, sm: 3, md: 4 }, padding: { xs: 1, sm: 2 } }}>
-        <Typography variant={isMobile ? "h5" : "h4"} fontWeight="bold">
+        <Typography variant={isMobile ? "h6" : "h4"} fontWeight="bold">
           UNLEASH YOUR STYLE
         </Typography>
         <Typography variant={isMobile ? "body2" : "subtitle1"} sx={{ marginTop: 1, color: "gray" }}>
@@ -128,17 +128,16 @@ export default function TitleCard() {
           sx={{
             marginTop: { xs: 1, sm: 2 },
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
             alignItems: "center",
             justifyContent: "center",
             gap: { xs: 1, sm: 2 },
           }}
         >
           <Link href="/stores" passHref>
-            <BaseButton sx={{ borderRadius: 15, width: { xs: "100%", sm: "auto" } }}>Explore Stores</BaseButton>
+            <BaseButton customSize="small"  sx={{ borderRadius: 15, width: { xs: "100%", sm: "auto" } }}>Explore Stores</BaseButton>
           </Link>
           <Link href="/products" passHref>
-            <BaseButton sx={{ borderRadius: 15, width: { xs: "100%", sm: "auto" } }}>Explore Products</BaseButton>
+            <BaseButton customSize="small" sx={{ borderRadius: 15, width: { xs: "100%", sm: "auto" } }}>Explore Products</BaseButton>
           </Link>
         </Box>
       </Box>

@@ -6,6 +6,8 @@ import  prisma  from '@/database/index'
 
 
 export async function toggleWishlistItem(userId: string, productId: string, productVariantId?: number) {
+  console.log("Toggling wishlist item:", { userId, productId, productVariantId });
+    
   try {
     const wishlist = await prisma.wishlist.upsert({
       where: { userId },
