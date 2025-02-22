@@ -9,37 +9,111 @@ import { generateUniqueStoreId } from '@/database/uniqueID'
 
 export async function createStore(formData: FormData) {
   try {
-    console.log(formData)
+    const ownerId = formData.get('ownerId') as string
+    
+    // First verify the user exists
+    const userExists = await prisma.user.findUnique({
+      where: { id: ownerId }
+    });
+
+    if (!userExists) {
+      return { success: false, error: 'User not authenticated or invalid user' }
+    }
+
+    // Basic Details
     const name = formData.get('name') as string
     const logo = formData.get('logo') as File
     const description = formData.get('description') as string
-    const city = formData.get('city') as string
-    const address = formData.get('address') as string
-    const mapLink = formData.get('mapLink') as string
-    const phoneNumber=formData.get('phoneNumber') as string
-    const ownerId = formData.get('ownerId') as string
 
-   
-    const { url } = await put(`stores/${name}-${Date.now()}.${logo.type.split('/')[1]}`, logo, {
+    // Business Details
+    const businessType = formData.get('businessType') as string
+    const gstNumber = formData.get('gstNumber') as string || null
+    const panNumber = formData.get('panNumber') as string
+    const businessLicense = formData.get('businessLicense') as string || null
+
+    // Address Details
+    const address = formData.get('address') as string
+    const city = formData.get('city') as string
+    const state = formData.get('state') as string
+    const pincode = formData.get('pincode') as string
+    const mapLink = formData.get('mapLink') as string
+
+    // Contact Details
+    const phoneNumber = formData.get('phoneNumber') as string
+    const alternatePhone = formData.get('alternatePhone') as string || null
+    const email = formData.get('email') as string
+
+    // Bank Details
+    const bankName = formData.get('bankName') as string
+    const accountNumber = formData.get('accountNumber') as string
+    const ifscCode = formData.get('ifscCode') as string
+
+    // Upload files
+    const { url: logoUrl } = await put(`stores/${name}-logo-${Date.now()}.${logo.type.split('/')[1]}`, logo, {
       access: 'public',
     })
-    console.log(url)
 
-    const id=await generateUniqueStoreId();
+    // KYC Documents
+    const addressProof = formData.get('addressProof') as File
+    const identityProof = formData.get('identityProof') as File
+    const businessProof = formData.get('businessProof') as File
+
+    const { url: addressProofUrl } = addressProof ? 
+      await put(`stores/${name}-address-proof-${Date.now()}.${addressProof.type.split('/')[1]}`, addressProof, { access: 'public' }) : 
+      { url: null }
+
+    const { url: identityProofUrl } = identityProof ? 
+      await put(`stores/${name}-identity-proof-${Date.now()}.${identityProof.type.split('/')[1]}`, identityProof, { access: 'public' }) : 
+      { url: null }
+
+    const { url: businessProofUrl } = businessProof ? 
+      await put(`stores/${name}-business-proof-${Date.now()}.${businessProof.type.split('/')[1]}`, businessProof, { access: 'public' }) : 
+      { url: null }
+
+    const id = await generateUniqueStoreId();
 
     const store = await prisma.store.create({
       data: {
         id,
         name,
-        logo: url, 
+        logo: logoUrl,
         description,
-        city,
-        phoneNumber,
-        address,
-        mapLink,
         ownerId,
+        
+        // Business Details
+        businessType,
+        gstNumber,
+        panNumber,
+        businessLicense,
+        
+        // Address Details
+        address,
+        city,
+        state,
+        pincode,
+        mapLink,
+        
+        // Contact Details
+        phoneNumber,
+        alternatePhone,
+        email,
+        
+        // Bank Details
+        bankName,
+        accountNumber,
+        ifscCode,
+        
+        // KYC Documents
+        addressProof: addressProofUrl,
+        identityProof: identityProofUrl,
+        businessProof: businessProofUrl,
+        
+        // Default fields
         bannerImage: null,
         offerDescription: null,
+        isApproved: false,
+        isActive: true,
+        verificationStatus: "PENDING"
       },
     })
 
@@ -64,6 +138,9 @@ export async function getAllStores(sortBy?: string) {
 
     const stores = await prisma.store.findMany({
       orderBy,
+      where:{
+        isApproved: true,
+      },
       select: {
         id: true,
         name: true,
@@ -75,6 +152,9 @@ export async function getAllStores(sortBy?: string) {
         ownerId: true,
         bannerImage: true,
         offerDescription: true,
+        isApproved: true,
+        isActive: true,
+        verificationStatus: true,
       },
     })
 
@@ -90,6 +170,7 @@ export async function getStoreById(storeId: string) {
     const store = await prisma.store.findUnique({
       where: {
         id: storeId,
+        isApproved: true,
       },
       select: {
         id: true,
@@ -103,6 +184,9 @@ export async function getStoreById(storeId: string) {
         ownerId: true,
         bannerImage: true,
         offerDescription: true,
+        isApproved: true,
+        isActive: true,
+        verificationStatus: true,
       },
     })
 
@@ -176,13 +260,21 @@ export async function checkUserHasStore(userId: string) {
       },
       select: {
         id: true,
-        name:true
+        name:true,
+        isApproved:true,
+        isActive:true,
+        verificationStatus:true,
+        rejectionReason:true,
       },
     })
 
     return { 
       success: true, 
       hasStore: !!store, 
+      isApproved:store?.isApproved,
+      isActive:store?.isActive,
+      verificationStatus:store?.verificationStatus,
+      rejectionReason:store?.rejectionReason,
       storeName:store?store.name:"",
       storeId: store ? store.id : null 
     }
@@ -198,7 +290,8 @@ export async function getStoreDetailsByStoreId(storeId:string){
   const storeDetails=await prisma.store.findUnique(
     {
       where:{
-      id:storeId
+      id:storeId,
+      isApproved: true,
       }
     }
   )

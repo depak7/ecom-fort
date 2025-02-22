@@ -46,14 +46,53 @@ model Store {
   bannerImage      String?
   description      String
   offerDescription String?
-  city             String
+  
+  // Business Details
+  businessType     String      // e.g., "Individual", "Partnership", "Corporation"
+  gstNumber        String?     // GST/Tax registration number
+  panNumber        String?     // PAN or tax ID
+  businessLicense  String?     // Business license number
+  
+  // Address Details
   address          String
+  city             String
+  state            String
+  pincode          String
   mapLink          String
+  
+  // Contact Details
+  phoneNumber      String
+  alternatePhone   String?
+  email            String
+  
+  // Bank Details
+  bankName         String?
+  accountNumber    String?
+  ifscCode         String?
+  
+  // KYC Documents
+  addressProof     String?     // URL to stored document
+  identityProof    String?     // URL to stored document
+  businessProof    String?     // URL to stored document
+  
+  // Verification Status
+  isApproved       Boolean     @default(false)
+  isActive         Boolean     @default(true)
+  verificationStatus String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason  String?
+  
+  // Timestamps
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  
+  // Relations
   ownerId          String      @unique
   owner            User        @relation("StoreOwner", fields: [ownerId], references: [id])
   products         Product[]
   orderItems       OrderItem[]
-  phoneNumber      String?
+
+  @@index([verificationStatus])
+  @@index([isApproved])
 }
 
 model ProductImage {
