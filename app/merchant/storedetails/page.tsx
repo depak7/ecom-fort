@@ -72,7 +72,7 @@ export default async function StorePage() {
             style={{ marginBottom: '2rem' }}
           />
           <Typography variant="h5" gutterBottom>
-            You haven't created a store yet
+            You haven&apos;t created a store yet
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Start selling by creating your store
@@ -100,7 +100,7 @@ export default async function StorePage() {
             <Alert severity="info" sx={{ mb: 3 }}>
               <AlertTitle>Application Under Review</AlertTitle>
               Your store application is currently being reviewed. This process typically takes up to 2 business days.
-              We'll notify you once the review is complete.
+              We&apos;ll notify you once the review is complete.
             </Alert>
           )}
 

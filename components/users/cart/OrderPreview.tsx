@@ -17,6 +17,7 @@ import {
   AccordionDetails,
   Button,
 } from '@mui/material'
+import Image from 'next/image'
 
 import CloseIcon from '@mui/icons-material/Close'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -142,10 +143,12 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
                     <TableRow key={product.id}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <img
+                          <Image 
                             src={product.variant.image || '/placeholder.svg?height=80&width=80'}
                             alt={product.product.name}
-                            style={{ width: 80, height: 80, marginRight: 16 }}
+                            width={80}
+                            height={80}
+                            style={{ marginRight: 16 }}
                           />
                           <Box>
                             <Typography variant="subtitle1">{product.product.name}</Typography>
