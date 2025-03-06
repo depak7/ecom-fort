@@ -89,6 +89,8 @@ export default function NavBar() {
               alt="logo"
               width={isMobile ? 100 : 150}
               height={isMobile ? 30 : 40}
+              style={{cursor:"pointer"}}
+              onClick={() => router.push("/")}
             />
           </Box>
           <Box
