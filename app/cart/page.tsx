@@ -14,6 +14,22 @@ export default async function AddressPage() {
 
   const { items, totalPrice, totalQuantity } = await getCartItems(userId ?? "null")
 
+  if (items.length === 0) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 8 }}>
+        <Typography variant="h5" gutterBottom>Your Cart is Empty</Typography>
+        <Typography color="text.secondary" mb={4}>
+          Looks like you haven't added anything to your cart yet.
+        </Typography>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <BaseButton>
+            Continue Shopping
+          </BaseButton>
+        </Link>
+      </Box>
+    )
+  }
+
   const formattedItems = items.map((item) => ({
     ...item,
     price: Number(item.price),
