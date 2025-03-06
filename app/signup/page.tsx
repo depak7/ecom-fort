@@ -24,6 +24,7 @@ export default function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -35,6 +36,16 @@ export default function SignUp() {
     e.preventDefault();
     setError('');
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     try {
       const result = await registerUser(name, email, password);
       if (result.success) {
@@ -44,10 +55,6 @@ export default function SignUp() {
           password,
         });
         router.push('/signin');
-        
-        if (signInResult?.error) {
-          setError(signInResult.error);
-        } 
       } else {
         setError(result.message);
       }
@@ -127,6 +134,30 @@ export default function SignUp() {
               ),
             }}
           />
+          <StyledTextField
+            margin="normal"
+            required
+            fullWidth
+            name="confirmPassword"
+            label="Confirm Password"
+            type={showPassword ? 'text' : 'password'}
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
           <BaseButton
             type="submit"
             fullWidth
@@ -134,7 +165,6 @@ export default function SignUp() {
           >
             Sign Up
           </BaseButton>
-        
         </Box>
       </Box>
     </Container>
