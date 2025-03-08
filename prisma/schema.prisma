@@ -37,6 +37,7 @@ model User {
   carts     Cart[]
   wishlists Wishlist[]
   addresses Address[]
+  reviews   Review[]
 }
 
 model Store {
@@ -137,6 +138,7 @@ model Product {
   orderItems    OrderItem[]
   cartItems     CartItem[]
   wishlistItems WishlistItem[]
+  reviews       Review[]
 }
 
 model ProductVariant {
@@ -212,3 +214,22 @@ model Address {
   userId               String
   user                 User    @relation(fields: [userId], references: [id])
 }
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      @db.SmallInt // 1-5 stars
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId]) // Ensures one review per product per user
+  @@index([productId])
+  @@index([userId])
+}
+

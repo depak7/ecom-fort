@@ -28,6 +28,8 @@ import { BaseButton } from "../users/buttons/BaseButton";
 import ProductCard from "../users/products/ProductCard";
 
 const allowedSizes = ["S-38", "XS-39", "M-40", "L-42", "XL-44", "XXL-46"];
+const allowedShoeSizes = ["UK-6", "UK-7", "UK-8", "UK-9", "UK-10", "UK-11", "UK-12"];
+const categories = ["Shirts", "Pants", "Shoes", "Accessories", "Others"];
 
 export default function ProductCreationForm({
   storeId,
@@ -46,6 +48,7 @@ export default function ProductCreationForm({
     name: "",
     price: "",
     image: null as string | null,
+    category: "",
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,6 +93,8 @@ export default function ProductCreationForm({
     });
 
     formData.append("storeId", storeId);
+    formData.append("category", previewData.category);
+
     try {
       const result = await createProduct(formData);
       console.log(result);
@@ -97,7 +102,7 @@ export default function ProductCreationForm({
         setSuccess(true);
         form.reset();
         setVariants([{ color: "", sizes: [{ size: "", stock: 0 }] }]);
-        setPreviewData({ name: "", price: "", image: null });
+        setPreviewData({ name: "", price: "", image: null, category: "" });
       } else {
         setError(
           result.error || "An error occurred while creating the product"
@@ -204,15 +209,21 @@ export default function ProductCreationForm({
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <StyledTextField
-                    required
-                    fullWidth
+                  <InputLabel id="category-label">Category</InputLabel>
+                  <Select
+                    labelId="category-label"
                     name="category"
-                    label="category"
-                    variant="outlined"
-                    onChange={handleInputChange}
-                    InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-                  />
+                    value={previewData.category}
+                    onChange={(e) => setPreviewData({ ...previewData, category: e.target.value })}
+                    fullWidth
+                    required
+                  >
+                    {categories.map((category) => (
+                      <MenuItem key={category} value={category}>
+                        {category}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </Grid>
                 <Grid item xs={12}>
                   <StyledTextField
@@ -318,31 +329,23 @@ export default function ProductCreationForm({
                                 gap: 1,
                               }}
                             >
-                              <>
                               <Typography variant="subtitle2" fontWeight={500}>Select Size</Typography>
                               <Select
                                 required
                                 value={size.size}
                                 onChange={(e) => {
                                   const newVariants = [...variants];
-                                  newVariants[variantIndex].sizes[
-                                    sizeIndex
-                                  ].size = e.target.value;
+                                  newVariants[variantIndex].sizes[sizeIndex].size = e.target.value;
                                   setVariants(newVariants);
                                 }}
                                 fullWidth
                               >
-                                {allowedSizes.map((allowedSize) => (
-                                  <MenuItem
-                                    key={allowedSize}
-                                    value={allowedSize}
-                                  >
+                                {(previewData.category === "Shoes" ? allowedShoeSizes : allowedSizes).map((allowedSize) => (
+                                  <MenuItem key={allowedSize} value={allowedSize}>
                                     {allowedSize}
                                   </MenuItem>
                                 ))}
                               </Select>
-                              </>
-                             
                               <StyledTextField
                                 required
                                 label="Stock"
@@ -350,17 +353,13 @@ export default function ProductCreationForm({
                                 value={size.stock}
                                 onChange={(e) => {
                                   const newVariants = [...variants];
-                                  newVariants[variantIndex].sizes[
-                                    sizeIndex
-                                  ].stock = parseInt(e.target.value, 10);
+                                  newVariants[variantIndex].sizes[sizeIndex].stock = parseInt(e.target.value, 10);
                                   setVariants(newVariants);
                                 }}
                                 InputProps={{ inputProps: { min: 0 } }}
                               />
                               <IconButton
-                                onClick={() =>
-                                  removeSize(variantIndex, sizeIndex)
-                                }
+                                onClick={() => removeSize(variantIndex, sizeIndex)}
                                 sx={{ color: "error.main" }}
                               >
                                 <DeleteIcon />
@@ -437,10 +436,9 @@ export default function ProductCreationForm({
               product={{
                 id: "preview",
                 name: previewData.name || "N/A",
-                category: "Some Category",
+                category: previewData.category || "Some Category",
                 price: previewData.price || "0.00",
                 store: storeName,
-
                 image: previewData.image || "/placeholder-image.png",
               }}
             />

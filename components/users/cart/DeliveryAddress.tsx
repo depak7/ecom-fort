@@ -15,7 +15,8 @@ import {
   IconButton,
   Backdrop,
   CircularProgress,
-
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import CheckoutProgress from './CheckoutProgress';
 
@@ -25,6 +26,7 @@ import { AddressText, StyledPaper, StyledTextField } from '@/components/styledco
 import { BaseButton } from '../buttons/BaseButton';
 import { useRouter } from 'next/navigation';
 import { addAddress, editAddress, deleteAddress, getUserAddresses } from '@/app/actions/cart/action';
+import UseCustomToast from '@/components/ui/useCustomToast';
 
 interface Address {
   id: number;
@@ -46,6 +48,9 @@ export default function DeliveryAddress({ userId }: { userId: string }) {
   const [newAddress, setNewAddress] = useState<Partial<Address>>({});
   const [isLoading, setIsLoading] = useState(true); 
   const[isAddressChangeLoading,setAddressChangeLoading]=useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const { errorToast, successToast } = UseCustomToast();
 
 
 
@@ -64,6 +69,10 @@ export default function DeliveryAddress({ userId }: { userId: string }) {
   }, [userId]);
 
   const handleProceedToCheckout = () => {
+    if (!selectedAddress) {
+      errorToast("Please add an address to proceed to checkout.");
+      return;
+    }
     router.push("/cart/address/place-order");  
   };
 
@@ -246,7 +255,7 @@ export default function DeliveryAddress({ userId }: { userId: string }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <StyledTextField
-                    placeholder="Street"
+                    placeholder="Full Address"
                     value={newAddress.street || ''}
                     onChange={handleNewAddressChange('street')}
                   />
@@ -318,6 +327,24 @@ export default function DeliveryAddress({ userId }: { userId: string }) {
       <Box sx={{display:"flex",justifyContent:"flex-end" ,mt:2}}>
         <BaseButton onClick={handleProceedToCheckout}>Proceed to Checkout</BaseButton>
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert onClose={() => setError(null)} severity="error">
+          {error}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={success}
+        autoHideDuration={6000}
+        onClose={() => setSuccess(false)}
+      >
+        <Alert onClose={() => setSuccess(false)} severity="success">
+          Address added successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

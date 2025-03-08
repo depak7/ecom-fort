@@ -14,7 +14,7 @@ export default async function ProductList() {
   const products=userId? await getAllProducts(userId):await getAllProducts();
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
+    <Box sx={{ maxWidth: 1600, margin: "auto", padding: 2 }}>
       <Typography
         variant="h6"
         component="h1"
