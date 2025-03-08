@@ -27,7 +27,7 @@ export default async function Page({ params }: ProductPageProps) {
     return <div>Product not found</div>;
   }
 
-  const similarProducts = similarProduct.products?.map(p => ({
+  const similarProducts = similarProduct.products?.filter(p => p.id !== response.product.id).map(p => ({
     id: p.id,
     name: p.name,
     category: p.category || '',
@@ -38,10 +38,10 @@ export default async function Page({ params }: ProductPageProps) {
   })) || [];
 
   return (
-    <Box>
+    <>
       <ProductDetails product={response.product}  isWishlisted={response.product.isWishlisted || false}  userId={userId?userId:""}/>
       <SimilarProducts product={similarProducts} />
-    </Box>
+    </>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Box,
@@ -15,6 +15,13 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  DialogContent,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  CircularProgress,
+  Divider,
+  IconButton,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -27,6 +34,7 @@ import {
 import { toggleWishlistItem } from "@/app/actions/wishlist/action";
 import UseCustomToast from "@/components/ui/useCustomToast";
 import { addToCart } from "@/app/actions/cart/action";
+import { addProductReview, getProductReviews, getProductReviewSummary } from "@/app/actions/wishlist/action";
 
 export default function ProductDetails({
   product,
@@ -48,16 +56,70 @@ export default function ProductDetails({
   const [reviewRating, setReviewRating] = useState<number | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>( selectedVariant.sizes[0].id); 
-
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewSummary, setReviewSummary] = useState<any>(null);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
 
   const { errorToast, successToast } = UseCustomToast();
+
+  const fetchReviews = async () => {
+    setIsLoadingReviews(true);
+    try {
+      const reviewsResult = await getProductReviews(product.id);
+      const summaryResult = await getProductReviewSummary(product.id);
+      
+      if (reviewsResult.success) {
+        setReviews(reviewsResult.reviews || []);
+      }
+      if (summaryResult.success) {
+        setReviewSummary(summaryResult.summary);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, [product.id]);
 
   const handleShowReviewForm = () => {
     setShowReviewForm(!showReviewForm);
   };
 
-  const handleReviewSubmit = () => {
-    console.log("Review submitted:", reviewText, reviewRating);
+  const handleReviewSubmit = async () => {
+    if (!userId) {
+      errorToast("Please login to submit a review");
+      return;
+    }
+
+    if (!reviewRating) {
+      errorToast("Please select a rating");
+      return;
+    }
+
+    try {
+      const result = await addProductReview({
+        userId,
+        productId: product.id,
+        rating: reviewRating,
+        comment: reviewText
+      });
+
+      if (result.success) {
+        successToast("Your review has been added successfully!");
+        setReviewText("");
+        setReviewRating(null);
+        setShowReviewForm(false);
+        fetchReviews(); // Refresh reviews
+      } else {
+        errorToast(result.error || "Failed to submit review");
+      }
+    } catch (error) {
+      errorToast("An error occurred while submitting the review");
+    }
   };
 
   const handleSeeAllReviews = () => {
@@ -121,7 +183,7 @@ export default function ProductDetails({
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: "auto", padding: 2 }}>
+    <Box sx={{ maxWidth: 1600, margin: "auto", padding: 1 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         {product.name}
       </Typography>
@@ -259,77 +321,81 @@ export default function ProductDetails({
               <Typography fontWeight={"bold"}>Reviews</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <Rating value={4.5} precision={0.5} readOnly />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  4.5 out of 5
-                </Typography>
-              </Box>
-              <Typography variant="body2">
-                Based on 123 reviews. Users love the comfort and style of these
-                shoes!
-              </Typography>
-              {showReviewForm ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    mt: 2,
-                    gap: 2,
-                  }}
-                >
-                  <StyledTextField
-                    label="Write a Review"
-                    multiline
-                    rows={4}
-                    fullWidth
-                    value={reviewText}
-                    onChange={(e) => setReviewText(e.target.value)}
-                  />
-                  <Rating
-                    name="review-rating"
-                    value={reviewRating}
-                    onChange={(event, newValue) => {
-                      setReviewRating(newValue);
-                    }}
-                  />
-                  <BaseButton size="medium" onClick={handleReviewSubmit}>
-                    Submit Review
-                  </BaseButton>
+              {isLoadingReviews ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress />
                 </Box>
               ) : (
-                <Button
-                  variant="text"
-                  sx={{
-                    mt: 2,
-                    color: "black",
-                    "&:hover": {
-                      textDecoration: "underline",
-                    },
-                  }}
-                  onClick={handleShowReviewForm}
-                >
-                  Write a Review
-                </Button>
-              )}
+                <>
+                  {reviewSummary && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6" gutterBottom>
+                        Overall Rating: {reviewSummary.averageRating}/5
+                      </Typography>
+                      <Rating value={reviewSummary.averageRating} precision={0.1} readOnly />
+                      <Typography variant="body2">
+                        Based on {reviewSummary.totalReviews} reviews
+                      </Typography>
+                    </Box>
+                  )}
 
-              <Button
-                variant="text"
-                sx={{
-                  color: "black",
-                  mt: 2,
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                }}
-                onClick={handleSeeAllReviews}
-              >
-                See All Reviews
-              </Button>
+                  <Divider sx={{ my: 2 }} />
+
+                  {reviews.length > 0 ? (
+                    reviews.map((review, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mr: 1 }}>
+                            {review.user.name}
+                          </Typography>
+                          <Rating value={review.rating} size="small" readOnly />
+                        </Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {review.comment}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </Typography>
+                        <Divider sx={{ mt: 2 }} />
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography variant="body1" sx={{ textAlign: 'center', py: 2 }}>
+                      No reviews yet. Be the first to review this product!
+                    </Typography>
+                  )}
+                </>
+              )}
             </AccordionDetails>
           </Accordion>
         </Box>
       </Box>
+      <Dialog open={showReviewForm} onClose={handleShowReviewForm} maxWidth="md" fullWidth>
+        <DialogTitle>Submit Review</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">Please provide your review:</Typography>
+          <StyledTextField
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            multiline
+            rows={4}
+            fullWidth
+          />
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h6">Select Rating:</Typography>
+            <Rating
+              value={reviewRating}
+              onChange={(event, newValue) => {
+                setReviewRating(newValue);
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleShowReviewForm} color="primary">Cancel</Button>
+          <Button onClick={handleReviewSubmit} color="primary">Submit</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

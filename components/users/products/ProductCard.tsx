@@ -87,13 +87,13 @@ export default function ProductCard({
   return (
     <Card
       sx={{
-        height: isMerchantAddProduct ? "40%" : "100%",
+        height: isMerchantAddProduct ? "40%" : "90%",
         display: "flex",
         flexDirection: "column",
         border: "1px solid black",
         boxShadow: "none",
         cursor: isMerchantAddProduct ? "default" : "pointer",
-        maxWidth: isMobile ? "100%" : "none",
+        maxWidth: isMobile ? "90%" : "none",
       }}
       onClick={handleCardClick}
     >
