@@ -19,7 +19,7 @@ export default async function AddressPage() {
       <Box sx={{ textAlign: 'center', py: 8 }}>
         <Typography variant="h5" gutterBottom>Your Cart is Empty</Typography>
         <Typography color="text.secondary" mb={4}>
-          Looks like you haven't added anything to your cart yet.
+          Looks like you haven&apos;t added anything to your cart yet.
         </Typography>
         <Link href="/" style={{ textDecoration: 'none' }}>
           <BaseButton>
