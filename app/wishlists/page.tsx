@@ -9,11 +9,11 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { BaseButton } from "@/components/users/buttons/BaseButton";
 import login from '@/components/assets/users/login-ecom.png'
 
-
 export default async function WishlistPage() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   let products;
+
 
   if (userId) {
     products = await getWishlistedItems(userId);

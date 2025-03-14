@@ -136,7 +136,7 @@ export default function ProductCard({
           )}
         </IconButton>
       </CardMedia>
-      <CardContent sx={{ flexGrow: 1, pt: 2, px: isMobile ? 1 : 2 }}>
+      <CardContent sx={{ flexGrow: 1, pt: 2, px: isMobile ? 1 : 2 , overflow: "hidden",}}>
         <Typography
           gutterBottom
           variant={isMobile ? "subtitle2" : "h6"}
