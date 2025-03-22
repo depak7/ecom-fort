@@ -64,6 +64,9 @@ export default function DeliveryAddress({ userId }: { userId: string }) {
       const { addresses } = await getUserAddresses(userId);
       setAddresses(addresses || []);
       setIsLoading(false);
+      if (addresses && addresses.length === 1) {
+        setSelectedAddress(addresses[0].id);
+      }
     };
     fetchAddresses();
   }, [userId]);
@@ -118,6 +121,9 @@ export default function DeliveryAddress({ userId }: { userId: string }) {
       if (result.success) {
         if (result.address) { 
           setAddresses([...addresses, result.address]);
+          if (addresses.length === 0) {
+            setSelectedAddress(result.address.id);
+          }
         }
         setIsAddingNewAddress(false);
         setNewAddress({});
@@ -144,6 +150,9 @@ export default function DeliveryAddress({ userId }: { userId: string }) {
         }
         setIsAddingNewAddress(false);
         setNewAddress({});
+        if (addresses.length === 0) {
+          setSelectedAddress(0);
+        }
       } else {
         console.error(result.error);
       }
