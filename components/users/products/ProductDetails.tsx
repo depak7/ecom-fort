@@ -331,14 +331,25 @@ export default function ProductDetails({
               ) : (
                 <>
                   {reviewSummary && (
-                    <Box sx={{ mb: 3 }}>
-                      <Typography variant="h6" gutterBottom>
-                        Overall Rating: {reviewSummary.averageRating}/5
-                      </Typography>
-                      <Rating value={reviewSummary.averageRating} precision={0.1} readOnly />
-                      <Typography variant="body2">
-                        Based on {reviewSummary.totalReviews} reviews
-                      </Typography>
+                    <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box>
+                        <Typography variant="h6" gutterBottom>
+                          Overall Rating: {reviewSummary.averageRating}/5
+                        </Typography>
+                        <Rating value={reviewSummary.averageRating} precision={0.1} readOnly />
+                        <Typography variant="body2">
+                          Based on {reviewSummary.totalReviews} reviews
+                        </Typography>
+                      </Box>
+                      {!hasUserReviewed && userId && (
+                        <BaseButton
+                          variant="contained"
+                          onClick={handleShowReviewForm}
+                          sx={{ backgroundColor: 'black', color: 'white', ml: 2 }}
+                        >
+                          Write a Review
+                        </BaseButton>
+                      )}
                     </Box>
                   )}
 
@@ -366,18 +377,13 @@ export default function ProductDetails({
                     <Typography variant="body1" sx={{ textAlign: 'center', py: 2 }}>
                       No reviews yet. Be the first to review this product!
                     </Typography>
-                  )}
+                    )}
                 </>
               )}
             </AccordionDetails>
           </Accordion>
         </Box>
       </Box>
-      {!hasUserReviewed && userId && (
-        <Button variant="contained" onClick={handleShowReviewForm}>
-          Write a Review
-        </Button>
-      )}
       <Dialog open={showReviewForm} onClose={handleShowReviewForm} maxWidth="md" fullWidth>
         <DialogTitle>Submit Review</DialogTitle>
         <DialogContent>
