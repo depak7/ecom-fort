@@ -4,12 +4,13 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/users/landing/appbar/NavBar";
 import { Toolbar } from "@mui/material";
-import {Providers} from "@/Provider";
+import { Providers } from "@/Provider";
 import { Toaster } from "sonner";
 
 
 
 const inter = Inter({ subsets: ["latin"] });
+const GA_MEASUREMENT_ID = "G-JSHPCHG02T";
 
 export const metadata: Metadata = {
   title: "Ecom-Fort",
@@ -21,18 +22,36 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
+      <head>
+
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_MEASUREMENT_ID}');
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
-       <Providers>
-      <AppRouterCacheProvider>
-      <NavBar/>
-      <Toolbar/>
-        {children}
-        </AppRouterCacheProvider>
+        <Providers>
+          <AppRouterCacheProvider>
+            <NavBar />
+            <Toolbar />
+            {children}
+          </AppRouterCacheProvider>
         </Providers>
-        <Toaster  richColors position="top-right"/>
-        </body>
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }
