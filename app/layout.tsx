@@ -6,7 +6,7 @@ import NavBar from "@/components/users/landing/appbar/NavBar";
 import { Toolbar } from "@mui/material";
 import { Providers } from "@/Provider";
 import { Toaster } from "sonner";
-
+import { Analytics } from '@vercel/analytics/next';
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -48,6 +48,7 @@ export default function RootLayout({
             <NavBar />
             <Toolbar />
             {children}
+            <Analytics />
           </AppRouterCacheProvider>
         </Providers>
         <Toaster richColors position="top-right" />
