@@ -19,7 +19,7 @@ import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlin
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
 import { toggleWishlistItem } from "@/app/actions/wishlist/action";
-
+import UseCustomToast from "@/components/ui/useCustomToast";
 
 export interface ProductProps {
   product: {
@@ -46,7 +46,7 @@ export default function ProductCard({
   const [isPending, setIsPending] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const {errorToast}=UseCustomToast();
   const isMerchantAddProduct = pathname === "/merchant/addproduct";
 
   const handleCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -61,7 +61,7 @@ export default function ProductCard({
       event.stopPropagation(); 
 
       if (!userId) {
-        console.log("User not logged in");
+        errorToast("please login to add wishlist products");
         return;
       }
 
@@ -69,7 +69,7 @@ export default function ProductCard({
 
       try {
         const result = await toggleWishlistItem(userId, product.id);
-        console.log(result)
+        console.log(result);
         if (result.success) {
           setInWishlist((prev) => !prev);
         } else {

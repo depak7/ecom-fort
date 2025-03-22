@@ -21,6 +21,7 @@ import {
   Container,
   Select,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -32,6 +33,8 @@ import Image from "next/image";
 import { Decimal } from "decimal.js";
 import { BaseButton } from "@/components/users/buttons/BaseButton";
 import { OutlinedButton } from "@/components/styledcomponents/StyledElements";
+import { updateProduct } from "@/app/actions/products/action";
+import { useRouter } from "next/router";
 
 interface Size {
   id: number;
@@ -74,6 +77,7 @@ export default function MerchantProductCard({
   const [newSize, setNewSize] = useState<string>("");
   const [newStock, setNewStock] = useState<number>(0);
   const [openAddSizeDialog, setOpenAddSizeDialog] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleEditClick = (product: Product) => {
     setEditingProduct(JSON.parse(JSON.stringify(product)));
@@ -86,9 +90,16 @@ export default function MerchantProductCard({
     setActiveVariant(0);
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (editingProduct) {
-      handleCloseDialog();
+      setIsUpdating(true);
+      const result = await updateProduct(editingProduct);
+      if (result.success) {
+        handleCloseDialog();
+      } else {
+        console.error(result.error);
+      }
+      setIsUpdating(false);
     }
   };
 
@@ -109,7 +120,8 @@ export default function MerchantProductCard({
 
   const handlePriceChange = (value: string) => {
     if (editingProduct) {
-      setEditingProduct({ ...editingProduct, price: new Decimal(value) });
+      const numericValue = value ? new Decimal(value) : new Decimal(0);
+      setEditingProduct({ ...editingProduct, price: numericValue });
     }
   };
 
@@ -120,11 +132,11 @@ export default function MerchantProductCard({
         id: Date.now(),
         size: newSize,
         stock: newStock,
-      }); // Add new size
+      });
       setEditingProduct({ ...editingProduct, variants: updatedVariants });
-      setNewSize(""); // Reset new size input
-      setNewStock(0); // Reset new stock input
-      setOpenAddSizeDialog(false); // Close dialog
+      setNewSize("");
+      setNewStock(0);
+      setOpenAddSizeDialog(false);
     }
   };
 
@@ -210,7 +222,7 @@ export default function MerchantProductCard({
                 onClick={() => handleEditClick(product)}
                 sx={{ m: 2 }}
               >
-                Edit
+                {isUpdating ? "Updating..." : "Edit"}
               </BaseButton>
             </Card>
           </Grid>
@@ -297,7 +309,7 @@ export default function MerchantProductCard({
                         <DialogContent>
                           <Select
                             value={"S-38"}
-                            onChange={(e) => setNewSize(e.target.value)} // Update size selection
+                            onChange={(e) => setNewSize(e.target.value)}
                             fullWidth
                             sx={{ mb: 2 }}
                           >
@@ -338,7 +350,7 @@ export default function MerchantProductCard({
         <DialogActions>
           <OutlinedButton onClick={handleCloseDialog}>Cancel</OutlinedButton>
           <BaseButton onClick={handleSaveChanges} startIcon={<SaveIcon />}>
-            Save Changes
+            {isUpdating ? <CircularProgress size={24} /> : "Save Changes"}
           </BaseButton>
         </DialogActions>
       </Dialog>

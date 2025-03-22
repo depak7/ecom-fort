@@ -143,6 +143,7 @@ export default function ProductDetails({
 
   const handleWishlistToggle = useCallback(async () => {
     if (!userId) {
+      errorToast("please login to add wishlist products");
       console.log("User not logged in");
       return;
     }
@@ -181,6 +182,8 @@ export default function ProductDetails({
       errorToast("Soory something went wrong")
     }
   };
+
+  const hasUserReviewed = reviews.some(review => review.userId === userId);
 
   return (
     <Box sx={{ maxWidth: 1600, margin: "auto", padding: 1 }}>
@@ -370,6 +373,11 @@ export default function ProductDetails({
           </Accordion>
         </Box>
       </Box>
+      {!hasUserReviewed && userId && (
+        <Button variant="contained" onClick={handleShowReviewForm}>
+          Write a Review
+        </Button>
+      )}
       <Dialog open={showReviewForm} onClose={handleShowReviewForm} maxWidth="md" fullWidth>
         <DialogTitle>Submit Review</DialogTitle>
         <DialogContent>

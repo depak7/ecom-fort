@@ -1,15 +1,34 @@
-import {  PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-const prismaClientSingleton = () => {
-  return new PrismaClient()
-}
+// Function to create a new PrismaClient instance
+const prismaClientSingleton = (url: string) => {
+  return new PrismaClient({
+    datasources: { db: { url } },
+  });
+};
 
+// Declare globals for development mode to avoid re-instantiating
 declare global {
-  var prisma: undefined | ReturnType<typeof prismaClientSingleton>
+  var prisma: PrismaClient | undefined;
+  var readOnlyPrisma: PrismaClient | undefined;
 }
 
-export const prisma = globalThis.prisma ?? prismaClientSingleton()
+// Create PrismaClient instances
+export const prisma =
+  process.env.NODE_ENV === 'production'
+    ? prismaClientSingleton(process.env.DATABASE_URL!) // Create new instance for production
+    : globalThis.prisma ?? prismaClientSingleton(process.env.DATABASE_URL!); // Use singleton in dev
 
-export default prisma
+const readOnlyPrisma =
+  process.env.NODE_ENV === 'production'
+    ? prismaClientSingleton(process.env.REPLICA_DATABASE_URL!) // New instance for production
+    : globalThis.readOnlyPrisma ?? prismaClientSingleton(process.env.REPLICA_DATABASE_URL!); // Singleton in dev
 
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma
+// Assign to global in development to avoid re-creating instances
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma;
+  globalThis.readOnlyPrisma = readOnlyPrisma;
+}
+
+export default prisma;
+export { readOnlyPrisma };

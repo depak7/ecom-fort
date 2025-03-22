@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Container,
@@ -26,6 +26,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn'
 import LinkIcon from '@mui/icons-material/Link'
 import EditIcon from '@mui/icons-material/Edit'
 import { BaseButton } from '@/components/users/buttons/BaseButton'
+import { updateStore, getTotalProductsByStoreId } from "@/app/actions/store/action"
 
 interface StoreData {
   name: string
@@ -42,11 +43,27 @@ interface StoreData {
 
 export default function StoreOverview({ initialStoreData }: { initialStoreData: StoreData }) {
   const [storeData, setStoreData] = useState<StoreData>(initialStoreData)
+  const [totalProducts, setTotalProducts] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editedData, setEditedData] = useState<StoreData>(initialStoreData)
+
+  useEffect(() => {
+    const fetchTotalProducts = async () => {
+      setIsLoading(true)
+      const result = await getTotalProductsByStoreId(storeData.id)
+      if (result.success) {
+        setTotalProducts(result.totalProducts || 0)
+      } else {
+        setError(result.error || "")
+      }
+      setIsLoading(false)
+    }
+
+    fetchTotalProducts()
+  }, [storeData.id])
 
   const handleEditDialogOpen = () => {
     setEditedData(storeData)
@@ -67,20 +84,14 @@ export default function StoreOverview({ initialStoreData }: { initialStoreData: 
     setError(null)
 
     try {
-      // Uncomment and implement the updateStore function when ready
-      // const result = await updateStore(editedData)
-      // if (result.success) {
-      //   setStoreData(editedData)
-      //   setSuccess(true)
-      //   handleEditDialogClose()
-      // } else {
-      //   setError(result.error || 'An error occurred while updating the store')
-      // }
-      
-      // Temporary success simulation
-      setStoreData(editedData)
-      setSuccess(true)
-      handleEditDialogClose()
+      const result = await updateStore(editedData)
+      if (result.success) {
+        setStoreData(editedData)
+        setSuccess(true)
+        handleEditDialogClose()
+      } else {
+        setError(result.error || 'An error occurred while updating the store')
+      }
     } catch (err) {
       setError('An unexpected error occurred')
     } finally {
@@ -137,13 +148,10 @@ export default function StoreOverview({ initialStoreData }: { initialStoreData: 
             </Typography>
           
             <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-              <Typography variant="body1">Total Products: 0</Typography>
+              <Typography variant="body1">Total Products: {totalProducts}</Typography>
             </Paper>
             <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
               <Typography variant="body1">Total Orders: 0</Typography>
-            </Paper>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="body1">Revenue: $0</Typography>
             </Paper>
           </Grid>
         </Grid>

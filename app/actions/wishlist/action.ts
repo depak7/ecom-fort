@@ -2,12 +2,38 @@
 
 import { revalidatePath } from 'next/cache'
 import  prisma  from '@/database/index'
-
+import { readOnlyPrisma } from '@/database/index';
 
 export async function toggleWishlistItem(userId: string, productId: string, productVariantId?: number) {
   console.log("Toggling wishlist item:", { userId, productId, productVariantId });
     
   try {
+    // Check if the user exists
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExists) {
+      return { success: false, error: 'User does not exist' };
+    }
+
+    // If productVariantId is undefined, fetch the first variant
+    let finalVariantId = productVariantId;
+    if (productVariantId === undefined) {
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        include: {
+          variants: {
+            take: 1,
+          },
+        },
+      });
+      
+      if (product?.variants[0]) {
+        finalVariantId = product.variants[0].id;
+      }
+    }
+
     const wishlist = await prisma.wishlist.upsert({
       where: { userId },
       create: { userId },
@@ -18,7 +44,7 @@ export async function toggleWishlistItem(userId: string, productId: string, prod
       where: {
         wishlistId: wishlist.id,
         productId,
-        productVariantId: productVariantId || undefined,
+        productVariantId: finalVariantId || undefined,
       },
     });
 
@@ -32,13 +58,14 @@ export async function toggleWishlistItem(userId: string, productId: string, prod
         productId,
       };
 
-      if (productVariantId !== undefined) {
-        createData.productVariantId = productVariantId;
+      if (finalVariantId !== undefined) {
+        createData.productVariantId = finalVariantId;
       }
 
-      await prisma.wishlistItem.create({
+     let res= await prisma.wishlistItem.create({
         data: createData,
       });
+      console.log(res);
     }
 
     revalidatePath('/products');
@@ -51,7 +78,7 @@ export async function toggleWishlistItem(userId: string, productId: string, prod
 
 export async function getWishlistedItems(userId: string) {
   try {
-    const wishlistedItems = await prisma.product.findMany({
+    const wishlistedItems = await readOnlyPrisma.product.findMany({
       where: {
         wishlistItems: {
           some: {
@@ -150,7 +177,7 @@ export async function getProductReviews(productId: string) {
 
 export async function getProductReviewSummary(productId: string) {
   try {
-    const reviews = await prisma.review.findMany({
+    const reviews = await readOnlyPrisma.review.findMany({
       where: { productId },
       select: { rating: true },
     });

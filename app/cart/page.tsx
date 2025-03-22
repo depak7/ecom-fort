@@ -7,7 +7,7 @@ import CheckoutProgress from "@/components/users/cart/CheckoutProgress"
 import { BaseButton } from "@/components/users/buttons/BaseButton"
 import { getCartItems } from "../actions/cart/action"
 import { authOptions } from "@/lib/auth"
-import LoginRequired from "@/components/auth/LoginRequired"
+
 
 export default async function AddressPage() {
   const session = await getServerSession(authOptions)

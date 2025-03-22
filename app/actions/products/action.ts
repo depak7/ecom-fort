@@ -5,12 +5,25 @@ import  prisma  from "@/database/index";
 import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
 import { generateUniqueProductId } from "@/database/uniqueID";
-
+import { readOnlyPrisma } from "@/database/index";
+import Decimal from "decimal.js";
 
 async function uploadImage(file: File) {
-  const blob = await put(file.name, file, { access: "public" });
-  console.log(blob);
-  return blob.url;
+  try {
+    // Convert File to ArrayBuffer to get the exact size
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const blob = await put(file.name, buffer, {
+      access: 'public',
+      addRandomSuffix: true,
+    });
+
+    return blob.url;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
 }
 
 // Define the interface for the variant data
@@ -33,7 +46,7 @@ export async function createProduct(formData: FormData) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
-    const price = parseFloat(formData.get("price") as string);
+    const price = new Decimal(parseFloat(formData.get("price") as string));
     const storeId = formData.get("storeId") as string;
 
 
@@ -145,7 +158,7 @@ export async function deleteProduct(productId: string) {
 
 export async function getAllProducts(userId?: string) {
   try {
-    const products = await prisma.product.findMany({
+    const products = await readOnlyPrisma.product.findMany({
       select: {
         id: true,
         store: true,
@@ -188,7 +201,7 @@ export async function getAllProducts(userId?: string) {
 export async function getProductById(productId: string, userId?: string) {
   console.log(userId)
   try {
-    const product = await prisma.product.findUnique({
+    const product = await readOnlyPrisma.product.findUnique({
       where: { id: productId },
       include: {
         store: {
@@ -235,7 +248,7 @@ export async function getProductById(productId: string, userId?: string) {
 
 export async function getSimilarProductsByCategory(category: string, userId?: string) {
   try {
-    const products = await prisma.product.findMany({
+    const products = await readOnlyPrisma.product.findMany({
       where: {
         category: category,
       },
@@ -281,7 +294,7 @@ export async function getSimilarProductsByCategory(category: string, userId?: st
 
 export async function getProductsByStoreIdForMerchant(storeId: string) {
   try {
-    const products = await prisma.product.findMany({
+    const products = await readOnlyPrisma.product.findMany({
       where: {
         storeId: storeId,
       },
@@ -335,7 +348,7 @@ export async function getProductsByStoreIdForMerchant(storeId: string) {
 
 export async function getProductsByStoreId(storeId: string, userId?: string) {
   try {
-    const products = await prisma.product.findMany({
+    const products = await readOnlyPrisma.product.findMany({
       where: {
         storeId: storeId,
       },
@@ -374,6 +387,41 @@ export async function getProductsByStoreId(storeId: string, userId?: string) {
   } catch (error) {
     console.error(`Failed to fetch products for store ${storeId}:`, error);
     return { success: false, error: "Failed to fetch products for the specified store" };
+  }
+}
+
+export async function updateProduct(productData: any) {
+  try {
+    const updatedProduct = await prisma.product.update({
+      where: { id: productData.id },
+      data: {
+        name: productData.name,
+        description: productData.description,
+        price: new Decimal(productData.price.toString()),
+        variants: {
+          update: productData.variants.map(variant => ({
+            where: { id: variant.id },
+            data: {
+              color: variant.color,
+              variantImage: variant.variantImage,
+              sizes: {
+                update: variant.sizes.map(size => ({
+                  where: { id: size.id },
+                  data: { stock: size.stock },
+                })),
+              },
+            },
+          })),
+        },
+      },
+    });
+
+    revalidatePath(`/products/${productData.id}`);
+
+    return { success: true, product: updatedProduct };
+  } catch (error) {
+    console.error("Failed to update product:", error);
+    return { success: false, error: "Failed to update product" };
   }
 }
 

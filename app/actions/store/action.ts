@@ -4,7 +4,7 @@ import  prisma from '@/database/index'
 import { revalidatePath } from 'next/cache'
 import { put } from '@vercel/blob'
 import { generateUniqueStoreId } from '@/database/uniqueID'
-
+import { readOnlyPrisma } from '@/database/index'
 
 
 export async function createStore(formData: FormData) {
@@ -136,7 +136,7 @@ export async function getAllStores(sortBy?: string) {
       orderBy = { city: 'asc' };
     }
 
-    const stores = await prisma.store.findMany({
+    const stores = await readOnlyPrisma.store.findMany({
       orderBy,
       where:{
         isApproved: true,
@@ -167,7 +167,7 @@ export async function getAllStores(sortBy?: string) {
 
 export async function getStoreById(storeId: string) {
   try {
-    const store = await prisma.store.findUnique({
+    const store = await readOnlyPrisma.store.findUnique({
       where: {
         id: storeId,
         isApproved: true,
@@ -201,60 +201,29 @@ export async function getStoreById(storeId: string) {
   }
 }
 
-export async function updateStore(storeId: string, formData: FormData) {
+export async function updateStore(storeData: any) {
   try {
-    const name = formData.get('name') as string
-    const logo = formData.get('logo') as File | null
-    const description = formData.get('description') as string
-    const city = formData.get('city') as string
-    const address = formData.get('address') as string
-    const mapLink = formData.get('mapLink') as string
-    const bannerImage = formData.get('bannerImage') as File | null
-    const offerDescription = formData.get('offerDescription') as string | null
-
- 
-    let logoUrl: string | null = null
-    if (logo) {
-      const { url } = await put(`stores/${name}-${Date.now()}.${logo.type.split('/')[1]}`, logo, {
-        access: 'public',
-      })
-      logoUrl = url
-    }
-
- 
-    let bannerImageUrl :string | null=null
-    if (bannerImage) {
-      const { url } = await put(`stores/${name}-banner-${Date.now()}.${bannerImage.type.split('/')[1]}`, bannerImage, {
-        access: 'public',
-      })
-      bannerImageUrl = url
-    }
-
-    const store = await prisma.store.update({
-      where: { id: storeId },
+    const updatedStore = await prisma.store.update({
+      where: { id: storeData.id },
       data: {
-        name,
-        description,
-        city,
-        address,
-        mapLink,
-        offerDescription,
-        ...(logoUrl && { logo: logoUrl }),
-        ...(bannerImageUrl && { bannerImage: bannerImageUrl }),
+        name: storeData.name,
+        description: storeData.description,
+        address: storeData.address,
+        city: storeData.city,
+        mapLink: storeData.mapLink,
       },
-    })
+    });
 
-    revalidatePath(`/stores/${storeId}`) 
-    return { success: true, store }
+    return { success: true, store: updatedStore };
   } catch (error) {
-    console.error('Failed to update store:', error)
-    return { success: false, error: 'Failed to update store' }
+    console.error("Failed to update store:", error);
+    return { success: false, error: "Failed to update store" };
   }
 }
 
 export async function checkUserHasStore(userId: string) {
   try {
-    const store = await prisma.store.findFirst({
+    const store = await readOnlyPrisma.store.findFirst({
       where: {
         ownerId: userId,
       },
@@ -287,7 +256,7 @@ export async function checkUserHasStore(userId: string) {
 
 export async function getStoreDetailsByStoreId(storeId:string){
 
-  const storeDetails=await prisma.store.findUnique(
+  const storeDetails=await readOnlyPrisma.store.findUnique(
     {
       where:{
       id:storeId,
@@ -295,4 +264,17 @@ export async function getStoreDetailsByStoreId(storeId:string){
       }
     }
   )
+}
+
+export async function getTotalProductsByStoreId(storeId: string) {
+  try {
+    const totalProducts = await prisma.product.count({
+      where: { storeId: storeId },
+    });
+
+    return { success: true, totalProducts };
+  } catch (error) {
+    console.error("Failed to fetch total products:", error);
+    return { success: false, error: "Failed to fetch total products" };
+  }
 }
