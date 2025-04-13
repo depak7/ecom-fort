@@ -2,7 +2,7 @@
 
 import { Grid, Box, Typography, IconButton } from "@mui/material";
 import { ArrowForwardIos, ArrowBackIos } from "@mui/icons-material";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import StoreCard from "../../stores/StoreCard";
 import { BaseButton } from "../../buttons/BaseButton";
@@ -22,30 +22,39 @@ interface StoreGridProps {
 
 export default function StoreGrid({ stores }: StoreGridProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const visibleStores = 3;
+  const [visibleStores, setVisibleStores] = useState(3);
 
-  const handleNext = () => {
-    if (currentIndex < stores.length - visibleStores) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
+  // Add useEffect to handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 600) { // md breakpoint
+        setVisibleStores(2);
+      } else {
+        setVisibleStores(3);
+      }
+    };
 
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
+    // Initial check
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
 
   return (
-    <Box sx={{ p: 4, textAlign: "center" }}>
-      <Typography variant="h5" fontWeight="bold" mb={2}>
+    <Box sx={{ p: 3, textAlign: "center" }}>
+      <Typography variant="h6" fontWeight="bold" mb={2}>
         SHOP BY STORES
       </Typography>
       <Grid container spacing={2} justifyContent="center">
         {stores
           .slice(currentIndex, currentIndex + visibleStores)
           .map((store) => (
-            <Grid item xs={6} sm={6} md={3} key={store.id}>
+            <Grid item xs={10} sm={6} md={3} key={store.id}>
               <StoreCard store={store} />
             </Grid>
             
@@ -55,28 +64,14 @@ export default function StoreGrid({ stores }: StoreGridProps) {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
           mt: 3,
         }}
       >
-        <IconButton
-          onClick={handlePrev}
-          disabled={currentIndex === 0}
-          sx={{ color: "black" }}
-        >
-          <ArrowBackIos />
-        </IconButton>
         <Link href="/stores" passHref>
           <BaseButton>View All</BaseButton>
         </Link>
-        <IconButton
-          onClick={handleNext}
-          disabled={currentIndex >= stores.length - visibleStores}
-          sx={{ color: "black" }}
-        >
-          <ArrowForwardIos />
-        </IconButton>
       </Box>
     </Box>
   );

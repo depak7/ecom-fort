@@ -24,7 +24,7 @@ export  const BaseButton = styled(Button)<CustomButtonProps>(({ theme, width, cu
   marginBottom: mb,
   marginLeft: ml,
   padding: customSize === 'small' ? '6px 10px' : customSize === 'large' ? '12px 32px' : '8px 24px',
-  fontSize: customSize === 'small' ? '15px' : customSize === 'large' ? '1.125rem' : '1rem',
+  fontSize: customSize === 'small' ? '14px' : customSize === 'large' ? '1.125rem' : '1rem',
   '&:hover': {
     backgroundColor: theme.palette.grey[800],
   },

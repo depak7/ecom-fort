@@ -2,7 +2,6 @@ import { getProductById, getSimilarProductsByCategory } from "@/app/actions/prod
 import ProductDetails from "@/components/users/products/ProductDetails";
 import SimilarProducts from "@/components/users/products/SimilarProducts";
 import { authOptions } from "@/lib/auth";
-import { Box } from "@mui/material";
 import { getServerSession } from "next-auth";
 
 interface ProductPageProps {
@@ -40,7 +39,7 @@ export default async function Page({ params }: ProductPageProps) {
   return (
     <>
       <ProductDetails product={response.product}  isWishlisted={response.product.isWishlisted || false}  userId={userId?userId:""}/>
-      <SimilarProducts product={similarProducts} />
+      {similarProducts.length > 0 && <SimilarProducts product={similarProducts} />}
     </>
   );
 }

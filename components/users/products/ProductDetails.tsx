@@ -22,6 +22,8 @@ import {
   CircularProgress,
   Divider,
   IconButton,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -61,6 +63,9 @@ export default function ProductDetails({
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
 
   const { errorToast, successToast } = UseCustomToast();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const fetchReviews = async () => {
     setIsLoadingReviews(true);
@@ -113,7 +118,7 @@ export default function ProductDetails({
         setReviewText("");
         setReviewRating(null);
         setShowReviewForm(false);
-        fetchReviews(); // Refresh reviews
+        fetchReviews(); 
       } else {
         errorToast(result.error || "Failed to submit review");
       }
@@ -186,29 +191,48 @@ export default function ProductDetails({
   const hasUserReviewed = reviews.some(review => review.userId === userId);
 
   return (
-    <Box sx={{ maxWidth: 1600, margin: "auto", padding: 1 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        {product.name}
-      </Typography>
-
+    <Box sx={{ maxWidth: 1600, margin: "auto", padding: { xs: 0, md: 1 } }}>
       <Box
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           gap: 4,
+          px: { xs: 2, md: 0 }
         }}
       >
-        <Box sx={{ flex: 1 }}>
-          <Image src={mainImage} alt={product.name} width={500} height={500} />
-          <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+        <Box sx={{ flex: 1, width: '100%' }}>
+          <Box sx={{ 
+            position: 'relative', 
+            width: '100%', 
+            height: { xs: 300, sm: 400, md: 500 },
+            mb: 2
+          }}>
+            <Image 
+              src={mainImage} 
+              alt={product.name} 
+              fill
+              style={{ objectFit: 'cover' }}
+            />
+          </Box>
+          <Box sx={{ 
+            display: "flex", 
+            gap: 2, 
+            mt: 2,
+            overflowX: 'auto',
+            pb: 1,
+            '&::-webkit-scrollbar': {
+              display: 'none'
+            }
+          }}>
             {selectedVariant.images.map((img, index) => (
               <Box
                 key={img.id}
                 sx={{
-                  width: 60,
+                  minWidth: 60,
                   height: 60,
                   border: img.url == mainImage ? "2px solid black" : "none",
                   cursor: "pointer",
+                  flexShrink: 0
                 }}
                 onClick={() => {
                   setMainImage(img.url);
@@ -225,8 +249,26 @@ export default function ProductDetails({
           </Box>
         </Box>
 
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h5" component="p" fontWeight={700} gutterBottom>
+        <Box sx={{ 
+          flex: 1,
+          px: { xs: 2, md: 0 }
+        }}>
+              <Typography 
+            variant="h5" 
+            component="p" 
+            fontWeight={700} 
+            gutterBottom
+            sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}
+          >
+            {product.name}
+          </Typography>
+          <Typography 
+            variant="h5" 
+            component="p" 
+            fontWeight={700} 
+            gutterBottom
+            sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}
+          >
             MRP : ₹ {product.price}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -260,29 +302,45 @@ export default function ProductDetails({
             </Box>
           </Box>
 
-          <Box sx={{ my: 3, display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom>
+          <Box sx={{ my: 3 }}>
+            <Typography 
+              variant="h6" 
+              fontWeight={700} 
+              gutterBottom
+              sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}
+            >
               Select Size
             </Typography>
-            <ToggleButtonGroup
-              value={selectedSize}
-              exclusive
-              onChange={handleSizeChange}
-              aria-label="shoe size"
-            >
-              {selectedVariant.sizes.map((size) => (
-                <ToggleButton
-                  key={size.id}
-                  value={size.size}
-                  aria-label={size.size}
-                >
-                  {size.size}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+            <Box sx={{ 
+              overflowX: 'auto',
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}>
+              <ToggleButtonGroup
+                value={selectedSize}
+                exclusive
+                onChange={handleSizeChange}
+                aria-label="shoe size"
+                sx={{ 
+                  flexWrap: 'nowrap',
+                  minWidth: 'max-content'
+                }}
+              >
+                {selectedVariant.sizes.map((size) => (
+                  <ToggleButton
+                    key={size.id}
+                    value={size.size}
+                    aria-label={size.size}
+                  >
+                    {size.size}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom>
+            <Typography  fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
               Quantity :
             </Typography>
             <Select

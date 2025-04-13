@@ -8,6 +8,8 @@ import {
 
   styled,
   Box,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { BaseButton } from "@/components/users/buttons/BaseButton";
 import { useRouter } from 'next/navigation';
@@ -28,6 +30,8 @@ interface StoreDetailsNavBarProps {
 
 export default function StoreDetailsNavBar({ storeName }: StoreDetailsNavBarProps) {
   const router = useRouter();
+  const theme=useTheme();
+  const isMobile=useMediaQuery(theme.breakpoints.down("sm"))
 
   const handleAddProductClick = () => {
     router.push('/merchant/addproduct');
@@ -37,7 +41,7 @@ export default function StoreDetailsNavBar({ storeName }: StoreDetailsNavBarProp
     <AppBarStyled position="sticky">
       <Toolbar>
         <Typography
-          variant="h6"
+          variant={isMobile?"body1":"h6"}
           fontWeight={700}
           noWrap
           component="div"
@@ -47,7 +51,7 @@ export default function StoreDetailsNavBar({ storeName }: StoreDetailsNavBarProp
         </Typography>
         <Box gap={2}>
         
-          <BaseButton onClick={handleAddProductClick}>Add Products</BaseButton>
+          <BaseButton customSize="small" onClick={handleAddProductClick}>Add Products</BaseButton>
         </Box>
       </Toolbar>
     </AppBarStyled>

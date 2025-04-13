@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Grid, IconButton } from "@mui/material";
+import { Box, Typography, Grid, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 import ProductCard from "@/components/users/products/ProductCard";
@@ -16,7 +16,7 @@ export default async function ProductList() {
   return (
     <Box sx={{ maxWidth: 1600, margin: "auto", padding: 2 }}>
       <Typography
-        variant="h6"
+        variant={"body2"}
         component="h1"
         gutterBottom
         align="center"
@@ -34,7 +34,7 @@ export default async function ProductList() {
           mb: 2
         }}
       >
-        <Typography variant="body1" component="h6" fontWeight="bold">
+        <Typography variant="body2" fontWeight="bold">
           SHOP OUR PRODUCTS
         </Typography>
         <Box display="flex" gap={2}>

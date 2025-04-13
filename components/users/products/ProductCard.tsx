@@ -93,7 +93,7 @@ export default function ProductCard({
         border: "1px solid black",
         boxShadow: "none",
         cursor: isMerchantAddProduct ? "default" : "pointer",
-        maxWidth: isMobile ? "90%" : "none",
+        maxWidth: isMobile ? "100%" : "none",
       }}
       onClick={handleCardClick}
     >

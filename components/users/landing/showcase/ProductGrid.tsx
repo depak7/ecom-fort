@@ -11,19 +11,19 @@ import { getServerSession } from "next-auth";
 export default async function ProductGrid() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
-  const products=userId? await getAllProducts(userId):await getAllProducts();
+  const products = userId ? await getAllProducts(userId) : await getAllProducts();
   const productsResponse = await getAllProducts();
-  const visibleProducts = 3;
+  const visibleProducts = { xs: 2, sm: 3 };
 
   return (
-    <Box sx={{ p: 4, textAlign: "center" }}>
-      <Typography variant="h5" fontWeight="bold" mb={2}>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, textAlign: "center" }}>
+      <Typography variant="h6" fontWeight="bold" mb={2}>
         SHOP BY PRODUCTS
       </Typography>
 
-      <Grid container spacing={3} justifyContent="center">
-        {productsResponse.products?.slice(0, visibleProducts).map((product: any) => (
-          <Grid item xs={6} sm={6} md={3} key={product.id}>
+      <Grid container spacing={{ xs: 1, sm: 3 }} justifyContent="center">
+        {productsResponse.products?.slice(0, visibleProducts.xs).map((product: any) => (
+          <Grid item xs={10} sm={6} md={3} key={product.id}>
             <ProductCard
               product={{
                 id: product.id,
@@ -44,23 +44,14 @@ export default async function ProductGrid() {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
           mt: 3,
         }}
       >
-        <IconButton disabled={true} sx={{ color: "black" }}>
-          <ArrowBackIos />
-        </IconButton>
         <Link href="/products" passHref>
           <BaseButton>View All</BaseButton>
         </Link>
-        <IconButton
-          disabled={true}
-          sx={{ color: "black" }}
-        >
-          <ArrowForwardIos />
-        </IconButton>
       </Box>
     </Box>
   );

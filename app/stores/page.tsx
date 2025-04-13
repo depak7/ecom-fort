@@ -9,6 +9,8 @@ import {
   Menu,
   MenuItem,
   Button,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
@@ -32,11 +34,13 @@ export default function AvailableStores() {
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     fetchStores();
   }, []);
-
+``
   const fetchStores = async (sort = '') => {
     const { stores } = await getAllStores(sort);
     setStores(stores as Store[]);
@@ -74,14 +78,14 @@ export default function AvailableStores() {
   return (
     <Box sx={{ maxWidth: 1600, margin: "auto", padding: 2 }}>
       <Typography
-        variant="h6"
+        variant={isMobile?"body2":"h6"}
         component="h1"
         gutterBottom
         align="center"
         fontWeight={"bold"}
-        sx={{ mb: 4 }}
+        sx={{ mb: 2 }}
       >
-        DISCOVER YOUR NEXT FASHION DESTINATION — SHOP TOP STORES IN ONE SEAMLESS
+        SHOP TOP STORES IN ONE SEAMLESS
         EXPERIENCE!
       </Typography>
 
