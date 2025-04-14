@@ -18,12 +18,12 @@ export default async function PlaceOrder() {
 
   const {stores,totalPrice,totalQuantity} = await getCartItemsByStore(userId ? userId : "null");
   const  { addresses }=await getDefaultUserAddresses(userId?userId:"");
-
+  const userAddress = addresses || {}; 
 
 
   return (
     <>
-    <OrderPreview stores={stores} totalPrice={totalPrice}  totalQuantity={totalQuantity} address={addresses} userId={userId|| ""}/>
+    <OrderPreview stores={stores} totalPrice={totalPrice}  totalQuantity={totalQuantity} address={userAddress} userId={userId|| ""}/>
     </>
     )
 }
