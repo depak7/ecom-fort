@@ -58,9 +58,10 @@ interface ShoppingCartProps {
   userId: string | null
   totalQuantity: number
   totalPrice: number
+  address:any
 }
 
-export default function OrderPreview({ stores, userId, totalQuantity, totalPrice }: ShoppingCartProps) {
+export default function OrderPreview({ stores, userId, totalQuantity, totalPrice,address }: ShoppingCartProps) {
   const [cartStores, setCartStores] = useState<Store[]>(stores)
  
   useEffect(() => {
@@ -107,6 +108,16 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
   
     const storeTotal = store.items.reduce((sum, item) => sum + item.quantity * parseFloat(formatPrice(item.price)), 0);
     message += `\nTotal: ₹${storeTotal.toFixed(2)}`;
+
+    message += `\n\nDelivery Address:\n`;
+    message += `${address.name}\n`;
+    message += `${address.street}\n`;
+    message += `${address.city}, ${address.state} ${address.postalCode}\n`;
+    message += `${address.country}\n`;
+    message += `Phone: ${address.phoneNumber}\n`;
+    if (address.alternatePhoneNumber) {
+      message += `Alternate Phone: ${address.alternatePhoneNumber}\n`;
+    }
     
     return encodeURIComponent(message);
   };

@@ -26,6 +26,7 @@ import { Button, useMediaQuery } from "@mui/material";
 import { checkUserHasStore } from "@/app/actions/store/action";
 import LoginIcon from '@mui/icons-material/Login';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 interface HideOnScrollProps {
   children: React.ReactElement;
@@ -232,17 +233,27 @@ export default function NavBar() {
           anchor="right"
           open={isDrawerOpen}
           onClose={() => setDrawerOpen(false)}
+          PaperProps={{
+            sx: {
+              height: 'auto',
+              top: 64, // Height of the AppBar
+              borderTopLeftRadius: 8,
+              borderBottomLeftRadius: 8,
+              borderTopRightRadius:8,
+              borderBottomRightRadius:8
+            }
+          }}
         >
           <Box
             sx={{
-              width: 150, 
+              width: 150,
               display: "flex",
               flexDirection: "column",
               p: 2,
+              gap: 1,
             }}
           >
             {isUserLoggedIn && (
-              
               <Button
                 onClick={() => {
                   if (hasStore) {
@@ -256,9 +267,35 @@ export default function NavBar() {
                 ) : (
                   <AddBusinessOutlinedIcon />
                 )}
-                sx={{ color:"black",justifyContent: "flex-start" }}
+                sx={{ 
+                  color: "black", 
+                  justifyContent: "flex-start",
+                  borderRadius: 1,
+                  fontSize:{xs:'small'},
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
               >
                 {hasStore ? "Visit Store" : "Add Store"}
+              </Button>
+            )}
+
+            {!isUserLoggedIn && (
+              <Button
+                onClick={() => handleNavigation("signup")}
+                startIcon={<PersonAddIcon />}
+                sx={{ 
+                  color: "black", 
+                  justifyContent: "flex-start",
+                  borderRadius: 1,
+                  fontSize:{xs:'small'},
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                Signup
               </Button>
             )}
 
@@ -270,8 +307,16 @@ export default function NavBar() {
                   handleNavigation("signin");
                 }
               }}
-              startIcon={isUserLoggedIn?<ExitToAppIcon/>:<LoginIcon/>}
-              sx={{color:"black", justifyContent: "flex-start" }}
+              startIcon={isUserLoggedIn ? <ExitToAppIcon /> : <LoginIcon />}
+              sx={{ 
+                color: "black", 
+                justifyContent: "flex-start",
+                fontSize:{xs:'small'},
+                borderRadius: 1,
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                }
+              }}
             >
               {isUserLoggedIn ? "Logout" : "Login"}
             </Button>

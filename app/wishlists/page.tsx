@@ -29,7 +29,7 @@ export default async function WishlistPage() {
             width={200}
             height={200}
           />
-          <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mt: 2 }}>
             Login Required
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -53,7 +53,7 @@ export default async function WishlistPage() {
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ p: 4, mt: 4, textAlign: 'center' }}>
           <ShoppingCartIcon sx={{ fontSize: 100, color: 'grey', mb: 2 }} />
-          <Typography variant="h5" fontWeight={700} gutterBottom>
+          <Typography variant="h6" fontWeight={700} gutterBottom>
             Your Wishlist is Empty
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -73,12 +73,12 @@ export default async function WishlistPage() {
 
   return (
     <Container>
-      <Typography variant="h4" fontWeight={700} sx={{ my: 4 }}>
+      <Typography variant="h6" fontWeight={700}>
         Your Wishlists
       </Typography>
       <Grid container spacing={3}>
         {products.products?.map((product) => (
-          <Grid item xs={12} sm={6} md={3} xl={3} key={product.id}>
+          <Grid item xs={12} sm={6} md={4} xl={3} key={product.id}>
             <ProductCard
               product={{
                 id: product.id,

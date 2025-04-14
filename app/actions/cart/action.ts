@@ -296,6 +296,23 @@ export async function getUserAddresses(userId: string) {
   }
 }
 
+export async function getDefaultUserAddresses(userId: string) {
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  try {
+    const addresses = await prisma.address.findFirst({
+      where: { userId ,isDefault:true},
+    });
+
+    return { addresses };
+  } catch (error) {
+    console.error("Error retrieving user addresses:", error);
+    return { success: false, error: "Failed to retrieve addresses" };
+  }
+}
+
 export async function editAddress(addressId: number, addressData: {
   name?: string;
   phoneNumber?: string;

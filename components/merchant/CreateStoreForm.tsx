@@ -17,6 +17,8 @@ import {
   CardMedia,
   Divider,
   Button,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material"
 import CloudUploadIcon from "@mui/icons-material/CloudUpload"
 import { BaseButton } from "../users/buttons/BaseButton"
@@ -81,6 +83,8 @@ export default function CreateStoreForm() {
     identityProof: null as string | null,
     businessProof: null as string | null,
   })
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const { data: session, status } = useSession()
 
@@ -194,23 +198,21 @@ export default function CreateStoreForm() {
     )
   }
 
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Grid container spacing={4}>
         {/* Form Section */}
         <Grid item xs={12} md={9}>
           <Paper elevation={3} sx={{ p: { xs: 2, md: 6 } }}>
-            <Typography variant="h4" sx={{ fontWeight: "bold" }} component="h1" gutterBottom align="center">
-              Want to publish your products?
-            </Typography>
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 4 }} component="h1" gutterBottom align="center">
+            <Typography variant={isMobile?"subtitle1":"h6"}  sx={{ fontWeight: "bold", mb: 2 }} component="h1" gutterBottom align="center">
               Apply here to become a merchant of ecom-fort !
             </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
               <Grid container spacing={3}>
                 {/* Basic Details Section */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant={isMobile?"subtitle1":"h6"} gutterBottom>
                     Basic Details
                   </Typography>
                 </Grid>
@@ -233,7 +235,7 @@ export default function CreateStoreForm() {
                     sx={{
                       borderRadius: "50px",
                       boxShadow: "none",
-                      padding: 2,
+                      padding: {xs:1,sm:2},
                       color: "black",
                       backgroundColor: "white",
                       border: "1px solid black",
@@ -268,7 +270,7 @@ export default function CreateStoreForm() {
                     name="description"
                     label="Store Description"
                     multiline
-                    rows={4}
+                    rows={3}
                     variant="outlined"
                     onChange={handleInputChange}
                   />
@@ -276,7 +278,7 @@ export default function CreateStoreForm() {
 
                 {/* Business Details Section */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant={isMobile?"subtitle1":"h6"} gutterBottom>
                     Business Details
                   </Typography>
                 </Grid>
@@ -326,7 +328,7 @@ export default function CreateStoreForm() {
 
                 {/* Address Details Section */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant={isMobile?"subtitle1":"h6"} gutterBottom>
                     Address Details
                   </Typography>
                 </Grid>
@@ -362,7 +364,7 @@ export default function CreateStoreForm() {
 
                 {/* Contact Details Section */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant={isMobile?"subtitle1":"h6"}  gutterBottom>
                     Contact Details
                   </Typography>
                 </Grid>
@@ -399,7 +401,7 @@ export default function CreateStoreForm() {
 
                 {/* Bank Details Section */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant={isMobile?"subtitle1":"h6"}  gutterBottom>
                     Bank Details
                   </Typography>
                 </Grid>
@@ -415,7 +417,7 @@ export default function CreateStoreForm() {
 
                 {/* KYC Documents Section */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant={isMobile?"subtitle1":"h6"}  gutterBottom>
                     KYC Documents
                   </Typography>
                 </Grid>
@@ -428,7 +430,7 @@ export default function CreateStoreForm() {
                     sx={{
                       borderRadius: "50px",
                       boxShadow: "none",
-                      padding: 2,
+                      padding: {xs:1,sm:2},
                       color: "black",
                       backgroundColor: "white",
                       border: "1px solid black",
@@ -475,7 +477,7 @@ export default function CreateStoreForm() {
                     sx={{
                       borderRadius: "50px",
                       boxShadow: "none",
-                      padding: 2,
+                      padding: {xs:1,sm:2},
                       color: "black",
                       backgroundColor: "white",
                       border: "1px solid black",
@@ -522,7 +524,7 @@ export default function CreateStoreForm() {
                     sx={{
                       borderRadius: "50px",
                       boxShadow: "none",
-                      padding: 2,
+                      padding: {xs:1,sm:2},
                       color: "black",
                       backgroundColor: "white",
                       border: "1px solid black",
