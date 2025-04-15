@@ -11,7 +11,7 @@ import Decimal from "decimal.js";
 async function uploadImage(file: File) {
   try {
     // Convert File to Blob (browser native)
-    if(file.bytes.length>0){
+    if(file){
     const blobFile = new Blob([file], { type: file.type });
 
     const blob = await put(file.name, blobFile, {
