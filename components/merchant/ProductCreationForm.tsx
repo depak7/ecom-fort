@@ -216,7 +216,7 @@ export default function ProductCreationForm({
       <Grid container spacing={4} sx={{}}>
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 4, bgcolor: "background.paper" }}>
-            <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ color: "text.primary" }}>
+            <Typography variant="h6" component="h1" gutterBottom align="center" sx={{ color: "text.primary" }}>
               Add New Product
             </Typography>
             <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
@@ -601,7 +601,7 @@ export default function ProductCreationForm({
         <Grid item xs={12} md={4}>
           <Paper elevation={0} sx={{ p: 4, bgcolor: "background.paper", height: "100%" }}>
             <Typography
-              variant="h5"
+              variant="h6"
               component="h2"
               gutterBottom
               align="center"
@@ -610,90 +610,98 @@ export default function ProductCreationForm({
               Product Preview
             </Typography>
 
-            <ProductCard
-              product={{
-                id: "preview",
-                name: previewData.name || "Product Name",
-                category: previewData.category || "Category",
-                price: previewData.price || "0.00",
-                store: storeName,
-                image: previewData.image || "/placeholder-image.png",
-              }}
-            />
-
-            {/* Display variant images in preview section */}
-            {variants.some((v) => v.image || v.additionalImages.length > 0) && (
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" gutterBottom>
-                  Product Variants
-                </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
+            {previewData.name && previewData.category && previewData.price && previewData.image ? (
+              <>
+                <ProductCard
+                  product={{
+                    id: "preview",
+                    name: previewData.name,
+                    category: previewData.category,
+                    price: previewData.price,
+                    store: storeName,
+                    image: previewData.image
                   }}
-                >
-                  {variants.map((variant, idx) =>
-                    variant.image || variant.additionalImages.length > 0 ? (
-                      <Box key={idx} sx={{ mb: 2 }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                          {variant.color || `Variant ${idx + 1}`}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 1,
-                          }}
-                        >
-                          {variant.image && (
+                />
+
+                {/* Display variant images in preview section */}
+                {variants.some((v) => v.image || v.additionalImages.length > 0) && (
+                  <Box sx={{ mt: 4 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Product Variants
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                      }}
+                    >
+                      {variants.map((variant, idx) =>
+                        variant.image || variant.additionalImages.length > 0 ? (
+                          <Box key={idx} sx={{ mb: 2 }}>
+                            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                              {variant.color || `Variant ${idx + 1}`}
+                            </Typography>
                             <Box
                               sx={{
-                                border: "1px solid #eee",
-                                borderRadius: "4px",
-                                p: 0.5,
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 1,
                               }}
                             >
-                              <img
-                                src={variant.image || "/placeholder.svg"}
-                                alt={variant.color || `Variant ${idx + 1}`}
-                                style={{
-                                  width: "80px",
-                                  height: "80px",
-                                  objectFit: "cover",
-                                  borderRadius: "4px",
-                                }}
-                              />
+                              {variant.image && (
+                                <Box
+                                  sx={{
+                                    border: "1px solid #eee",
+                                    borderRadius: "4px",
+                                    p: 0.5,
+                                  }}
+                                >
+                                  <img
+                                    src={variant.image || "/placeholder.svg"}
+                                    alt={variant.color || `Variant ${idx + 1}`}
+                                    style={{
+                                      width: "80px",
+                                      height: "80px",
+                                      objectFit: "cover",
+                                      borderRadius: "4px",
+                                    }}
+                                  />
+                                </Box>
+                              )}
+                              {variant.additionalImages.map((img, imgIdx) => (
+                                <Box
+                                  key={imgIdx}
+                                  sx={{
+                                    border: "1px solid #eee",
+                                    borderRadius: "4px",
+                                    p: 0.5,
+                                  }}
+                                >
+                                  <img
+                                    src={img || "/placeholder.svg"}
+                                    alt={`${variant.color || `Variant ${idx + 1}`} - ${imgIdx + 1}`}
+                                    style={{
+                                      width: "80px",
+                                      height: "80px",
+                                      objectFit: "cover",
+                                      borderRadius: "4px",
+                                    }}
+                                  />
+                                </Box>
+                              ))}
                             </Box>
-                          )}
-                          {variant.additionalImages.map((img, imgIdx) => (
-                            <Box
-                              key={imgIdx}
-                              sx={{
-                                border: "1px solid #eee",
-                                borderRadius: "4px",
-                                p: 0.5,
-                              }}
-                            >
-                              <img
-                                src={img || "/placeholder.svg"}
-                                alt={`${variant.color || `Variant ${idx + 1}`} - ${imgIdx + 1}`}
-                                style={{
-                                  width: "80px",
-                                  height: "80px",
-                                  objectFit: "cover",
-                                  borderRadius: "4px",
-                                }}
-                              />
-                            </Box>
-                          ))}
-                        </Box>
-                      </Box>
-                    ) : null,
-                  )}
-                </Box>
-              </Box>
+                          </Box>
+                        ) : null,
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              </>
+            ) : (
+              <Typography variant="body1" align="center" sx={{ color: "text.secondary", mt: 2 }}>
+                Complete the required fields to see the preview
+              </Typography>
             )}
           </Paper>
         </Grid>

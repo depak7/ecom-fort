@@ -11,19 +11,18 @@ import Decimal from "decimal.js";
 async function uploadImage(file: File) {
   try {
     // Convert File to Blob (browser native)
+    if(file.bytes.length>0){
     const blobFile = new Blob([file], { type: file.type });
 
-    // Create a readable stream from the Blob
-    const stream = blobFile.stream();
-
-    // Upload using the readable stream
-    const blob = await put(file.name, stream, {
+    const blob = await put(file.name, blobFile, {
       access: 'public',
       addRandomSuffix: true,
-      contentType: file.type, 
+      contentType: file.type,
     });
 
+   
     return blob.url;
+  }
   } catch (error) {
     console.error('Error uploading image:', error);
     throw error;

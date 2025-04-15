@@ -7,8 +7,8 @@ import Link from "next/link"
 import { BaseButton } from "../../buttons/BaseButton"
 import { ChevronLeft, ChevronRight } from "@mui/icons-material"
 
-import leftImage from "@/components/assets/users/tc-1.png"
-import rightImage from "@/components/assets/users/tc-2.png"
+import leftImage from "@/components/assets/users/bnr1.jpg"
+import rightImage from "@/components/assets/users/bnr2.jpg"
 
 const carouselImages = [
   { src: leftImage, alt: "Clothing" },

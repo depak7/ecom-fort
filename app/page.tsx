@@ -2,6 +2,8 @@ import ProductGrid from "@/components/users/landing/showcase/ProductGrid";
 import StoreGrid from "@/components/users/landing/showcase/StoreGrid";
 import TitleCard from "@/components/users/landing/showcase/TitleCard";
 import { getAllStores } from "./actions/store/action";
+import Footer from "@/components/users/landing/appbar/footer";
+import { Box} from "@mui/material";
 
 interface Store {
   id: string;
@@ -17,10 +19,17 @@ export default async function Home() {
   const stores: Store[] = (res.stores) || []; 
 
   return (
-    <>
-      <TitleCard />
-      <StoreGrid stores={stores} /> {/* Passing stores array */}
-      <ProductGrid />
-    </>
+<Box
+  sx={{
+    m: 0,
+    p: 0, // avoids horizontal scrollbar
+  }}
+>
+  <TitleCard />
+  <StoreGrid stores={stores} />
+  <ProductGrid />
+  <Footer />
+</Box>
+
   );
 }

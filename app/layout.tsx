@@ -7,6 +7,7 @@ import { Toolbar } from "@mui/material";
 import { Providers } from "@/Provider";
 import { Toaster } from "sonner";
 import { Analytics } from '@vercel/analytics/next';
+import Footer from "@/components/users/landing/appbar/footer";
 
 
 const inter = Inter({ subsets: ["latin"] });
