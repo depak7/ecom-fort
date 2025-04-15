@@ -78,7 +78,7 @@ const PrivacyPolicy = () => {
         {/* Introduction */}
         <PolicySection title="1. Introduction">
           <Typography variant="body1" paragraph>
-            Ecom-Fort ("we," "our," or "us") values your privacy...
+            Ecom-Fort (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) values your privacy...
           </Typography>
         </PolicySection>
         
