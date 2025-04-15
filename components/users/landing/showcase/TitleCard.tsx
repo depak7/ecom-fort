@@ -60,7 +60,7 @@ export default function TitleCard() {
           position: "relative",
           width: "100%",
           height: "auto",
-          aspectRatio: isMobile ? "1 / 1" : isTablet ? "2 / 1" : "4 / 1.20",
+          aspectRatio: isMobile ? "2/1" : isTablet ? "2 / 1" : "4 / 1.20",
         }}
       >
        <Image
