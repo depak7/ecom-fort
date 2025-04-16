@@ -1,6 +1,5 @@
 import { Box, Typography, Paper, Container, Alert, AlertTitle } from "@mui/material";
 import StoreDashboard from "@/components/merchant/storeinfo/StoreOverview";
-import StoreDetailsNavBar from "@/components/merchant/storeinfo/StoreDetailsNavbar";
 import { checkUserHasStore, getStoreById } from "@/app/actions/store/action";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -141,7 +140,6 @@ export default async function StorePage() {
 
   return (
     <Box>
-      <StoreDetailsNavBar storeName={storeDetails.storeName || ""} />
       <StoreDashboard initialStoreData={store || defaultStoreData} />
       <MerchantProductCard products={products || []} />
     </Box>

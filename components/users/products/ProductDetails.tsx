@@ -312,10 +312,10 @@ export default function ProductDetails({
               Select Size
             </Typography>
             <Box sx={{ 
-              overflowX: 'auto',
-              '&::-webkit-scrollbar': {
-                display: 'none'
-              }
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 1,
+              maxWidth: '100%'
             }}>
               <ToggleButtonGroup
                 value={selectedSize}
@@ -323,8 +323,15 @@ export default function ProductDetails({
                 onChange={handleSizeChange}
                 aria-label="shoe size"
                 sx={{ 
-                  flexWrap: 'nowrap',
-                  minWidth: 'max-content'
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  '& .MuiToggleButton-root': {
+                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                    '&.Mui-selected': {
+                      border: '2px solid black'
+                    }
+                  }
                 }}
               >
                 {selectedVariant.sizes.map((size) => (
@@ -332,6 +339,11 @@ export default function ProductDetails({
                     key={size.id}
                     value={size.size}
                     aria-label={size.size}
+                    sx={{ 
+                      minWidth: '60px',
+                      height: '40px',
+                      p: 1
+                    }}
                   >
                     {size.size}
                   </ToggleButton>
@@ -391,7 +403,7 @@ export default function ProductDetails({
                   {reviewSummary && (
                     <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Box>
-                        <Typography variant="h6" gutterBottom>
+                        <Typography variant= {isMobile?"body1":"h6" } gutterBottom>
                           Overall Rating: {reviewSummary.averageRating}/5
                         </Typography>
                         <Rating value={reviewSummary.averageRating} precision={0.1} readOnly />
@@ -403,7 +415,15 @@ export default function ProductDetails({
                         <BaseButton
                           variant="contained"
                           onClick={handleShowReviewForm}
-                          sx={{ backgroundColor: 'black', color: 'white', ml: 2 }}
+                          customSize={isMobile ? "small" : "medium"}
+                          sx={{ 
+                            backgroundColor: 'black', 
+                            color: 'white', 
+                            ml: 2,
+                            fontSize: isMobile ? '0.75rem' : 'inherit',
+                            py: isMobile ? 0.5 : 1,
+                            px: isMobile ? 1 : 2
+                          }}
                         >
                           Write a Review
                         </BaseButton>
@@ -432,7 +452,7 @@ export default function ProductDetails({
                       </Box>
                     ))
                   ) : (
-                    <Typography variant="body1" sx={{ textAlign: 'center', py: 2 }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', py: 2 }}>
                       No reviews yet. Be the first to review this product!
                     </Typography>
                     )}
@@ -443,18 +463,18 @@ export default function ProductDetails({
         </Box>
       </Box>
       <Dialog open={showReviewForm} onClose={handleShowReviewForm} maxWidth="md" fullWidth>
-        <DialogTitle>Submit Review</DialogTitle>
+        <DialogTitle sx={{fontWeight:700}}>Submit Review</DialogTitle>
         <DialogContent>
           <Typography variant="body1">Please provide your review:</Typography>
           <StyledTextField
             value={reviewText}
             onChange={(e) => setReviewText(e.target.value)}
             multiline
-            rows={4}
+            rows={isMobile?2:4}
             fullWidth
           />
           <Box sx={{ mt: 2 }}>
-            <Typography variant="h6">Select Rating:</Typography>
+            <Typography variant={isMobile?"body1":"h6"}>Select Rating:</Typography>
             <Rating
               value={reviewRating}
               onChange={(event, newValue) => {
@@ -464,8 +484,8 @@ export default function ProductDetails({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleShowReviewForm} color="primary">Cancel</Button>
-          <Button onClick={handleReviewSubmit} color="primary">Submit</Button>
+          <Button onClick={handleShowReviewForm} sx={{color:"grey"}}>Cancel</Button>
+          <Button onClick={handleReviewSubmit} color="inherit">Submit</Button>
         </DialogActions>
       </Dialog>
     </Box>

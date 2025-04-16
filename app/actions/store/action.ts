@@ -214,6 +214,8 @@ export async function updateStore(storeData: any) {
       },
     });
 
+    console.log(updateStore)
+
     return { success: true, store: updatedStore };
   } catch (error) {
     console.error("Failed to update store:", error);
