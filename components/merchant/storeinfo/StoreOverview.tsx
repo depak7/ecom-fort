@@ -83,23 +83,20 @@ const salesData = [
   { name: 'Jun', sales: 8000 },
 ];
 
-const categoryData = [
-  { name: 'Shirts', value: 35 },
-  { name: 'T-Shirts', value: 25 },
-  { name: 'Trousers', value: 20 },
-  { name: 'Shoes', value: 20 },
-];
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-export default function StoreOverview({ initialStoreData }: { initialStoreData: StoreData }) {
+export default function StoreOverview({ 
+  initialStoreData, 
+  stats, 
+  categoryClassification 
+}: { 
+  initialStoreData: StoreData, 
+  stats: StatsData, 
+  categoryClassification: { category: string, count: number }[] 
+}) {
   const [storeData, setStoreData] = useState<StoreData>(initialStoreData)
-  const [statsData, setStatsData] = useState<StatsData>({
-    totalProducts: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalCustomers: 0
-  })
+  const [statsData, setStatsData] = useState<StatsData>(stats)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -116,34 +113,8 @@ export default function StoreOverview({ initialStoreData }: { initialStoreData: 
   }
 
   useEffect(() => {
-    const fetchTotalProducts = async () => {
-      setIsLoading(true)
-      try {
-        const result = await getTotalProductsByStoreId(storeData.id)
-        if (result.success) {
-          setStatsData(prevStats => ({
-            ...prevStats,
-            totalProducts: result.totalProducts || 0
-          }))
-        } else {
-          setError(result.error || "")
-        }
-      } catch (err) {
-        setError("Failed to fetch product data")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchTotalProducts()
-
-    setStatsData({
-      totalProducts: 24,
-      totalOrders: 128,
-      totalRevenue: 5840,
-      totalCustomers: 67
-    })
-  }, [storeData.id])
+    setStatsData(stats);
+  }, [stats]);
 
   const handleEditDialogOpen = () => {
     setEditedData(storeData)
@@ -397,20 +368,21 @@ export default function StoreOverview({ initialStoreData }: { initialStoreData: 
                     <ResponsiveContainer>
                       <PieChart>
                         <Pie
-                          data={categoryData}
+                          data={categoryClassification}
+                          dataKey="count"
+                          nameKey="category"
                           cx="50%"
                           cy="50%"
-                          labelLine={false}
-                          outerRadius={100}
+                          outerRadius={80}
                           fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          label
                         >
-                          {categoryData.map((entry, index) => (
+                          {categoryClassification.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
                         <Tooltip />
+                        <Legend />
                       </PieChart>
                     </ResponsiveContainer>
                   </Box>
@@ -418,13 +390,18 @@ export default function StoreOverview({ initialStoreData }: { initialStoreData: 
                 <Grid item xs={12} md={6}>
                   <Box sx={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
-                      <BarChart data={categoryData}>
+                      <BarChart 
+                        data={categoryClassification.map(item => ({
+                          name: item.category,
+                          value: item.count
+                        }))}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip />
                         <Bar dataKey="value" fill="#8884d8">
-                          {categoryData.map((entry, index) => (
+                          {categoryClassification.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Bar>

@@ -19,7 +19,7 @@ import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 export default function StoreNavbar() {
   const params = useParams();
   const [storeName, setStoreName] = useState<string>("");
-  const [anchorFilterMenu, setAnchorFilterMenu] = useState<null | HTMLElement>(null);
+
   const [anchorSortMenu, setAnchorSortMenu] = useState<null | HTMLElement>(null);
 
   const theme = useTheme();

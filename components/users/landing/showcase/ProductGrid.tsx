@@ -11,9 +11,8 @@ import { getServerSession } from "next-auth";
 export default async function ProductGrid() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
-  const products = userId ? await getAllProducts(userId) : await getAllProducts();
-  const productsResponse = await getAllProducts();
-  const visibleProducts = { xs: 2, sm: 3 };
+  const productsResponse = userId ? await getAllProducts(userId) : await getAllProducts();
+  const visibleProducts =3;
 
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, textAlign: "center" }}>
@@ -22,7 +21,7 @@ export default async function ProductGrid() {
       </Typography>
 
       <Grid container spacing={{ xs: 1, sm: 3 }} justifyContent="center">
-        {productsResponse.products?.slice(0, visibleProducts.xs).map((product: any) => (
+        {productsResponse.products?.slice(0, visibleProducts).map((product: any) => (
           <Grid item xs={10} sm={6} md={3} key={product.id}>
             <ProductCard
               product={{

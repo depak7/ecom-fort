@@ -1,6 +1,6 @@
 import { Box, Typography, Paper, Container, Alert, AlertTitle } from "@mui/material";
 import StoreDashboard from "@/components/merchant/storeinfo/StoreOverview";
-import { checkUserHasStore, getStoreById } from "@/app/actions/store/action";
+import { checkUserHasStore, getStoreById, getTotalProductsByStoreId, getProductsCountByCategory } from "@/app/actions/store/action";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getProductsByStoreIdForMerchant } from "@/app/actions/products/action";
@@ -33,6 +33,13 @@ const defaultStoreData: Store = {
   mapLink: "",
   ownerId: "",
 };
+
+interface StatsData {
+  totalProducts: number
+  totalOrders: number
+  totalRevenue: number
+  totalCustomers: number
+}
 
 export default async function StorePage() {
   const session = await getServerSession(authOptions);
@@ -138,9 +145,29 @@ export default async function StorePage() {
   const { store } = await getStoreById(storeDetails.storeId || "");
   const { products } = await getProductsByStoreIdForMerchant(storeDetails.storeId || "");
 
+  // Get total products
+  const { success, totalProducts } = await getTotalProductsByStoreId(storeDetails.storeId || "");
+
+  // Get products by category
+  const { success: categorySuccess, categoryCounts } = await getProductsCountByCategory(storeDetails.storeId || "");
+ 
+  const stats: StatsData = {
+    totalCustomers: 0,
+    totalOrders: 0,
+    totalProducts: totalProducts || 0,
+    totalRevenue: 0
+  };
+
+  console.log(totalProducts)
+  console.log(categoryCounts)
+
   return (
     <Box>
-      <StoreDashboard initialStoreData={store || defaultStoreData} />
+      <StoreDashboard 
+        initialStoreData={store || defaultStoreData} 
+        stats={stats} 
+        categoryClassification={categoryCounts || []} 
+      />
       <MerchantProductCard products={products || []} />
     </Box>
   );

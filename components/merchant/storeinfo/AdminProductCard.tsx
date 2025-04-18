@@ -165,7 +165,7 @@ export default function MerchantProductCard({
       
       const updatedVariants = [...editingProduct.variants];
       updatedVariants[activeVariant].sizes.push({
-        id: Date.now(),
+        id: Math.floor(Math.random() * 1000),
         size: newSize,
         stock: newStock >= 0 ? newStock : 0,
       });
@@ -180,7 +180,7 @@ export default function MerchantProductCard({
         availableSizes: Array.from(allSizes)
       });
       
-      setNewSize("S-38");
+      setNewSize(editingProduct.category === 'shoes' ? "UK-7" : "S");
       setNewStock(0);
       setOpenAddSizeDialog(false);
       setUpdateMessage({ type: "success", message: "Size added successfully" });

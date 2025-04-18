@@ -408,10 +408,14 @@ export async function updateProduct(productData: any) {
               color: variant.color,
               variantImage: variant.variantImage,
               sizes: {
-                update: variant.sizes.map(size => ({
+                upsert: variant.sizes.map(size => ({
                   where: { id: size.id },
-                  data: { stock: size.stock },
-                })),
+                  update: { stock: size.stock },
+                  create: { 
+                    size: size.size,
+                    stock: size.stock 
+                  }
+                }))
               },
             },
           })),
@@ -420,7 +424,6 @@ export async function updateProduct(productData: any) {
     });
 
     revalidatePath(`/products/${productData.id}`);
-
     return { success: true, product: updatedProduct };
   } catch (error) {
     console.error("Failed to update product:", error);

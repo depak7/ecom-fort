@@ -270,7 +270,7 @@ export async function getStoreDetailsByStoreId(storeId:string){
 
 export async function getTotalProductsByStoreId(storeId: string) {
   try {
-    const totalProducts = await prisma.product.count({
+    const totalProducts = await readOnlyPrisma.product.count({
       where: { storeId: storeId },
     });
 
@@ -278,5 +278,28 @@ export async function getTotalProductsByStoreId(storeId: string) {
   } catch (error) {
     console.error("Failed to fetch total products:", error);
     return { success: false, error: "Failed to fetch total products" };
+  }
+}
+
+export async function getProductsCountByCategory(storeId: string) {
+  try {
+    const productsByCategory = await readOnlyPrisma.product.groupBy({
+      by: ['category'],
+      where: { storeId: storeId },
+      _count: {
+        _all: true
+      },
+    });
+
+    // Transform the data into a more usable format
+    const categoryCounts = productsByCategory.map(item => ({
+      category: item.category || 'Uncategorized',
+      count: item._count._all
+    }));
+
+    return { success: true, categoryCounts };
+  } catch (error) {
+    console.error("Failed to fetch products by category:", error);
+    return { success: false, error: "Failed to fetch products by category" };
   }
 }
