@@ -2,12 +2,15 @@ import React from 'react';
 import { Box } from '@mui/material';
 
 const LoadingAnimation: React.FC = () => {
+    // Pick a random number between 1 and 4 (inclusive)
+    const randomIndex = React.useMemo(() => Math.floor(Math.random() * 4) + 1, []);
+    console.log(randomIndex)
   return (
     <Box
       sx={{
         display: 'flex',
-        justifyContent: 'center',
         alignItems: 'center',
+        justifyContent: 'center',
         height: '100vh',
         width: '100%',
         overflow: 'hidden',
@@ -24,7 +27,7 @@ const LoadingAnimation: React.FC = () => {
           maxHeight: '80vh', 
         }}
       >
-        <source src="/Animation - 1725127559887.webm" type="video/webm" />
+           <source src={`/Ani-${randomIndex}.webm`} type="video/webm" />
         Your browser does not support the video tag.
       </video>
     </Box>

@@ -24,6 +24,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { WhatsApp, ShoppingCart } from '@mui/icons-material'
 
 import { removeFromCart } from '@/app/actions/cart/action'
+import UseCustomToast from '@/components/ui/useCustomToast'
+import { addOrders } from '@/app/actions/order/action'
+import { useRouter } from 'next/navigation'
 
 interface CartItem {
   id: number
@@ -63,10 +66,34 @@ interface ShoppingCartProps {
 
 export default function OrderPreview({ stores, userId, totalQuantity, totalPrice,address }: ShoppingCartProps) {
   const [cartStores, setCartStores] = useState<Store[]>(stores)
- 
+  const { errorToast, successToast } = UseCustomToast();
+  const route=useRouter();
+
+
   useEffect(() => {
     setCartStores(stores)
-  }, [stores])
+  }, [stores, address])
+
+  const handlePlaceOrder = async () => {
+    try {
+      const { success,order } = await addOrders({
+        userId,
+        address,
+        stores: cartStores,
+      })
+  
+      if (success) {
+        successToast('Order Placed')
+        route.push("/order-placed")
+      } else {
+        errorToast('Failed to place order')
+      }
+    } catch (error) {
+      console.error('Error placing order:', error)
+      errorToast('Something went wrong while placing the order')
+    }
+  }
+  
 
   const handleRemoveItem = async (storeId: string, itemId: number) => {
     try {
@@ -196,13 +223,19 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
                 </TableBody>
               </Table>
             </TableContainer>
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant='contained'
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' ,gap:2}}>
+              { /*<Button variant='contained'
                 onClick={() => handleSendWhatsApp(store)}
                 sx={{bgcolor:"green",":hover":{bgcolor:"green"}}}
               >
                 <WhatsApp />
                 Order Now via WhatsApp
+              </Button> */}
+              <Button variant='contained'
+              onClick={handlePlaceOrder}
+                sx={{bgcolor:"black",":hover":{bgcolor:"black"}}}
+              >
+               place Order
               </Button>
             </Box>
           </AccordionDetails>

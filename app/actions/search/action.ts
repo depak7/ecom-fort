@@ -1,7 +1,6 @@
 import prisma from '@/database/index'
 
 export async function searchStoresAndProducts(query:string,userId?:string) {
-     console.log(query)
   const stores = await prisma.store.findMany({
     where: {
       OR: [
