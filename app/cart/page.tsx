@@ -15,6 +15,7 @@ export default async function AddressPage() {
 
 
   const { items, totalPrice, totalQuantity } = await getCartItems(userId ?? "null")
+  
 
   if (items.length === 0) {
     return (
