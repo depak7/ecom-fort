@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { getOrderById } from "../../actions/order/action";
 import OrderConfirmation from "@/components/users/cart/OrderPlaced";
-import { Box, Typography, CircularProgress } from "@mui/material";
 import OrderNotFound from "@/components/users/cart/OrderNotFound";
 
 interface PlaceOrderProps {
@@ -15,11 +14,10 @@ interface PlaceOrderProps {
 
 export default async function PlaceOrder({params}:PlaceOrderProps) {
 
-
     const session = await getServerSession(authOptions);
     const userId = session?.user.id || "";
 
-    const { success, order } = await getOrderById(params.orderId,userId);
+    const { success, order } = await getOrderById(params.orderId);
   
     
       if (!success || !order || order.id !== params.orderId) {

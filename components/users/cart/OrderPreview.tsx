@@ -84,7 +84,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
   
       if (success) {
         successToast('Order Placed')
-        route.push("/order-placed")
+        route.push(`/order-placed/${order?.id}`)
       } else {
         errorToast('Failed to place order')
       }

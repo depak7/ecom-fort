@@ -7,6 +7,7 @@ import { getProductsByStoreIdForMerchant } from "@/app/actions/products/action";
 import MerchantProductCard from "@/components/merchant/storeinfo/AdminProductCard";
 import Image from "next/image";
 import complaint from "@/components/assets/users/complaint.png"
+import { getGroupedOrdersByStore } from "@/app/actions/order/action";
 
 interface Store {
   address: string;
@@ -158,8 +159,8 @@ export default async function StorePage() {
     totalRevenue: 0
   };
 
-  console.log(totalProducts)
-  console.log(categoryCounts)
+  const orders=await getGroupedOrdersByStore(store?.id || "")
+
 
   return (
     <Box>
@@ -167,6 +168,7 @@ export default async function StorePage() {
         initialStoreData={store || defaultStoreData} 
         stats={stats} 
         categoryClassification={categoryCounts || []} 
+        orders={orders}
       />
       <MerchantProductCard products={products || []} />
     </Box>

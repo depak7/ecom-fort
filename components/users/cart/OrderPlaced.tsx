@@ -34,7 +34,7 @@ import Image from "next/image"
 import orderplaced from "@/components/assets/users/order-placed.jpg"
 import { motion } from "framer-motion"
 
-const OrderConfirmation = (order: { order: any }) => {
+const OrderConfirmation = ({order}: { order: any }) => {
     const router = useRouter()
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -49,6 +49,14 @@ const OrderConfirmation = (order: { order: any }) => {
 
     useEffect(() => {
         // Simulate loading
+        if (order) {
+            setOrderDetails({
+                orderId: order.id,
+                date: new Date(order.createdAt).toLocaleDateString(),
+                items: order.itemCount,  // You can fill this in if item data is available
+                total: order.total   // Same for total, if you can calculate it
+            })
+        }
         const timer = setTimeout(() => {
             setLoading(false)
         }, 1500)

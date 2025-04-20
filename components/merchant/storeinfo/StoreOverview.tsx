@@ -89,11 +89,13 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 export default function StoreOverview({ 
   initialStoreData, 
   stats, 
-  categoryClassification 
+  categoryClassification ,
+  orders
 }: { 
   initialStoreData: StoreData, 
   stats: StatsData, 
-  categoryClassification: { category: string, count: number }[] 
+  categoryClassification: { category: string, count: number }[] ,
+  orders:any
 }) {
   const [storeData, setStoreData] = useState<StoreData>(initialStoreData)
   const [statsData, setStatsData] = useState<StatsData>(stats)
@@ -419,21 +421,54 @@ export default function StoreOverview({
 
       {/* Recent Activity Section */}
       <Paper sx={{ p: 3, borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Recent Activity</Typography>
-        <Box sx={{ 
-          p: 3, 
-          bgcolor: '#f8f9fa', 
-          borderRadius: 1, 
-          display: 'flex', 
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100px'
-        }}>
-          <Typography variant="body1" color="text.secondary">
-            No recent activity to display
-          </Typography>
-        </Box>
+        <Typography variant="h6" sx={{ mb: 2 }}>Recent Orders</Typography>
+
+        {orders==null || orders?.length === 0? (
+          <Box
+            sx={{
+              p: 3,
+              bgcolor: '#f8f9fa',
+              borderRadius: 1,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100px',
+            }}
+          >
+            <Typography variant="body1" color="text.secondary">
+              No recent orders
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            {orders?.slice(0, Math.min(2,orders.length)).map((order) => (
+              <Box
+                key={order.orderId}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  bgcolor: '#f1f3f5',
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="subtitle1">
+                  Order ID: {order.orderId.slice(0, 8)}...
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Items: {order.items.length} | Date: {new Date(order.createdAt).toLocaleDateString()}
+                </Typography>
+              </Box>
+            ))}
+
+            <Box textAlign="right">
+              <Button size="small" onClick={() => router.push(`storedetails/all-orders/${storeData.id}`)}>
+                View All Orders
+              </Button>
+            </Box>
+          </>
+        )}
       </Paper>
+
 
       {/* Edit Dialog */}
       <Dialog
