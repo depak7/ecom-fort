@@ -349,12 +349,29 @@ export async function getProductsByStoreIdForMerchant(storeId: string) {
 }
 
 
-export async function getProductsByStoreId(storeId: string, userId?: string) {
+export async function getProductsByStoreId(storeId: string,sort:string, userId?: string) {
   try {
+    let orderByClause = {};
+
+    console.log(sort)
+
+    switch (sort) {
+      case 'price-low-high':
+      orderByClause = { price: 'asc' };
+      break;
+      case 'price-high-low':
+      orderByClause = { price: 'desc' };
+      break;
+    case 'new-arrivals':
+    default:
+      orderByClause = { createdAt: 'desc' }; // Most recent first
+      break;
+    }
     const products = await readOnlyPrisma.product.findMany({
       where: {
         storeId: storeId,
       },
+      orderBy:orderByClause,
       select: {
         id: true,
         store: true,
@@ -385,7 +402,6 @@ export async function getProductsByStoreId(storeId: string, userId?: string) {
       ...product,
       isWishlisted: userId ? product.wishlistItems.length > 0 : false,
     }));
-
     return { success: true, products: productsWithWishlistStatus };
   } catch (error) {
     console.error(`Failed to fetch products for store ${storeId}:`, error);

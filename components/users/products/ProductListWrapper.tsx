@@ -13,20 +13,17 @@ interface ProductListWrapperProps {
 const ProductListWrapper = ({ initialProducts, userId }: ProductListWrapperProps) => {
   const [products, setProducts] = useState(initialProducts);
 
-  const handleSort = (sortBy: string) => {
-    const sortedProducts = [...products].sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low-high':
-          return parseFloat(a.price) - parseFloat(b.price);
-        case 'price-high-low':
-          return parseFloat(b.price) - parseFloat(a.price);
-        case 'new-arrivals':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        default:
-          return 0;
+  const handleSort = async (sortBy: string) => {
+    try {
+      const res = await fetch(`/api/sort?sort=${sortBy}`);
+      const data = await res.json();
+   console.log(data)
+      if (data.success) {
+        setProducts(data.products);
       }
-    });
-    setProducts(sortedProducts);
+    } catch (error) {
+      console.error('Sorting failed:', error);
+    }
   };
 
   return (

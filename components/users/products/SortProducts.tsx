@@ -1,16 +1,14 @@
-'use client';
-
-import React, { useState } from 'react';
-import { Box, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
+import React, { useState } from "react";
+import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 
 interface SortProductsProps {
-  onSortChange: (sortBy: string) => void;
+  onSortChange: (sort: string) => void;
 }
 
 const SortProducts = ({ onSortChange }: SortProductsProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedSort, setSelectedSort] = useState('new-arrivals');
+  const [selectedSort, setSelectedSort] = useState("new-arrivals");
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -27,28 +25,40 @@ const SortProducts = ({ onSortChange }: SortProductsProps) => {
   };
 
   const sortOptions = [
-    { value: 'new-arrivals', label: 'New Arrivals' },
-    { value: 'price-low-high', label: 'Price: Low to High' },
-    { value: 'price-high-low', label: 'Price: High to Low' },
+    { value: "new-arrivals", label: "New Arrivals" },
+    { value: "price-low-high", label: "Price: Low to High" },
+    { value: "price-high-low", label: "Price: High to Low" },
   ];
 
   return (
     <Box display="flex" alignItems="center">
-      <Typography variant="body2" sx={{ mr: 1 }}>Sort By</Typography>
-      <IconButton 
-        onClick={handleClick}
-        sx={{ color: "black" }} 
-        aria-label="sort"
-      >
-        <ExpandMoreOutlinedIcon />
-      </IconButton>
+         <IconButton onClick={handleClick}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        padding: 0, // Ensure there's no extra padding
+      }}
+    >
+      <Typography variant="body2" color="black" sx={{ mr: 1 }}>
+        Sort By
+      </Typography>
+      <ExpandMoreOutlinedIcon />
+    </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
       >
         {sortOptions.map((option) => (
-          <MenuItem 
+          <MenuItem
             key={option.value}
             onClick={() => handleSort(option.value)}
             selected={selectedSort === option.value}

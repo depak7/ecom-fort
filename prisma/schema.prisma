@@ -140,6 +140,7 @@ model Product {
   cartItems     CartItem[]
   wishlistItems WishlistItem[]
   reviews       Review[]
+  createdAt     DateTime    @default(now())
 }
 
 model ProductVariant {

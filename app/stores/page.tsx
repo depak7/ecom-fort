@@ -8,12 +8,10 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Button,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
-import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
 
 import StoreCard from "@/components/users/stores/StoreCard";
 import { getAllStores } from "../actions/store/action";
