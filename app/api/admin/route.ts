@@ -3,13 +3,7 @@ import { readOnlyPrisma } from '@/database/index'; // adjust the path to your pr
 
 export async function GET() {
   try {
-    const stores = await readOnlyPrisma.store.findMany({
-      include: {
-        owner: true,
-        products: true,
-        orderItems: true,
-      },
-    });
+    const stores = await readOnlyPrisma.store.findMany();
 
     return NextResponse.json({ success: true, data: stores });
   } catch (error) {
