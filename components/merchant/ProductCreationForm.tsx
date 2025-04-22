@@ -51,6 +51,33 @@ const categories = {
   ]
 };
 
+const womenCategorySizes: Record<string, string[]> = {
+  "Sarees": ["Free Size"],
+  "Chudidars": ["36", "38", "40", "42", "44"],
+  "Salwar Suits": ["36", "38", "40", "42", "44"],
+  "Lehengas": ["36", "38", "40", "42", "44"],
+  "Kurtis": ["34", "36", "38", "40", "42", "44"],
+  "Dupattas": ["Free Size"],
+  "Shoes": allowedShoeSizes,
+  "Others": allowedSizes
+};
+
+const getAllowedSizes = (category: string) => {
+  // Prioritize women's category-specific sizes
+  if (womenCategorySizes[category]) {
+    return womenCategorySizes[category];
+  }
+
+  // Fallback: if category is "Shoes", return general shoe sizes
+  if (category === "Shoes") {
+    return allowedShoeSizes;
+  }
+
+  // Fallback: return generic sizes
+  return allowedSizes;
+};
+
+
 
 export default function ProductCreationForm({
   storeId,
@@ -603,13 +630,12 @@ export default function ProductCreationForm({
                                 }}
                                 fullWidth
                               >
-                                {(previewData.category === "Shoes" ? allowedShoeSizes : allowedSizes).map(
-                                  (allowedSize) => (
-                                    <MenuItem key={allowedSize} value={allowedSize}>
-                                      {allowedSize}
-                                    </MenuItem>
-                                  ),
-                                )}
+                                {getAllowedSizes(previewData.category).map((allowedSize) => (
+                                  <MenuItem key={allowedSize} value={allowedSize}>
+                                    {allowedSize}
+                                  </MenuItem>
+                                ))}
+
                               </Select>
                               <StyledTextField
                                 required
