@@ -17,6 +17,7 @@ import {
   MenuItem,
   Select,
   InputLabel,
+  Menu,
 } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteIcon from "@mui/icons-material/Delete"
@@ -27,7 +28,29 @@ import ProductCard from "../users/products/ProductCard"
 
 const allowedSizes = ["S-38", "XS-39", "M-40", "L-42", "XL-44", "XXL-46"]
 const allowedShoeSizes = ["UK-6", "UK-7", "UK-8", "UK-9", "UK-10", "UK-11", "UK-12"]
-const categories = ["Shirts","T-Shirts","Hoodies","Trousers", "Jeans", "Shoes", "Accessories", "Others"]
+const categories = {
+  men: [
+    "Shirts",
+    "T-Shirts",
+    "Hoodies",
+    "Trousers",
+    "Jeans",
+    "Shoes",
+    "Accessories",
+    "Others"
+  ],
+  women: [
+    "Sarees",
+    "Chudidars",
+    "Salwar Suits",
+    "Lehengas",
+    "Kurtis",
+    "Dupattas",
+    "Shoes",
+    "Others"
+  ]
+};
+
 
 export default function ProductCreationForm({
   storeId,
@@ -39,6 +62,21 @@ export default function ProductCreationForm({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSelect = (category: string) => {
+    setPreviewData({ ...previewData, category });
+    handleClose();
+  };
   const [variants, setVariants] = useState([
     {
       color: "",
@@ -61,7 +99,6 @@ export default function ProductCreationForm({
 
     const form = e.currentTarget
     const formData = new FormData(form)
-
     // Append variants data
     variants.forEach((variant, index) => {
       formData.append(`color-${index}`, variant.color)
@@ -254,20 +291,63 @@ export default function ProductCreationForm({
                 </Grid>
                 <Grid item xs={12}>
                   <InputLabel id="category-label">Category</InputLabel>
-                  <Select
-                    labelId="category-label"
-                    name="category"
-                    value={previewData.category}
-                    onChange={(e) => setPreviewData({ ...previewData, category: e.target.value as string })}
-                    fullWidth
-                    required
+                  <OutlinedButton fullWidth onClick={handleClick}>
+                    {previewData.category || "Select Category"}
+                  </OutlinedButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    PaperProps={{
+                      sx: {
+                        border: "2px solid black",
+                        paddingX: 2,
+                        paddingY: 1,
+                      },
+                    }}
                   >
-                    {categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        {category}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                    <Box display="flex" gap={4}>
+                      {/* Men Category Column */}
+                      <Box>
+                        <Typography
+                          variant="subtitle2"
+                          gutterBottom
+                          sx={{ fontWeight: "bold", color: "black" }}
+                        >
+                          Men
+                        </Typography>
+                        {categories.men.map((item) => (
+                          <MenuItem
+                            key={`men-${item}`}
+                            onClick={() => handleSelect(item)}
+                            sx={{ color: "grey.700" }}
+                          >
+                            {item}
+                          </MenuItem>
+                        ))}
+                      </Box>
+
+                      {/* Women Category Column */}
+                      <Box>
+                        <Typography
+                          variant="subtitle2"
+                          gutterBottom
+                          sx={{ fontWeight: "bold", color: "black" }}
+                        >
+                          Women
+                        </Typography>
+                        {categories.women.map((item) => (
+                          <MenuItem
+                            key={`women-${item}`}
+                            onClick={() => handleSelect(item)}
+                            sx={{ color: "grey.700" }}
+                          >
+                            {item}
+                          </MenuItem>
+                        ))}
+                      </Box>
+                    </Box>
+                  </Menu>
                 </Grid>
                 <Grid item xs={12}>
                   <StyledTextField

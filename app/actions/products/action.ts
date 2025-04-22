@@ -48,6 +48,7 @@ export async function createProduct(formData: FormData) {
   try {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
+    const brand=formData.get("brandName") as string;
     const category = formData.get("category") as string;
     const price = new Decimal(parseFloat(formData.get("price") as string));
     const storeId = formData.get("storeId") as string;
@@ -61,6 +62,7 @@ export async function createProduct(formData: FormData) {
       data: {
         id,
         name,
+        brand,
         category,
         description,
         price,
@@ -352,8 +354,6 @@ export async function getProductsByStoreIdForMerchant(storeId: string) {
 export async function getProductsByStoreId(storeId: string,sort:string, userId?: string) {
   try {
     let orderByClause = {};
-
-    console.log(sort)
 
     switch (sort) {
       case 'price-low-high':
