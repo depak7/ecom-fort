@@ -1,20 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/database/index';
 
-// Handle OPTIONS for CORS preflight
-export async function OPTIONS() {
-  return NextResponse.json({}, {
-    status: 200,
+// Define allowed origins and CORS options
+const allowedOrigins = ['https://store-admin-portal.lovable.app/', 'http://localhost:3000'];
+const corsOptions = {
+  'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400', // 24 hours
+};
+
+// Handle OPTIONS request for preflight
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin') || '';
+  const isAllowedOrigin = allowedOrigins.includes(origin);
+  
+  return new NextResponse(null, {
+    status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '*', // Or restrict to specific origin
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      ...(isAllowedOrigin && { 'Access-Control-Allow-Origin': origin }),
+      ...corsOptions,
     },
   });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const origin = req.headers.get('origin') || '*';
+  const origin = req.headers.get('origin') || '';
+  const isAllowedOrigin = allowedOrigins.includes(origin);
+  
   const storeId = params.id;
   const body = await req.json();
 
@@ -22,12 +34,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   if (!['SUCCESS', 'REJECTED'].includes(status)) {
     return NextResponse.json(
-      { success: false, message: 'Invalid status' },
-      {
+      { success: false, message: 'Invalid status' }, 
+      { 
         status: 400,
         headers: {
-          'Access-Control-Allow-Origin': origin,
-        },
+          ...(isAllowedOrigin && { 'Access-Control-Allow-Origin': origin }),
+          'Access-Control-Allow-Methods': corsOptions['Access-Control-Allow-Methods'],
+        }
       }
     );
   }
@@ -47,19 +60,21 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       { success: true, data: updatedStore },
       {
         headers: {
-          'Access-Control-Allow-Origin': origin,
-        },
+          ...(isAllowedOrigin && { 'Access-Control-Allow-Origin': origin }),
+          'Access-Control-Allow-Methods': corsOptions['Access-Control-Allow-Methods'],
+        }
       }
     );
   } catch (error) {
     console.error('[ADMIN_UPDATE_STORE_STATUS]', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to update store status' },
-      {
+      { success: false, message: 'Failed to update store status' }, 
+      { 
         status: 500,
         headers: {
-          'Access-Control-Allow-Origin': origin,
-        },
+          ...(isAllowedOrigin && { 'Access-Control-Allow-Origin': origin }),
+          'Access-Control-Allow-Methods': corsOptions['Access-Control-Allow-Methods'],
+        }
       }
     );
   }
