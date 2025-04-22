@@ -53,10 +53,10 @@ const categories = {
 
 const womenCategorySizes: Record<string, string[]> = {
   "Sarees": ["Free Size"],
-  "Chudidars": ["36", "38", "40", "42", "44"],
-  "Salwar Suits": ["36", "38", "40", "42", "44"],
-  "Lehengas": ["36", "38", "40", "42", "44"],
-  "Kurtis": ["34", "36", "38", "40", "42", "44"],
+  "Chudidars": ["S-36", "M-38", "L-40", "XL-42", "XXL-44"],
+  "Salwar Suits": ["S-36", "M-38", "L-40", "XL-42", "XXL-44"],
+  "Lehengas": ["S-36", "M-38", "L-40", "XL-42", "XXL-44"],
+  "Kurtis": ["XS-34", "S-36", "M-38", "L-40", "XL-42", "XXL-44"],
   "Dupattas": ["Free Size"],
   "Shoes": allowedShoeSizes,
   "Others": allowedSizes
