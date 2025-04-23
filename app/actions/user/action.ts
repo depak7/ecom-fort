@@ -35,3 +35,16 @@ export async function registerUser(name: string, email: string, password: string
     return { success: false, message: "An error occurred during registration" };
   }
 }
+
+export async function getUserById(userId:string) {
+  try {
+    // Check if user already exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    return { success: true,user};
+  } catch (error) {
+    console.error("Registration error:", error);
+    return { success: false };
+  }
+}

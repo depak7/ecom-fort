@@ -303,3 +303,21 @@ export async function getProductsCountByCategory(storeId: string) {
     return { success: false, error: "Failed to fetch products by category" };
   }
 }
+
+
+export async function getStoreDetailsByUserId(userId: string) {
+  try {
+    const store = await readOnlyPrisma.store.findUnique(
+      {
+        where: {
+          ownerId:userId
+        }
+      }
+    );
+    return { success: true, store }
+  }
+  catch (e) {
+    console.log(e)
+    return { success: false }
+  }
+}

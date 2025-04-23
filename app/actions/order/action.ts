@@ -144,3 +144,47 @@ export async function updateOrderStatus(orderId: string, itemId: number, newStat
     throw new Error("Failed to update order status")
   }
 }
+
+
+export async function getOrderDetailsByUserId(userId: string) {
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      createdAt: true,
+      Address: true,
+      items: {
+        select: {
+          product: {
+            select: { name: true },
+          },
+          quantity: true,
+          price: true,
+          orderStatus: true,
+        },
+      },
+    },
+  })
+
+  if (!orders || orders.length === 0) return []
+
+  return orders.map(order => {
+    const total = order.items.reduce((acc, item) => {
+      return acc + Number(item.price) * item.quantity
+    }, 0)
+
+    return {
+      orderId: order.id,
+      date: order.createdAt,
+      address: order.Address,
+      items: order.items.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.price,
+        status: item.orderStatus,
+      })),
+      total: total.toFixed(2),
+      status: order.items.length > 0 ? order.items[0].orderStatus : "Unknown",
+    }
+  })
+}

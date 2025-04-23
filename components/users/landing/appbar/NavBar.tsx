@@ -27,6 +27,7 @@ import { checkUserHasStore } from "@/app/actions/store/action";
 import LoginIcon from '@mui/icons-material/Login';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { PersonPin } from "@mui/icons-material";
 
 interface HideOnScrollProps {
   children: React.ReactElement;
@@ -176,6 +177,23 @@ export default function NavBar() {
                     </TypographyButton>
                   </>
                 )}
+                 {isUserLoggedIn && (
+                  <> <PersonPin/>
+                    <TypographyButton
+                      variant="body2"
+                      sx={{
+                        mr: 2,
+                        ml: 0.5,
+                      }}
+                      onClick={() => {
+                        
+                          handleNavigation("my-profile");
+                      }}
+                    >
+                      Profile
+                    </TypographyButton>
+                  </>
+                )}
                 {!isUserLoggedIn && (
                   <Button
                     variant="contained"
@@ -217,6 +235,9 @@ export default function NavBar() {
                 >
                   {isUserLoggedIn ? "Logout" : "Login"}
                 </Button>
+
+
+
               </Box>
             )}
 
@@ -253,6 +274,27 @@ export default function NavBar() {
               gap: 1,
             }}
           >
+            {isUserLoggedIn && (
+              <Button
+                onClick={() => {
+                    handleNavigation("my-profile");
+                 
+                }}
+                startIcon={<PersonPin/>}
+                sx={{ 
+                  color: "black", 
+                  justifyContent: "flex-start",
+                  borderRadius: 1,
+                  fontSize:{xs:'small'},
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+               Profile
+              </Button>
+            )}
+
             {isUserLoggedIn && (
               <Button
                 onClick={() => {
