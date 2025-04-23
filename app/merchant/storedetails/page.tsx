@@ -175,7 +175,7 @@ export default async function StorePage() {
                     </Typography>
                     <Typography variant="body1">
                       Your store application is currently being reviewed. This process typically takes up to 2 business days.
-                      We'll notify you once the review is complete.
+                      We&apos;ll notify you once the review is complete.
                     </Typography>
                   </Box>
                 </CardContent>
