@@ -266,7 +266,7 @@ export default function ProfilePage({ user, storeDetails, orders }) {
                                     }}
                                 >
                                     <Image
-                                        src={storeDetails.bannerImage || banner}
+                                        src={banner}
                                         alt="Store Banner"
                                         fill
                                         style={{ objectFit: "cover" }}
