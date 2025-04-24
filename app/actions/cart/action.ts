@@ -73,7 +73,7 @@ export async function addToCart(
 
 export async function getCartItems(userId: string) {
   if (!userId) {
-    return {error:true}
+    return { items: [], totalQuantity: 0, totalPrice: 0 };
   }
 
   try {
@@ -173,6 +173,7 @@ export async function getCartItems(userId: string) {
   } catch (error) {
     console.error("Error retrieving cart items:", error);
   }
+  return { items: [], totalQuantity: 0, totalPrice: 0 };
 }
 
 

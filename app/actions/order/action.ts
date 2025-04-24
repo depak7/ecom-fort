@@ -17,7 +17,8 @@ export async function addOrders({ userId, address, stores }: any) {
               quantity: item.quantity,
               price: parseFloat(item.price),
               storeId: store.id,
-              orderStatus: 'PENDING'
+              orderStatus: 'PENDING',
+              size: item.size
             }))
           ),
         },
@@ -63,6 +64,10 @@ export async function addOrders({ userId, address, stores }: any) {
       }
     })
 
+    console.log(order)
+    console.log(order.items[0].product.variants[0].variantImage)
+    console.log(order.items[0])
+
     const orderDetails = {
       orderId: order.id,
       userName: user?.name,
@@ -72,6 +77,7 @@ export async function addOrders({ userId, address, stores }: any) {
         productName: item.product.name,
         quantity: item.quantity,
         price: item.price,
+        size:item.size,
         storeName: item.store.name,
         productImage: item.product.variants && item.product.variants.length > 0
           ? item.product.variants[0]?.variantImage?.url

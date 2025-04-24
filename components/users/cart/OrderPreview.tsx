@@ -85,10 +85,11 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
         address,
         stores: cartStores,
       })
-
+   
       if (success) {
+        console.log(order)
         console.log("Sending email...");
-        await sendEmailToSeller(order)
+        // await sendEmailToSeller(order)
         console.log("Mail send ");
         successToast('Order Placed')
         route.push(`/order-placed/${order?.orderId}`)
@@ -105,7 +106,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
 
   const sendEmailToSeller = async (order: any) => {
     const emailContent = {
-      sellerEmail: 'seller@example.com',  // Replace with seller's email from your database
+      sellerEmail:order.userEmail,  // Replace with seller's email from your database
       subject: `New Order from ${order.userName}`,
       body: `
        <!DOCTYPE html>
@@ -223,7 +224,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
           </tr>
         </thead>
         <tbody>
-          ${order.items.map((item) => `
+          ${order.orderedItems.map((item) => `
             <tr>
               <td>${item.productName}</td>
               <td>${item.size}</td>
