@@ -16,6 +16,8 @@ import {
   AccordionSummary,
   AccordionDetails,
   Button,
+  CircularProgress,
+  Backdrop,
 } from '@mui/material'
 import Image from 'next/image'
 
@@ -61,13 +63,14 @@ interface ShoppingCartProps {
   userId: string | null
   totalQuantity: number
   totalPrice: number
-  address:any
+  address: any
 }
 
-export default function OrderPreview({ stores, userId, totalQuantity, totalPrice,address }: ShoppingCartProps) {
+export default function OrderPreview({ stores, userId, totalQuantity, totalPrice, address }: ShoppingCartProps) {
   const [cartStores, setCartStores] = useState<Store[]>(stores)
+  const [isLoading, setIsLoading] = useState(false)
   const { errorToast, successToast } = UseCustomToast();
-  const route=useRouter();
+  const route = useRouter();
 
 
   useEffect(() => {
@@ -75,25 +78,206 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
   }, [stores, address])
 
   const handlePlaceOrder = async () => {
+    setIsLoading(true)
     try {
-      const { success,order } = await addOrders({
+      const { success, order } = await addOrders({
         userId,
         address,
         stores: cartStores,
       })
-  
+
       if (success) {
+        console.log("Sending email...");
+        await sendEmailToSeller(order)
+        console.log("Mail send ");
         successToast('Order Placed')
-        route.push(`/order-placed/${order?.id}`)
+        route.push(`/order-placed/${order?.orderId}`)
       } else {
         errorToast('Failed to place order')
       }
     } catch (error) {
       console.error('Error placing order:', error)
       errorToast('Something went wrong while placing the order')
+    } finally {
+      setIsLoading(false)
     }
   }
-  
+
+  const sendEmailToSeller = async (order: any) => {
+    const emailContent = {
+      sellerEmail: 'seller@example.com',  // Replace with seller's email from your database
+      subject: `New Order from ${order.userName}`,
+      body: `
+       <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Order Notification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .navbar {
+      background-color: #000000;
+      padding: 15px 20px;
+      text-align: center;
+    }
+    .logo-placeholder img {
+      width: 150px; /* Adjust logo size */
+    }
+    .content {
+      padding: 20px;
+    }
+    .header {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    .footer {
+      background-color: #f5f5f5;
+      padding: 15px 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .highlight {
+      background-color: #f8f8f8;
+      padding: 15px;
+      border-left: 4px solid #000;
+      margin: 15px 0;
+    }
+    .button {
+      display: inline-block;
+      background-color: #000;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-top: 15px;
+    }
+    .important {
+      color: #d9534f;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="navbar">
+      <!-- Logo in Navbar -->
+      <div class="logo-placeholder">
+        <img src="https://i.ibb.co/Vccqnv69/ecom-fort.png" alt="Ecom Fort Logo" />
+      </div>
+    </div>
+    
+    <div class="content">
+      <div class="header">
+        <h1>New Order Received</h1>
+        <p>You have received a new order from Ecom Fort. Please review the details below and contact the customer to arrange payment.</p>
+      </div>
+      
+      <h2>Order Details</h2>
+      <p><strong>Order ID:</strong> ${order.orderId}</p>
+      <p><strong>User Name:</strong> ${order.userName}</p>
+      <p><strong>Email:</strong> ${order.userEmail}</p>
+      <p><strong>Shipping Address:</strong> ${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.postalCode}, ${order.address.country}</p>
+      <p><strong>Phone:</strong> ${order.address.phoneNumber}</p>
+      <p><strong>Alternate Phone:</strong> ${order.address.alternatePhoneNumber || 'N/A'}</p>
+
+      <h3>Ordered Products:</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Size</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Image</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${order.items.map((item) => `
+            <tr>
+              <td>${item.productName}</td>
+              <td>${item.size}</td>
+              <td>${item.quantity}</td>
+              <td>₹${item.price}</td>
+              <td><img src="${item.image}" alt="${item.productName}" width="100" /></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <h3>Total Amount: ₹${order.totalAmount}</h3>
+      
+      <div class="highlight">
+        <p><span class="important">Action Required:</span> Please contact the customer to confirm payment details.</p>
+        <p>Once payment is confirmed, please begin processing the order and update the order status in the order management page.</p>
+      </div>
+      
+      <p>Thank you for your prompt attention to this order.</p>
+      
+      <p>If you have any questions or need additional information, please reply to this email.</p>
+      
+      <a href="#" class="button">View Order Details</a>
+    </div>
+    
+    <div class="footer">
+      <p>© 2024 Ecom Fort. All rights reserved.</p>
+      <p>This is an automated notification.</p>
+    </div>
+  </div>
+</body>
+</html>
+
+      `,
+    }
+
+    try {
+      const response = await fetch('/api/sendemail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailContent),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send email to seller')
+      }
+
+      console.log('Email sent successfully to seller')
+    } catch (error) {
+      console.error('Error sending email:', error)
+    }
+  }
 
   const handleRemoveItem = async (storeId: string, itemId: number) => {
     try {
@@ -126,13 +310,13 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
 
   const formatWhatsAppMessage = (store: Store) => {
     let message = `Hello, I'd like to place an order from ${store.name}:\n\n`;
-    
+
     store.items.forEach((item) => {
       const imageUrl = item.variant.image || '/placeholder.svg';
       message += `${item.product.name} (Size: ${item.size.name}) x${item.quantity} - ₹${formatPrice(item.price)}\n`;
-      message += `Image: ${imageUrl}\n`;  
+      message += `Image: ${imageUrl}\n`;
     });
-  
+
     const storeTotal = store.items.reduce((sum, item) => sum + item.quantity * parseFloat(formatPrice(item.price)), 0);
     message += `\nTotal: ₹${storeTotal.toFixed(2)}`;
 
@@ -145,10 +329,10 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
     if (address.alternatePhoneNumber) {
       message += `Alternate Phone: ${address.alternatePhoneNumber}\n`;
     }
-    
+
     return encodeURIComponent(message);
   };
-  
+
   const handleSendWhatsApp = (store: Store) => {
     const whatsappUrl = `https://wa.me/91${store.phoneNumber}?text=${formatWhatsAppMessage(store)}`
     window.open(whatsappUrl, '_blank')
@@ -156,6 +340,12 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
 
   return (
     <Box sx={{ maxWidth: 800, margin: 'auto', p: 2 }}>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Typography variant="h5" gutterBottom fontWeight={700}>
         Order Preview
       </Typography>
@@ -181,7 +371,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
                     <TableRow key={product.id}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Image 
+                          <Image
                             src={product.variant.image || '/placeholder.svg?height=80&width=80'}
                             alt={product.product.name}
                             width={80}
@@ -223,7 +413,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
                 </TableBody>
               </Table>
             </TableContainer>
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' ,gap:2}}>
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
               { /*<Button variant='contained'
                 onClick={() => handleSendWhatsApp(store)}
                 sx={{bgcolor:"green",":hover":{bgcolor:"green"}}}
@@ -232,58 +422,58 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
                 Order Now via WhatsApp
               </Button> */}
               <Button variant='contained'
-              onClick={handlePlaceOrder}
-                sx={{bgcolor:"black",":hover":{bgcolor:"black"}}}
+                onClick={handlePlaceOrder}
+                sx={{ bgcolor: "black", ":hover": { bgcolor: "black" } }}
               >
-               place Order
+                place Order
               </Button>
             </Box>
           </AccordionDetails>
         </Accordion>
       ))}
-    <Paper elevation={0} sx={{ mt: 4, p: 3, borderRadius: 2 }}>
-  <Box
-    sx={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexDirection: { xs: 'column', sm: 'row' }, // Stack on small screens
-      textAlign: { xs: 'center', sm: 'left' }, // Center text for smaller screens
-      gap: { xs: 2, sm: 0 }, // Add spacing between items for mobile
-    }}
-  >
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: { xs: 'center', sm: 'flex-start' }, // Center items on mobile
-      }}
-    >
-      <ShoppingCart sx={{ fontSize: 40, mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }} />
-      <Box>
-        <Typography variant="h6" fontWeight={700}>
-          Total Items
-        </Typography>
-        <Typography variant="h4" fontWeight={700}>
-          {totalQuantity}
-        </Typography>
-      </Box>
-    </Box>
-    <Box
-      sx={{
-        textAlign: { xs: 'center', sm: 'right' },
-        mt: { xs: 2, sm: 0 }, // Add margin for mobile
-      }}
-    >
-      <Typography variant="h6" fontWeight={700}>
-        Total Amount
-      </Typography>
-      <Typography variant="h6" fontWeight={700}>
-        ₹{formatPrice(totalPrice)}
-      </Typography>
-    </Box>
-  </Box>
-</Paper>
+      <Paper elevation={0} sx={{ mt: 4, p: 3, borderRadius: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' }, // Stack on small screens
+            textAlign: { xs: 'center', sm: 'left' }, // Center text for smaller screens
+            gap: { xs: 2, sm: 0 }, // Add spacing between items for mobile
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: { xs: 'center', sm: 'flex-start' }, // Center items on mobile
+            }}
+          >
+            <ShoppingCart sx={{ fontSize: 40, mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }} />
+            <Box>
+              <Typography variant="h6" fontWeight={700}>
+                Total Items
+              </Typography>
+              <Typography variant="h4" fontWeight={700}>
+                {totalQuantity}
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              textAlign: { xs: 'center', sm: 'right' },
+              mt: { xs: 2, sm: 0 }, // Add margin for mobile
+            }}
+          >
+            <Typography variant="h6" fontWeight={700}>
+              Total Amount
+            </Typography>
+            <Typography variant="h6" fontWeight={700}>
+              ₹{formatPrice(totalPrice)}
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
 
     </Box>
   )

@@ -22,6 +22,18 @@ export async function addOrders({ userId, address, stores }: any) {
           ),
         },
       },
+      include: {
+        items: {  // Ensure this is included to fetch order items
+          include: {
+            product: {  // Include product and its variants
+              include: {
+                variants: true,  // Include variants related to the product
+              },
+            },
+            store: true,    // Ensure related store is included
+          },
+        },
+      },
     });
 
     await prisma.cartItem.deleteMany({
@@ -39,7 +51,37 @@ export async function addOrders({ userId, address, stores }: any) {
       },
     })
 
-    return { success: true, order }
+    const user=await prisma.user.findUnique({
+      where:{
+        id:userId
+      }
+    })
+
+    const shippingAddress=await prisma.address.findUnique({
+      where:{
+        id:address?.id
+      }
+    })
+
+    const orderDetails = {
+      orderId: order.id,
+      userName: user?.name,
+      userEmail: user?.email,
+      shippingAddress, 
+      orderedItems: order.items.map((item: any) => ({
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: item.price,
+        storeName: item.store.name,
+        productImage: item.product.variants && item.product.variants.length > 0
+          ? item.product.variants[0]?.variantImage?.url
+          : '', 
+      })),
+      totalAmount: Math.round(order.items.reduce((total: number, item: any) => total + parseFloat(item.price.toString()) * item.quantity, 0)),  // Round total amount to nearest integer
+    };
+
+
+    return { success: true, order: orderDetails };
   } catch (error) {
     console.error('Order Error:', error)
     return { success: false, error: 'Failed to place order' }
@@ -103,7 +145,7 @@ export async function getGroupedOrdersByStore(storeId: string | null) {
         user: true,
         items: {
           where: {
-            storeId: storeId, // only include this store’s items
+            storeId: storeId, // only include this store's items
           },
           include: {
             product: true,

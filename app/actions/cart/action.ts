@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import prisma from "@/database/index";
 import { getStoreById } from "../store/action";
+import { SuiteContext } from "node:test";
 
 export async function addToCart(
   userId: string,
@@ -72,7 +73,7 @@ export async function addToCart(
 
 export async function getCartItems(userId: string) {
   if (!userId) {
-    throw new Error("User not authenticated");
+    return {error:true}
   }
 
   try {
@@ -171,7 +172,6 @@ export async function getCartItems(userId: string) {
     };
   } catch (error) {
     console.error("Error retrieving cart items:", error);
-    throw new Error("Failed to retrieve cart items");
   }
 }
 

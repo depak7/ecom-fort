@@ -44,7 +44,7 @@ const CheckoutProgress = () => {
         fontWeight={isPayment ? "bold" : "normal"}
         color={isPayment ? "text.primary" : "text.secondary"}
       >
-        Payment
+       Checkout
       </Typography>
     </Box>
   );
