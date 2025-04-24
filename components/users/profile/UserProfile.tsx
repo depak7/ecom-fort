@@ -76,7 +76,6 @@ export default function ProfilePage({ user, storeDetails, orders }) {
     const formatDate = (dateObj) => {
         if (!dateObj) return "N/A";
         try {
-            // Handle both Date objects and strings
             const date = dateObj instanceof Date ? dateObj : new Date(dateObj);
             return format(date, "MMM dd, yyyy - h:mm a");
         } catch (error) {
@@ -248,407 +247,425 @@ export default function ProfilePage({ user, storeDetails, orders }) {
                             "& .Mui-selected": { color: "#e91e63" },
                         }}
                     >
-                        <Tab icon={<StoreIcon />} label="Store Details" iconPosition="start" />
+                        {storeDetails && (
+                            <Tab icon={<StoreIcon />} label="Store Details" iconPosition="start" />
+                        )}
                         <Tab icon={<ShoppingBagIcon />} label="Orders" iconPosition="start" />
                     </Tabs>
 
                     {/* Store Details Tab */}
-                    <Box sx={{ p: { xs: 2, sm: 3 }, display: tabValue === 0 ? "block" : "none" }}>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <Box
-                                    sx={{
-                                        position: "relative",
-                                        height: { xs: 150, sm: 200 },
-                                        mb: 3,
-                                        borderRadius: 2,
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    <Image
-                                        src={banner}
-                                        alt="Store Banner"
-                                        fill
-                                        style={{ objectFit: "cover" }}
-                                    />
+                    {storeDetails && (
+                        <Box sx={{ p: { xs: 2, sm: 3 }, display: tabValue === 0 ? "block" : "none" }}>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12}>
                                     <Box
                                         sx={{
-                                            position: "absolute",
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            p: 2,
-                                            background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
-                                            display: "flex",
-                                            alignItems: "center",
+                                            position: "relative",
+                                            height: { xs: 150, sm: 200 },
+                                            mb: 3,
+                                            borderRadius: 2,
+                                            overflow: "hidden",
                                         }}
                                     >
-                                        <Avatar
-                                            src={storeDetails.logo}
-                                            alt={storeDetails.name}
-                                            sx={{
-                                                width: { xs: 40, sm: 60 },
-                                                height: { xs: 40, sm: 60 },
-                                                border: "2px solid white",
-                                                mr: 2,
-                                            }}
+                                        <Image
+                                            src={banner}
+                                            alt="Store Banner"
+                                            fill
+                                            style={{ objectFit: "cover" }}
                                         />
-                                        <Typography variant="h5" fontWeight="bold" color="white">
-                                            {storeDetails.name}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Typography variant="body1" paragraph color="text.secondary">
-                                    {storeDetails.description}
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Accordion
-                                    defaultExpanded
-                                    sx={{
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                        "&:before": { display: "none" },
-                                        mb: 2,
-                                    }}
-                                >
-                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                                            <BusinessIcon sx={{ mr: 1, color: "#00acc1" }} />
-                                            <Typography variant="h6">Business Details</Typography>
-                                        </Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <List dense>
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Business Type"
-                                                    secondary={storeDetails.businessType}
-                                                    primaryTypographyProps={{ fontWeight: 500 }}
-                                                />
-                                            </ListItem>
-                                            {storeDetails.gstNumber && (
-                                                <ListItem>
-                                                    <ListItemText
-                                                        primary="GST Number"
-                                                        secondary={storeDetails.gstNumber}
-                                                        primaryTypographyProps={{ fontWeight: 500 }}
-                                                    />
-                                                </ListItem>
-                                            )}
-                                            {storeDetails.panNumber && (
-                                                <ListItem>
-                                                    <ListItemText
-                                                        primary="PAN Number"
-                                                        secondary={storeDetails.panNumber}
-                                                        primaryTypographyProps={{ fontWeight: 500 }}
-                                                    />
-                                                </ListItem>
-                                            )}
-                                        </List>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Accordion
-                                    defaultExpanded
-                                    sx={{
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                        "&:before": { display: "none" },
-                                        mb: 2,
-                                    }}
-                                >
-                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                                            <LocationIcon sx={{ mr: 1, color: "#00acc1" }} />
-                                            <Typography variant="h6">Address</Typography>
-                                        </Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <Typography variant="body1" paragraph>
-                                            {storeDetails.address}
-                                            <br />
-                                            {storeDetails.city}, {storeDetails.state} {storeDetails.pincode}
-                                        </Typography>
-                                        {storeDetails.mapLink && (
-                                            <Typography variant="body2" color="primary">
-                                                Google Maps Link Available
-                                            </Typography>
-                                        )}
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Accordion
-                                    sx={{
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                        "&:before": { display: "none" },
-                                        mb: 2,
-                                    }}
-                                >
-                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                                            <PhoneIcon sx={{ mr: 1, color: "#00acc1" }} />
-                                            <Typography variant="h6">Contact Information</Typography>
-                                        </Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <List dense>
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Phone"
-                                                    secondary={storeDetails.phoneNumber}
-                                                    primaryTypographyProps={{ fontWeight: 500 }}
-                                                />
-                                            </ListItem>
-                                            {storeDetails.alternatePhone && (
-                                                <ListItem>
-                                                    <ListItemText
-                                                        primary="Alternate Phone"
-                                                        secondary={storeDetails.alternatePhone}
-                                                        primaryTypographyProps={{ fontWeight: 500 }}
-                                                    />
-                                                </ListItem>
-                                            )}
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Email"
-                                                    secondary={storeDetails.email}
-                                                    primaryTypographyProps={{ fontWeight: 500 }}
-                                                />
-                                            </ListItem>
-                                        </List>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Accordion
-                                    sx={{
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                        "&:before": { display: "none" },
-                                        mb: 2,
-                                    }}
-                                >
-                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                                            <VerifiedUserIcon sx={{ mr: 1, color: "#00acc1" }} />
-                                            <Typography variant="h6">Verification Status</Typography>
-                                        </Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <Box sx={{ mb: 2 }}>
-                                            <Chip
-                                                label={storeDetails.verificationStatus}
-                                                color={storeDetails.isApproved ? "success" : "warning"}
-                                                size="small"
-                                                sx={{ mb: 1 }}
-                                            />
-                                            <Typography variant="body2" color="text.secondary">
-                                                Active Status: {storeDetails.isActive ? "Active" : "Inactive"}
-                                            </Typography>
-                                        </Box>
-                                        <Typography variant="subtitle2" fontWeight="bold">
-                                            Submitted Documents:
-                                        </Typography>
-                                        <List dense>
-                                            {storeDetails.addressProof && (
-                                                <ListItem>
-                                                    <ListItemText primary="Address Proof" />
-                                                </ListItem>
-                                            )}
-                                            {storeDetails.identityProof && (
-                                                <ListItem>
-                                                    <ListItemText primary="Identity Proof" />
-                                                </ListItem>
-                                            )}
-                                            {storeDetails.businessProof && (
-                                                <ListItem>
-                                                    <ListItemText primary="Business Proof" />
-                                                </ListItem>
-                                            )}
-                                        </List>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Accordion
-                                    sx={{
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                                        "&:before": { display: "none" },
-                                        mb: 2,
-                                    }}
-                                >
-                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                                            <AccountBalanceIcon sx={{ mr: 1, color: "#00acc1" }} />
-                                            <Typography variant="h6">Bank Details</Typography>
-                                        </Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <List dense>
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Bank Name"
-                                                    secondary={storeDetails.bankName}
-                                                    primaryTypographyProps={{ fontWeight: 500 }}
-                                                />
-                                            </ListItem>
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="Account Number"
-                                                    secondary={storeDetails.accountNumber}
-                                                    primaryTypographyProps={{ fontWeight: 500 }}
-                                                />
-                                            </ListItem>
-                                            <ListItem>
-                                                <ListItemText
-                                                    primary="IFSC Code"
-                                                    secondary={storeDetails.ifscCode}
-                                                    primaryTypographyProps={{ fontWeight: 500 }}
-                                                />
-                                            </ListItem>
-                                        </List>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                    {/* Orders Tab */}
-                    <Box sx={{ p: { xs: 2, sm: 3 }, display: tabValue === 1 ? "block" : "none" }}>
-                        {/* Mobile-friendly order cards for small screens */}
-                        <Box sx={{ display: { xs: "block", md: "none" } }}>
-                            {orders.map((order) => (
-                                <Card key={order.orderId} sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-                                    <CardContent>
-                                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                                            <Typography variant="h6" color="text.primary">
-                                                {order.orderId}
-                                            </Typography>
-                                            <Chip
-                                                label={order.status}
-                                                size="small"
-                                                color={order.status === "Delivered" ? "success" : "primary"}
+                                        <Box
+                                            sx={{
+                                                position: "absolute",
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                p: 2,
+                                                background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
+                                                display: "flex",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <Avatar
+                                                src={storeDetails.logo}
+                                                alt={storeDetails.name}
                                                 sx={{
-                                                    bgcolor: order.status === "Delivered" ? "#4caf50" : "#00acc1",
-                                                    color: "white",
-                                                    fontWeight: 500,
+                                                    width: { xs: 40, sm: 60 },
+                                                    height: { xs: 40, sm: 60 },
+                                                    border: "2px solid white",
+                                                    mr: 2,
                                                 }}
                                             />
-                                        </Box>
-
-                                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                                            Date: {formatDate(order.date)}
-                                        </Typography>
-
-                                        <Divider sx={{ my: 1.5 }} />
-
-                                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                            Items:
-                                        </Typography>
-
-                                        {order.items.map((item, index) => (
-                                            <Box key={index} sx={{ mb: 1 }}>
-                                                <Typography variant="body2">
-                                                    {item.quantity}x {item.name} -
-                                                    ₹{item.price}
-                                                </Typography>
-                                            </Box>
-                                        ))}
-
-                                        <Divider sx={{ my: 1.5 }} />
-
-                                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                            <Typography variant="subtitle1" fontWeight="bold">
-                                                Total:
-                                            </Typography>
-                                            <Typography variant="subtitle1" fontWeight="bold" color="#00acc1">
-
-                                                ₹{order.total}
+                                            <Typography variant="h5" fontWeight="bold" color="white">
+                                                {storeDetails.name}
                                             </Typography>
                                         </Box>
-                                    </CardContent>
+                                    </Box>
+                                </Grid>
 
-                                </Card>
-                            ))}
-                        </Box>
+                                <Grid item xs={12}>
+                                    <Typography variant="body1" paragraph color="text.secondary">
+                                        {storeDetails.description}
+                                    </Typography>
+                                </Grid>
 
-                        {/* Desktop table view for larger screens */}
-                        <Box sx={{ display: { xs: "none", md: "block" } }}>
-                            <Paper sx={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-                                <Box sx={{ p: 2, borderBottom: "1px solid rgba(0,0,0,0.1)" }}>
-                                    <Grid container sx={{ fontWeight: "bold" }}>
-                                        <Grid item xs={2}>
-                                            <Typography variant="subtitle1">Order ID</Typography>
-                                        </Grid>
-                                        <Grid item xs={2}>
-                                            <Typography variant="subtitle1">Date</Typography>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <Typography variant="subtitle1">Items</Typography>
-                                        </Grid>
-                                        <Grid item xs={2}>
-                                            <Typography variant="subtitle1">Total</Typography>
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <Typography variant="subtitle1">Status</Typography>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-
-                                {orders.map((order, index) => (
-                                    <Box
-                                        key={order.orderId}
+                                <Grid item xs={12} md={6}>
+                                    <Accordion
+                                        defaultExpanded
                                         sx={{
-                                            p: 2,
-                                            borderBottom: index < orders.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none",
-                                            "&:hover": { bgcolor: "rgba(0,0,0,0.02)" },
+                                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                                            "&:before": { display: "none" },
+                                            mb: 2,
                                         }}
                                     >
-                                        <Grid container alignItems="center">
-                                            <Grid item xs={2}>
-                                                <Typography variant="body2">{order.orderId}</Typography>
-                                            </Grid>
-                                            <Grid item xs={2}>
-                                                <Typography variant="body2">{formatDate(order.date)}</Typography>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                {order.items.map((item, idx) => (
-                                                    <Typography key={idx} variant="body2" sx={{ mb: 0.5 }}>
-                                                        {item.quantity}x {item.name}
-                                                    </Typography>
-                                                ))}
-                                            </Grid>
-                                            <Grid item xs={2}>
-                                                <Typography variant="body2" fontWeight="medium" color="#00acc1">
+                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <BusinessIcon sx={{ mr: 1, color: "#00acc1" }} />
+                                                <Typography variant="h6">Business Details</Typography>
+                                            </Box>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <List dense>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Business Type"
+                                                        secondary={storeDetails.businessType}
+                                                        primaryTypographyProps={{ fontWeight: 500 }}
+                                                    />
+                                                </ListItem>
+                                                {storeDetails.gstNumber && (
+                                                    <ListItem>
+                                                        <ListItemText
+                                                            primary="GST Number"
+                                                            secondary={storeDetails.gstNumber}
+                                                            primaryTypographyProps={{ fontWeight: 500 }}
+                                                        />
+                                                    </ListItem>
+                                                )}
+                                                {storeDetails.panNumber && (
+                                                    <ListItem>
+                                                        <ListItemText
+                                                            primary="PAN Number"
+                                                            secondary={storeDetails.panNumber}
+                                                            primaryTypographyProps={{ fontWeight: 500 }}
+                                                        />
+                                                    </ListItem>
+                                                )}
+                                            </List>
+                                        </AccordionDetails>
+                                    </Accordion>
+                                </Grid>
 
-                                                    ₹{order.total}
+                                <Grid item xs={12} md={6}>
+                                    <Accordion
+                                        defaultExpanded
+                                        sx={{
+                                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                                            "&:before": { display: "none" },
+                                            mb: 2,
+                                        }}
+                                    >
+                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <LocationIcon sx={{ mr: 1, color: "#00acc1" }} />
+                                                <Typography variant="h6">Address</Typography>
+                                            </Box>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <Typography variant="body1" paragraph>
+                                                {storeDetails.address}
+                                                <br />
+                                                {storeDetails.city}, {storeDetails.state} {storeDetails.pincode}
+                                            </Typography>
+                                            {storeDetails.mapLink && (
+                                                <Typography variant="body2" color="primary">
+                                                    Google Maps Link Available
                                                 </Typography>
-                                            </Grid>
-                                            <Grid item xs={2}>
-                                                <Chip
-                                                    label={order.status}
-                                                    size="small"
-                                                    color={order.status === "Delivered" ? "success" : "primary"}
-                                                    sx={{
-                                                        bgcolor: order.status === "Delivered" ? "#4caf50" : "#00acc1",
-                                                        color: "white",
-                                                        fontWeight: 500,
-                                                    }}
-                                                />
-                                            </Grid>
+                                            )}
+                                        </AccordionDetails>
+                                    </Accordion>
+                                </Grid>
 
-                                        </Grid>
-                                    </Box>
-                                ))}
-                            </Paper>
+                                <Grid item xs={12} md={6}>
+                                    <Accordion
+                                        sx={{
+                                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                                            "&:before": { display: "none" },
+                                            mb: 2,
+                                        }}
+                                    >
+                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <PhoneIcon sx={{ mr: 1, color: "#00acc1" }} />
+                                                <Typography variant="h6">Contact Information</Typography>
+                                            </Box>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <List dense>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Phone"
+                                                        secondary={storeDetails.phoneNumber}
+                                                        primaryTypographyProps={{ fontWeight: 500 }}
+                                                    />
+                                                </ListItem>
+                                                {storeDetails.alternatePhone && (
+                                                    <ListItem>
+                                                        <ListItemText
+                                                            primary="Alternate Phone"
+                                                            secondary={storeDetails.alternatePhone}
+                                                            primaryTypographyProps={{ fontWeight: 500 }}
+                                                        />
+                                                    </ListItem>
+                                                )}
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Email"
+                                                        secondary={storeDetails.email}
+                                                        primaryTypographyProps={{ fontWeight: 500 }}
+                                                    />
+                                                </ListItem>
+                                            </List>
+                                        </AccordionDetails>
+                                    </Accordion>
+                                </Grid>
+
+                                <Grid item xs={12} md={6}>
+                                    <Accordion
+                                        sx={{
+                                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                                            "&:before": { display: "none" },
+                                            mb: 2,
+                                        }}
+                                    >
+                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <VerifiedUserIcon sx={{ mr: 1, color: "#00acc1" }} />
+                                                <Typography variant="h6">Verification Status</Typography>
+                                            </Box>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <Box sx={{ mb: 2 }}>
+                                                <Chip
+                                                    label={storeDetails.verificationStatus}
+                                                    color={storeDetails.isApproved ? "success" : "warning"}
+                                                    size="small"
+                                                    sx={{ mb: 1 }}
+                                                />
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Active Status: {storeDetails.isActive ? "Active" : "Inactive"}
+                                                </Typography>
+                                            </Box>
+                                            <Typography variant="subtitle2" fontWeight="bold">
+                                                Submitted Documents:
+                                            </Typography>
+                                            <List dense>
+                                                {storeDetails.addressProof && (
+                                                    <ListItem>
+                                                        <ListItemText primary="Address Proof" />
+                                                    </ListItem>
+                                                )}
+                                                {storeDetails.identityProof && (
+                                                    <ListItem>
+                                                        <ListItemText primary="Identity Proof" />
+                                                    </ListItem>
+                                                )}
+                                                {storeDetails.businessProof && (
+                                                    <ListItem>
+                                                        <ListItemText primary="Business Proof" />
+                                                    </ListItem>
+                                                )}
+                                            </List>
+                                        </AccordionDetails>
+                                    </Accordion>
+                                </Grid>
+
+                                <Grid item xs={12} md={6}>
+                                    <Accordion
+                                        sx={{
+                                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                                            "&:before": { display: "none" },
+                                            mb: 2,
+                                        }}
+                                    >
+                                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <AccountBalanceIcon sx={{ mr: 1, color: "#00acc1" }} />
+                                                <Typography variant="h6">Bank Details</Typography>
+                                            </Box>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <List dense>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Bank Name"
+                                                        secondary={storeDetails.bankName}
+                                                        primaryTypographyProps={{ fontWeight: 500 }}
+                                                    />
+                                                </ListItem>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Account Number"
+                                                        secondary={storeDetails.accountNumber}
+                                                        primaryTypographyProps={{ fontWeight: 500 }}
+                                                    />
+                                                </ListItem>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="IFSC Code"
+                                                        secondary={storeDetails.ifscCode}
+                                                        primaryTypographyProps={{ fontWeight: 500 }}
+                                                    />
+                                                </ListItem>
+                                            </List>
+                                        </AccordionDetails>
+                                    </Accordion>
+                                </Grid>
+                            </Grid>
                         </Box>
+                    )}
+                    {/* Orders Tab */}
+                    <Box sx={{ p: { xs: 2, sm: 3 }, display: tabValue === 1 ? "block" : "none" }}>
+                        {orders && orders.length > 0 ? (
+                            <>
+                                {/* Mobile-friendly order cards for small screens */}
+                                <Box sx={{ display: { xs: "block", md: "none" } }}>
+                                    {orders.map((order) => (
+                                        <Card key={order.orderId} sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+                                            <CardContent>
+                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                                                    <Typography variant="h6" color="text.primary">
+                                                        {order.orderId}
+                                                    </Typography>
+                                                    <Chip
+                                                        label={order.status}
+                                                        size="small"
+                                                        color={order.status === "Delivered" ? "success" : "primary"}
+                                                        sx={{
+                                                            bgcolor: order.status === "Delivered" ? "#4caf50" : "#00acc1",
+                                                            color: "white",
+                                                            fontWeight: 500,
+                                                        }}
+                                                    />
+                                                </Box>
+
+                                                <Typography variant="body2" color="text.secondary" gutterBottom>
+                                                    Date: {formatDate(order.date)}
+                                                </Typography>
+
+                                                <Divider sx={{ my: 1.5 }} />
+
+                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                                                    Items:
+                                                </Typography>
+
+                                                {order.items.map((item, index) => (
+                                                    <Box key={index} sx={{ mb: 1 }}>
+                                                        <Typography variant="body2">
+                                                            {item.quantity}x {item.name} -
+                                                            ₹{item.price}
+                                                        </Typography>
+                                                    </Box>
+                                                ))}
+
+                                                <Divider sx={{ my: 1.5 }} />
+
+                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <Typography variant="subtitle1" fontWeight="bold">
+                                                        Total:
+                                                    </Typography>
+                                                    <Typography variant="subtitle1" fontWeight="bold" color="#00acc1">
+
+                                                        ₹{order.total}
+                                                    </Typography>
+                                                </Box>
+                                            </CardContent>
+
+                                        </Card>
+                                    ))}
+                                </Box>
+
+                                {/* Desktop table view for larger screens */}
+                                <Box sx={{ display: { xs: "none", md: "block" } }}>
+                                    <Paper sx={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+                                        <Box sx={{ p: 2, borderBottom: "1px solid rgba(0,0,0,0.1)" }}>
+                                            <Grid container sx={{ fontWeight: "bold" }}>
+                                                <Grid item xs={2}>
+                                                    <Typography variant="subtitle1">Order ID</Typography>
+                                                </Grid>
+                                                <Grid item xs={2}>
+                                                    <Typography variant="subtitle1">Date</Typography>
+                                                </Grid>
+                                                <Grid item xs={3}>
+                                                    <Typography variant="subtitle1">Items</Typography>
+                                                </Grid>
+                                                <Grid item xs={2}>
+                                                    <Typography variant="subtitle1">Total</Typography>
+                                                </Grid>
+                                                <Grid item xs={3}>
+                                                    <Typography variant="subtitle1">Status</Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+
+                                        {orders.map((order, index) => (
+                                            <Box
+                                                key={order.orderId}
+                                                sx={{
+                                                    p: 2,
+                                                    borderBottom: index < orders.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none",
+                                                    "&:hover": { bgcolor: "rgba(0,0,0,0.02)" },
+                                                }}
+                                            >
+                                                <Grid container alignItems="center">
+                                                    <Grid item xs={2}>
+                                                        <Typography variant="body2">{order.orderId}</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Typography variant="body2">{formatDate(order.date)}</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={3}>
+                                                        {order.items.map((item, idx) => (
+                                                            <Typography key={idx} variant="body2" sx={{ mb: 0.5 }}>
+                                                                {item.quantity}x {item.name}
+                                                            </Typography>
+                                                        ))}
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Typography variant="body2" fontWeight="medium" color="#00acc1">
+
+                                                            ₹{order.total}
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Chip
+                                                            label={order.status}
+                                                            size="small"
+                                                            color={order.status === "Delivered" ? "success" : "primary"}
+                                                            sx={{
+                                                                bgcolor: order.status === "Delivered" ? "#4caf50" : "#00acc1",
+                                                                color: "white",
+                                                                fontWeight: 500,
+                                                            }}
+                                                        />
+                                                    </Grid>
+
+                                                </Grid>
+                                            </Box>
+                                        ))}
+                                    </Paper>
+                                </Box>
+                            </>
+                        ) : (
+                            <Box sx={{ textAlign: "center", py: 4 }}>
+                                <ShoppingBagIcon sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
+                                <Typography variant="h6" color="text.secondary">
+                                    No orders found
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    You haven't placed any orders yet
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
                 </Paper>
             </Container>

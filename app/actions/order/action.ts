@@ -85,9 +85,9 @@ export async function getOrderById(orderId: string) {
 
 
 
-export async function getGroupedOrdersByStore(storeId: string) {
+export async function getGroupedOrdersByStore(storeId: string | null) {
   try {
-    console.log(storeId)
+    if(storeId!=null){
     const orders = await prisma.order.findMany({
       where: {
         items: {
@@ -111,24 +111,27 @@ export async function getGroupedOrdersByStore(storeId: string) {
         },
       },
     });
-
-    return orders.map(order => ({
-      orderId: order.id,
-      createdAt: order.createdAt,
-      address: order.Address,
-      user: order.user,
-      items: order.items.map(item => ({
-        product: item.product,
-        quantity: item.quantity,
-        price: item.price,
-        orderStatus: item.orderStatus,
-      })),
-    }));
+    return {
+      success: true,
+      orders: orders.map(order => ({
+        orderId: order.id,
+        createdAt: order.createdAt,
+        address: order.Address,
+        user: order.user,
+        items: order.items.map(item => ({
+          product: item.product,
+          quantity: item.quantity,
+          price: item.price,
+          orderStatus: item.orderStatus,
+        })),
+      }))
+    };    
   }
+}
   catch (error) {
     console.log(error)
-    return null;
   }
+  return {success:false};
 }
 
 export async function updateOrderStatus(orderId: string, itemId: number, newStatus: string) {

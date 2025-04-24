@@ -73,15 +73,6 @@ interface StatsData {
   totalCustomers: number
 }
 
-// Sample data for charts
-const salesData = [
-  { name: 'Jan', sales: 4000 },
-  { name: 'Feb', sales: 3000 },
-  { name: 'Mar', sales: 5000 },
-  { name: 'Apr', sales: 7000 },
-  { name: 'May', sales: 6000 },
-  { name: 'Jun', sales: 8000 },
-];
 
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -90,12 +81,14 @@ export default function StoreOverview({
   initialStoreData, 
   stats, 
   categoryClassification ,
-  orders
+  orders,
+  salesData
 }: { 
-  initialStoreData: StoreData, 
+  initialStoreData:any, 
   stats: StatsData, 
   categoryClassification: { category: string, count: number }[] ,
-  orders:any
+  orders:any,
+  salesData:any
 }) {
   const [storeData, setStoreData] = useState<StoreData>(initialStoreData)
   const [statsData, setStatsData] = useState<StatsData>(stats)

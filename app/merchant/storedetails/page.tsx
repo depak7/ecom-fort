@@ -1,7 +1,7 @@
-import { Box, Typography, Paper, Container, Button, Card, CardContent, Avatar, Divider, Chip} from "@mui/material";
+import { Box, Typography, Paper, Container, Button, Card, CardContent, Avatar, Divider, Chip } from "@mui/material";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import StoreDashboard from "@/components/merchant/storeinfo/StoreOverview";
-import { checkUserHasStore, getStoreById, getTotalProductsByStoreId, getProductsCountByCategory } from "@/app/actions/store/action";
+import { checkUserHasStore, getStoreById, getTotalProductsByStoreId, getProductsCountByCategory, getStoreSalesData } from "@/app/actions/store/action";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getProductsByStoreIdForMerchant } from "@/app/actions/products/action";
@@ -25,6 +25,13 @@ interface Store {
   ownerId: string;
 }
 
+interface StatsData {
+  totalProducts: number
+  totalOrders: number
+  totalRevenue: number
+  totalCustomers: number
+}
+
 const defaultStoreData: Store = {
   address: "",
   id: "",
@@ -38,12 +45,6 @@ const defaultStoreData: Store = {
   ownerId: "",
 };
 
-interface StatsData {
-  totalProducts: number
-  totalOrders: number
-  totalRevenue: number
-  totalCustomers: number
-}
 
 export default async function StorePage() {
   const session = await getServerSession(authOptions);
@@ -97,18 +98,18 @@ export default async function StorePage() {
   if (!storeDetails.isApproved) {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
-        <Paper 
-          elevation={6} 
-          sx={{ 
-            p: { xs: 3, md: 5 }, 
+        <Paper
+          elevation={6}
+          sx={{
+            p: { xs: 3, md: 5 },
             borderRadius: 2,
             background: 'linear-gradient(to bottom, #ffffff, #f9f9f9)'
           }}
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {/* Status Icon/Image */}
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 mb: 4,
                 position: 'relative',
                 '&::after': {
@@ -126,14 +127,14 @@ export default async function StorePage() {
               }}
             >
             </Box>
-  
+
             {/* Store Name with Badge */}
             <Box sx={{ mb: 4, textAlign: 'center' }}>
-              <Typography 
-                variant="h4" 
-                component="h1" 
+              <Typography
+                variant="h4"
+                component="h1"
                 gutterBottom
-                sx={{ 
+                sx={{
                   fontWeight: 700,
                   background: 'linear-gradient(45deg, #2196F3, #3f51b5)',
                   WebkitBackgroundClip: 'text',
@@ -149,13 +150,13 @@ export default async function StorePage() {
                 sx={{ fontWeight: 500 }}
               />
             </Box>
-  
+
             {/* Status Cards */}
             {storeDetails.verificationStatus === "PENDING" && (
-              <Card 
-                variant="outlined" 
-                sx={{ 
-                  mb: 4, 
+              <Card
+                variant="outlined"
+                sx={{
+                  mb: 4,
                   width: '100%',
                   borderLeft: '4px solid #2196F3',
                   borderRadius: 2,
@@ -181,12 +182,12 @@ export default async function StorePage() {
                 </CardContent>
               </Card>
             )}
-  
+
             {storeDetails.verificationStatus === "REJECTED" && (
-              <Card 
-                variant="outlined" 
-                sx={{ 
-                  mb: 4, 
+              <Card
+                variant="outlined"
+                sx={{
+                  mb: 4,
                   width: '100%',
                   borderLeft: '4px solid #f44336',
                   borderRadius: 2,
@@ -207,17 +208,17 @@ export default async function StorePage() {
                     <Typography variant="body1" paragraph>
                       Unfortunately, your store application was not approved.
                     </Typography>
-                    
+
                     <Divider sx={{ my: 2 }} />
-                    
+
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
                       Reason for rejection:
                     </Typography>
-                    <Paper 
-                      variant="outlined" 
-                      sx={{ 
-                        p: 2, 
-                        bgcolor: 'rgba(244, 67, 54, 0.05)', 
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        bgcolor: 'rgba(244, 67, 54, 0.05)',
                         borderColor: 'rgba(244, 67, 54, 0.2)',
                         borderRadius: 1
                       }}
@@ -226,7 +227,7 @@ export default async function StorePage() {
                         {storeDetails.rejectionReason || "No specific reason provided"}
                       </Typography>
                     </Paper>
-                    
+
                     <Box sx={{ mt: 3 }}>
                       <Typography variant="body1">
                         Please update your application addressing the above concerns and submit again.
@@ -237,25 +238,25 @@ export default async function StorePage() {
               </Card>
             )}
             {storeDetails.verificationStatus === "REJECTED" &&
-             <Link href="/merchant/addstore" passHref>
-             <Button
-               variant="contained"
-               color="error"
-               size="large"
-               startIcon={<EditIcon />}
-               sx={{
-                 mt: 2,
-                 px: 4,
-                 py: 1.5,
-                 borderRadius: 2,
-                 boxShadow: 2,
-                 textTransform: 'none',
-                 fontWeight: 600
-               }}
-             >
-               Update Application
-             </Button>
-           </Link>
+              <Link href="/merchant/addstore" passHref>
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="large"
+                  startIcon={<EditIcon />}
+                  sx={{
+                    mt: 2,
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: 2,
+                    boxShadow: 2,
+                    textTransform: 'none',
+                    fontWeight: 600
+                  }}
+                >
+                  Update Application
+                </Button>
+              </Link>
             }
           </Box>
         </Paper>
@@ -263,35 +264,53 @@ export default async function StorePage() {
     );
   }
 
-  // If store is approved, show the store dashboard
-  const { store } = await getStoreById(storeDetails.storeId || "");
-  const { products } = await getProductsByStoreIdForMerchant(storeDetails.storeId || "");
+  if (storeDetails.isApproved) {
+    const storeId = storeDetails.storeId;
 
-  // Get total products
-  const { success, totalProducts } = await getTotalProductsByStoreId(storeDetails.storeId || "");
+    const [store, totalProducts, categoryCounts, ordersData, productsData] = await Promise.all([
+      getStoreById(storeId),
+      getTotalProductsByStoreId(storeId),
+      getProductsCountByCategory(storeId),
+      getGroupedOrdersByStore(storeId),
+      getProductsByStoreIdForMerchant(storeId),
+    ]);
 
-  // Get products by category
-  const { success: categorySuccess, categoryCounts } = await getProductsCountByCategory(storeDetails.storeId || "");
- 
-  const stats: StatsData = {
-    totalCustomers: 0,
-    totalOrders: 0,
-    totalProducts: totalProducts || 0,
-    totalRevenue: 0
-  };
+    const totalRevenue = ordersData.success
+      ? ordersData.orders?.reduce((acc: number, order: any) => {
+        const orderTotal = order.items.reduce(
+          (sum: number, item: any) => sum + Number(item.price) * item.quantity,
+          0
+        );
+        return acc + orderTotal;
+      }, 0)
+      : 0;
 
-  const orders=await getGroupedOrdersByStore(store?.id || "")
+    const totalOrders = ordersData.success ? ordersData.orders?.length : 0;
 
+    const uniqueCustomerIds = new Set(
+      ordersData.success ? ordersData.orders?.map((order: any) => order.user.id) : []
+    );
+    const statsData:StatsData = {
+      totalProducts: totalProducts.success ? totalProducts.totalProducts : 0,
+      totalOrders: totalOrders ?? 0,
+      totalRevenue:totalRevenue ?? 0,
+      totalCustomers: new Set( uniqueCustomerIds ).size,
+    };
 
-  return (
-    <Box>
-      <StoreDashboard 
-        initialStoreData={store || defaultStoreData} 
-        stats={stats} 
-        categoryClassification={categoryCounts || []} 
-        orders={orders}
+    const salesData=await getStoreSalesData(storeId || "")
+
+    return (
+      <>
+      <StoreDashboard
+        initialStoreData={store.success ? store.store : defaultStoreData}
+        stats={statsData}
+        categoryClassification={categoryCounts.success ? categoryCounts.categoryCounts || [] : []}
+        orders={ordersData.success ? ordersData.orders : []}
+        salesData={salesData.salesData}
       />
-      <MerchantProductCard products={products || []} />
-    </Box>
-  );
+      <MerchantProductCard products={productsData.success?productsData.products:[]}/>
+      </>
+      
+    );
+  }
 }

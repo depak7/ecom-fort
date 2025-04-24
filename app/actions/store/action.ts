@@ -165,7 +165,10 @@ export async function getAllStores(sortBy?: string) {
   }
 }
 
-export async function getStoreById(storeId: string) {
+export async function getStoreById(storeId: string | null) {
+  if(storeId==null){
+    return {success:false}
+  }
   try {
     const store = await readOnlyPrisma.store.findUnique({
       where: {
@@ -268,21 +271,65 @@ export async function getStoreDetailsByStoreId(storeId:string){
   )
 }
 
-export async function getTotalProductsByStoreId(storeId: string) {
+export async function getTotalProductsByStoreId(storeId: string | null) {
   try {
+    if(storeId!=null){
     const totalProducts = await readOnlyPrisma.product.count({
-      where: { storeId: storeId },
+      where: { storeId },
     });
 
-    return { success: true, totalProducts };
-  } catch (error) {
-    console.error("Failed to fetch total products:", error);
-    return { success: false, error: "Failed to fetch total products" };
+    // Get all completed order items for the store
+    const orderItems = await readOnlyPrisma.orderItem.findMany({
+      where: {
+        storeId,
+        orderStatus: 'DELIVERED'
+      },
+      include: {
+        order: {
+          select: {
+            userId: true
+          }
+        }
+      }
+    });
+
+    // Total revenue
+    const totalRevenue = orderItems.reduce((sum, item) => {
+      return sum + Number(item.price) * item.quantity;
+    }, 0);
+
+    const uniqueCustomerIds = new Set(orderItems.map(item => item.order.userId));
+    const totalCustomers = uniqueCustomerIds.size;
+
+    // Total orders (count unique order IDs)
+    const uniqueOrderIds = new Set(orderItems.map(item => item.orderId));
+    const totalOrders = uniqueOrderIds.size;
+
+    return {
+      success: true,
+      totalProducts,
+      totalCustomers,
+      totalOrders,
+      totalRevenue
+    };
   }
+  } catch (error) {
+    console.error("Failed to fetch store statistics:", error);
+  }
+  return {
+    success: false,
+    error: "Failed to fetch store statistics",
+    totalProducts: 0,
+    totalCustomers: 0,
+    totalOrders: 0,
+    totalRevenue: 0
+  };
 }
 
-export async function getProductsCountByCategory(storeId: string) {
+
+export async function getProductsCountByCategory(storeId: string | null) {
   try {
+    if(storeId!=null){
     const productsByCategory = await readOnlyPrisma.product.groupBy({
       by: ['category'],
       where: { storeId: storeId },
@@ -298,10 +345,11 @@ export async function getProductsCountByCategory(storeId: string) {
     }));
 
     return { success: true, categoryCounts };
+  }
   } catch (error) {
     console.error("Failed to fetch products by category:", error);
-    return { success: false, error: "Failed to fetch products by category" };
   }
+  return { success: false, error: "Failed to fetch products by category" };
 }
 
 
@@ -319,5 +367,57 @@ export async function getStoreDetailsByUserId(userId: string) {
   catch (e) {
     console.log(e)
     return { success: false }
+  }
+}
+
+export async function getStoreSalesData(storeId: string) {
+  try {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    // Get all OrderItems for this store where the parent Order was created in the last 6 months
+    const orderItems = await readOnlyPrisma.orderItem.findMany({
+      where: {
+        storeId: storeId,
+        order: {
+          createdAt: {
+            gte: sixMonthsAgo,
+          },
+        },
+      },
+      select: {
+        order: {
+          select: {
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    // Group by month and count
+    const monthlyCounts = orderItems.reduce((acc, item) => {
+      const month = new Date(item.order.createdAt).toLocaleString('default', { month: 'short' });
+      acc[month] = (acc[month] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Ensure months are in the right order
+    const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const salesData = allMonths.map(month => ({
+      name: month,
+      sales: monthlyCounts[month] || 0,
+    }));
+
+    return {
+      success: true,
+      salesData,
+    };
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error);
+    return {
+      success: false,
+      error: "Failed to fetch sales data",
+      salesData: [],
+    };
   }
 }

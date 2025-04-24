@@ -23,6 +23,7 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload"
 import { BaseButton } from "../users/buttons/BaseButton"
 import { useSession } from "next-auth/react"
+import {  useRouter } from "next/navigation"
 
 const FilePreview = ({
   preview,
@@ -85,6 +86,7 @@ export default function CreateStoreForm() {
   })
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const router=useRouter()
 
   const { data: session, status } = useSession()
 
@@ -125,6 +127,7 @@ export default function CreateStoreForm() {
           identityProof: null,
           businessProof: null,
         })
+        router.push('/storedetails')
       } else {
         setError(result.error || "Failed to create store")
       }

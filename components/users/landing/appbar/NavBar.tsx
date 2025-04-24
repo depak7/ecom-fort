@@ -20,7 +20,7 @@ import Image from "next/image";
 import logo from "@/components/assets/users/ecom-fort.png";
 import { useRouter } from "next/navigation";
 import { TypographyButton } from "@/components/styledcomponents/StyledElements";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { Button, useMediaQuery } from "@mui/material";
 import { checkUserHasStore } from "@/app/actions/store/action";
@@ -50,7 +50,7 @@ export default function NavBar() {
   const [storeId, setStoreId] = useState<String>();
   const [hasStore, setHasStore] = useState<boolean>();
   const [isDrawerOpen, setDrawerOpen] = useState(false);
-
+  const [currentPath, setCurrentPath] = useState<string>("");
   const userId = session?.user.id;
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -63,6 +63,9 @@ export default function NavBar() {
           setStoreId(res.storeId || "");
           setHasStore(res.hasStore);
         }
+      }
+      if (typeof window !== "undefined") {
+        setCurrentPath(window.location.pathname);
       }
     };
     checkAuth();
@@ -78,7 +81,11 @@ export default function NavBar() {
 
   const handleNavigation = (link: string) => {
     router.push(`/${link}`);
-    setDrawerOpen(false); // Close drawer after navigation
+    setDrawerOpen(false); 
+  };
+
+  const handleLogin = () => {
+    signIn(undefined, { callbackUrl: currentPath || '/' });
   };
 
   return (
@@ -218,9 +225,9 @@ export default function NavBar() {
                   variant="contained"
                   onClick={() => {
                     if (!isUserLoggedIn) {
-                      handleNavigation("signin");
+                      handleLogin();
                     } else {
-                      signOut();
+                      signOut({ callbackUrl: '/' });
                     }
                   }}
                   sx={{
@@ -344,9 +351,9 @@ export default function NavBar() {
             <Button
               onClick={() => {
                 if (isUserLoggedIn) {
-                  signOut();
+                  signOut({ callbackUrl: '/' });
                 } else {
-                  handleNavigation("signin");
+                  handleLogin();
                 }
               }}
               startIcon={isUserLoggedIn ? <ExitToAppIcon /> : <LoginIcon />}

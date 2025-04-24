@@ -297,8 +297,9 @@ export async function getSimilarProductsByCategory(category: string, userId?: st
   }
 }
 
-export async function getProductsByStoreIdForMerchant(storeId: string) {
+export async function getProductsByStoreIdForMerchant(storeId: string | null) {
   try {
+    if(storeId!=null){
     const products = await readOnlyPrisma.product.findMany({
       where: {
         storeId: storeId,
@@ -344,10 +345,11 @@ export async function getProductsByStoreIdForMerchant(storeId: string) {
     }));
 
     return { success: true, products: formattedProducts };
+  }
   } catch (error) {
     console.error("Failed to fetch products by store ID:", error);
-    return { success: false, error: "Failed to fetch products for this store" };
   }
+  return { success: false, error: "Failed to fetch products for this store" };
 }
 
 
