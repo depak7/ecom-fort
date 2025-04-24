@@ -18,7 +18,7 @@ export async function addOrders({ userId, address, stores }: any) {
               price: parseFloat(item.price),
               storeId: store.id,
               orderStatus: 'PENDING',
-              size: item.size,
+              size: item.size?.name || null  // Changed to use size name string
             }))
           ),
         },
