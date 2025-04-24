@@ -11,6 +11,8 @@ import { getGroupedOrdersByStore } from "@/app/actions/order/action";
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import EditIcon from '@mui/icons-material/Edit';
 import Link from 'next/link'
+import oops from '@/components/assets/users/oops.jpg'
+import unauthorized from '@/components/assets/users/unauthorized.jpg'
 
 interface Store {
   address: string;
@@ -56,7 +58,7 @@ export default async function StorePage() {
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Image
-            src="/unauthorized.svg" // Add an appropriate image
+            src={unauthorized} // Add an appropriate image
             alt="Unauthorized"
             width={300}
             height={300}
@@ -77,18 +79,18 @@ export default async function StorePage() {
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Image
-            src="/no-store.svg" // Add an appropriate image
+            src={oops} // Add an appropriate image
             alt="No Store Found"
             width={300}
             height={300}
             style={{ marginBottom: '2rem' }}
           />
-          <Typography variant="h5" gutterBottom>
-            You haven&apos;t created a store yet
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Start selling by creating your store
-          </Typography>
+            <Typography variant="h5" gutterBottom>
+          Something went wrong
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          We couldn&apos;t load your store data. Please try again.
+        </Typography>
         </Paper>
       </Container>
     );

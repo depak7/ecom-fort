@@ -662,7 +662,7 @@ export default function ProfilePage({ user, storeDetails, orders }) {
                                     No orders found
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    You haven't placed any orders yet
+                                    You haven&apos;t placed any orders yet
                                 </Typography>
                             </Box>
                         )}
