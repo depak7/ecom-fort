@@ -120,6 +120,7 @@ model OrderItem {
   productId   String
   product     Product     @relation(fields: [productId], references: [id])
   quantity    Int
+  size        String?
   orderStatus OrderStatus
   price       Decimal     @db.Decimal(10, 2)
   storeId     String
