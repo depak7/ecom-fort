@@ -29,6 +29,7 @@ import { removeFromCart } from '@/app/actions/cart/action'
 import UseCustomToast from '@/components/ui/useCustomToast'
 import { addOrders } from '@/app/actions/order/action'
 import { useRouter } from 'next/navigation'
+import { text } from 'stream/consumers'
 
 interface CartItem {
   id: number
@@ -89,7 +90,8 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
       if (success) {
         console.log(order)
         console.log("Sending email...");
-        // await sendEmailToSeller(order)
+       const res= await sendEmailToSeller(order)
+       console.log(res)
         console.log("Mail send ");
         successToast('Order Placed')
         route.push(`/order-placed/${order?.orderId}`)
@@ -105,10 +107,11 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
   }
 
   const sendEmailToSeller = async (order: any) => {
+    console.log(order)
     const emailContent = {
-      sellerEmail:order.userEmail,  // Replace with seller's email from your database
+      to:order.userEmail,  // Replace with seller's email from your database
       subject: `New Order from ${order.userName}`,
-      body: `
+      html: `
        <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -208,9 +211,9 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
       <p><strong>Order ID:</strong> ${order.orderId}</p>
       <p><strong>User Name:</strong> ${order.userName}</p>
       <p><strong>Email:</strong> ${order.userEmail}</p>
-      <p><strong>Shipping Address:</strong> ${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.postalCode}, ${order.address.country}</p>
-      <p><strong>Phone:</strong> ${order.address.phoneNumber}</p>
-      <p><strong>Alternate Phone:</strong> ${order.address.alternatePhoneNumber || 'N/A'}</p>
+      <p><strong>Shipping Address:</strong> ${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state}, ${order.shippingAddress.postalCode}, ${order.shippingAddress.country}</p>
+      <p><strong>Phone:</strong> ${order.shippingAddress.phoneNumber}</p>
+      <p><strong>Alternate Phone:</strong> ${order.shippingAddress.alternatePhoneNumber || 'N/A'}</p>
 
       <h3>Ordered Products:</h3>
       <table>
