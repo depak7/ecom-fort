@@ -51,6 +51,7 @@ const ProductListWrapper = ({ initialProducts, userId }: ProductListWrapperProps
                 price: product.price,
                 store: product.store.name,
                 storeId: product.storeId,
+                productImage:product.productImage,
                 category: product.category || "shirt",
                 image: product.variants[0]?.variantImage || "",
               }}

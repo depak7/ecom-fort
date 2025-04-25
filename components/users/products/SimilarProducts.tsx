@@ -11,6 +11,7 @@ interface ProductProps {
     id: string;
     name: string;
     category: string;
+    productImage:string,
     price: string;
     store: string;
     storeId?: string;

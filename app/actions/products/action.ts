@@ -210,6 +210,7 @@ export async function getSimilarProductsByCategory(category: string, userId?: st
         store: true,
         category: true,
         description: true,
+        productImage:true,
         name: true,
         storeId: true,
         price: true,

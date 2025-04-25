@@ -30,6 +30,7 @@ export default async function Page({ params }: ProductPageProps) {
     id: p.id,
     name: p.name,
     category: p.category || '',
+    productImage:p.productImage,
     price: p.price.toString(),
     store: p.store.name,
     storeId: p.storeId,

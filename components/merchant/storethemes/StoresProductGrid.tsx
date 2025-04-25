@@ -60,6 +60,7 @@ export default function StoresProductGrid({
                 name: product.name,
                 price: product.price.toString(),
                 store: product.store.name,
+                productImage:product.productImage,
                 storeId: product.storeId,
                 category: product.category || "",
                 image: product.variants[0]?.variantImage || "",
