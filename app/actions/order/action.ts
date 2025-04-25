@@ -5,11 +5,11 @@ import { OrderStatus } from '@prisma/client'
 
 export async function addOrders({ userId, address, stores }: any) {
   try {
-    const addressId = address?.id.toString();
+    const addressId = address?.id;
     const order = await prisma.order.create({
       data: {
         userId,
-        Address: addressId,
+        AddressId: addressId,
         items: {
           create: stores.flatMap((store: any) =>
             store.items.map((item: any) => ({
@@ -164,7 +164,7 @@ export async function getGroupedOrdersByStore(storeId: string | null) {
       orders: orders.map(order => ({
         orderId: order.id,
         createdAt: order.createdAt,
-        address: order.Address,
+        address: order.AddressId,
         user: order.user,
         items: order.items.map(item => ({
           product: item.product,
@@ -203,7 +203,7 @@ export async function getOrderDetailsByUserId(userId: string) {
     select: {
       id: true,
       createdAt: true,
-      Address: true,
+      AddressId: true,
       items: {
         select: {
           product: {
@@ -227,7 +227,7 @@ export async function getOrderDetailsByUserId(userId: string) {
     return {
       orderId: order.id,
       date: order.createdAt,
-      address: order.Address,
+      address: order.AddressId,
       items: order.items.map(item => ({
         name: item.product.name,
         quantity: item.quantity,

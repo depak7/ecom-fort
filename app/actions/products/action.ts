@@ -3,146 +3,93 @@
 
 import  prisma  from "@/database/index";
 import { revalidatePath } from "next/cache";
-import { put } from "@vercel/blob";
-import { generateUniqueProductId } from "@/database/uniqueID";
 import { readOnlyPrisma } from "@/database/index";
 import Decimal from "decimal.js";
+import { z } from 'zod';
 
-async function uploadImage(file: File) {
+
+
+const ProductFormSchema = z.object({
+  name: z.string().min(1, 'Product name is required'),
+  description: z.string().min(1, 'Description is required'),
+  brand: z.string().optional(),
+  category: z.string().optional(),
+  price: z.number().positive('Price must be positive'),
+  productImage: z.string().url('Valid image URL is required'),
+  storeId:z.string(),
+  variants: z.array(
+    z.object({
+      color: z.string().min(1, 'Color is required'),
+      variantImage: z.string().url('Valid variant image URL is required'),
+      images: z.array(z.string().url('Valid image URL is required')).optional(),
+      sizes: z.array(
+        z.object({
+          size: z.string().min(1, 'Size is required'),
+          stock: z.number().int().positive('Stock must be positive')
+        })
+      ).min(1, 'At least one size is required')
+    })
+  ).min(1, 'At least one variant is required')
+});
+
+export type ProductFormData = z.infer<typeof ProductFormSchema>;
+
+export async function createProduct(data: ProductFormData) {
   try {
-    // Convert File to Blob (browser native)
-    if(file){
-    const blobFile = new Blob([file], { type: file.type });
+ 
+    const validatedData = ProductFormSchema.safeParse(data);
+    if (!validatedData.success) {
+      return {
+        success: false,
+        message: 'Invalid form data',
+        errors: validatedData.error.errors
+      };
+    }
 
-    const blob = await put(file.name, blobFile, {
-      access: 'public',
-      addRandomSuffix: true,
-      contentType: file.type,
-    });
-
-   
-    return blob.url;
-  }
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    throw error;
-  }
-}
-
-// Define the interface for the variant data
-interface VariantData {
-  color: string;
-  variantImage: string;
-  images: {
-    create: { url: string }[];
-  };
-  sizes: {
-    create: { size: string; stock: number }[];
-  };
-}
-
-// Update the variantsData declaration to use the interface
-const variantsData: VariantData[] = [];
-
-export async function createProduct(formData: FormData) {
-  try {
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
-    const brand=formData.get("brandName") as string;
-    const category = formData.get("category") as string;
-    const price = new Decimal(parseFloat(formData.get("price") as string));
-    const storeId = formData.get("storeId") as string;
-
-
-    const variantsData = await processVariantData(formData);
-
-    const id = await generateUniqueProductId();
-
+    // Create product with variants and sizes
     const product = await prisma.product.create({
       data: {
-        id,
-        name,
-        brand,
-        category,
-        description,
-        price,
-        storeId,
+        name: data.name,
+        description: data.description,
+        brand: data.brand || null,
+        category: data.category || null,
+        price: data.price,
+        productImage: data.productImage,
+        storeId: data.storeId,
         variants: {
-          create: variantsData,
-        },
-      },
-      include: {
-        variants: {
-          include: {
-            sizes: true,
-            images: true,
-          },
-        },
-      },
+          create: data.variants.map(variant => ({
+            color: variant.color,
+            variantImage: variant.variantImage,
+            sizes: {
+              create: variant.sizes.map(size => ({
+                size: size.size,
+                stock: size.stock
+              }))
+            },
+            images: variant.images && variant.images.length > 0 ? {
+              create: variant.images.map(imageUrl => ({
+                url: imageUrl
+              }))
+            } : undefined
+          }))
+        }
+      }
     });
 
-    revalidatePath(`/store/${storeId}`);
-    return { success: true, product };
+    revalidatePath('/products');
+    
+    return {
+      success: true,
+      message: 'Product created successfully',
+      productId: product.id
+    };
   } catch (error) {
-    console.error("Failed to create product:", error);
-    return { success: false, error: "Failed to create product" };
+    console.error('Error creating product:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to create product'
+    };
   }
-}
-
-async function processVariantData(formData: FormData) {
-  const variantsData: VariantData[] = [];
-  let variantIndex = 0;
-
-  while (formData.has(`color-${variantIndex}`)) {
-    const color = formData.get(`color-${variantIndex}`) as string;
-    const variantImage = formData.get(`variantImage-${variantIndex}`) as File | null;
-    const additionalImages = formData.getAll(`additionalImages-${variantIndex}`) as File[];
-    
-    // Combine all images into a single array for processing
-    const allImages = variantImage ? [variantImage, ...additionalImages] : additionalImages;
-    
-    // Upload all images at once
-    const uploadedUrls = await Promise.all(allImages.map(uploadImage));
-    
-    const [variantImageUrl, ...additionalImageUrls] = uploadedUrls;
-
-    // Process sizes
-    const sizes = processSizes(formData, variantIndex);
-
-    variantsData.push({
-      color,
-      variantImage: variantImageUrl || "",
-      images: {
-        create: additionalImageUrls.map(url => ({
-          url: url as string,
-        })),
-      },
-      sizes: {
-        create: sizes,
-      },
-    });
-
-    variantIndex++;
-  }
-
-  return variantsData;
-}
-
-function processSizes(formData: FormData, variantIndex: number) {
-  const sizes: { size: string; stock: number }[] = [];
-  let sizeIndex = 0;
-
-  while (formData.has(`size-${variantIndex}-${sizeIndex}`)) {
-    const size = formData.get(`size-${variantIndex}-${sizeIndex}`) as string;
-    const stock = parseInt(
-      formData.get(`stock-${variantIndex}-${sizeIndex}`) as string,
-      10
-    );
-    sizes.push({ size, stock });
-    sizeIndex++;
-  }
-
-  return sizes;
 }
 
 export async function deleteProduct(productId: string) {
@@ -169,6 +116,7 @@ export async function getAllProducts(userId?: string) {
         store: true,
         category: true,
         description: true,
+        productImage:true,
         name: true,
         storeId: true,
         price: true,

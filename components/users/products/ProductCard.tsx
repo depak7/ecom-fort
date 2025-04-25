@@ -27,6 +27,7 @@ export interface ProductProps {
     name: string;
     category: string;
     price: string;
+    productImage:string;
     store: string;
     storeId?: string;
     image: string;
@@ -105,7 +106,7 @@ export default function ProductCard({
         }}
       >
         <Image
-          src={product.image}
+          src={product.productImage}
           alt={product.name}
           layout="fill"
           objectFit="cover"

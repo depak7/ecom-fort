@@ -43,6 +43,7 @@ export default function ProductDetails({
   isWishlisted,
   userId,
 }: ProductResponse) {
+  console.log(product)
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
   const [inWishlist, setInWishlist] = useState(isWishlisted);
   const [isPending, setIsPending] = useState(false);

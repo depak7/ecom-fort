@@ -110,7 +110,8 @@ model Order {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   items     OrderItem[]
-  Address   String
+  AddressId  Int
+  total     Int?
 }
 
 model OrderItem {
@@ -135,6 +136,7 @@ model Product {
   category      String?
   price         Decimal          @db.Decimal(10, 2)
   storeId       String
+  productImage  String
   store         Store            @relation(fields: [storeId], references: [id])
   variants      ProductVariant[]
   orderItems    OrderItem[]

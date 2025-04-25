@@ -5,6 +5,7 @@ export interface ProductResponse {
       description: string;
       price: any;
       storeId: string;
+      productImage:string
       store: {
         name: string;
       };

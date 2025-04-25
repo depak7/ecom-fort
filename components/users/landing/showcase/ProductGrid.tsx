@@ -14,6 +14,7 @@ export default async function ProductGrid() {
   const productsResponse = userId ? await getAllProducts(userId) : await getAllProducts();
   const visibleProducts =3;
 
+  console.log(productsResponse)
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, textAlign: "center" }}>
       <Typography variant="h6" fontWeight="bold" mb={2}>
@@ -30,6 +31,7 @@ export default async function ProductGrid() {
                 price: product.price.toString(),
                 store: product.store?.name || "",
                 storeId: product.storeId,
+                productImage:product.productImage,
                 category: product.category || "N/A",
                 image: product.variants?.[0]?.variantImage || "",
               }}

@@ -12,7 +12,7 @@ export default async  function AddProduct(){
 
     return(
         <>
-        <ProductCreationForm storeId={storeId|| ""}  storeName={storeName||""}/>
+        <ProductCreationForm storeId={storeId|| ""}/>
         </>
     )
 }
