@@ -82,16 +82,46 @@ export default function ProductForm({ storeId }: { storeId: string }) {
   })
 
   const categories = [
-    "Electronics",
-    "Clothing",
+    "Women's Clothing",
+    "Women's Dresses",
+    "Women's Tops & Blouses",
+    "Women's Skirts",
+    "Women's Pants & Jeans",
+    "Women's Activewear",
+    "Women's Coats & Jackets",
+    "Women's Sweaters & Cardigans",
+    "Women's Lingerie & Sleepwear",
+    "Women's Swimwear",
+    "Women's Formal Wear",
+    "Women's Maternity",
+    "Women's Plus Size",
+    
+    // Men's Clothing
+    "Men's Clothing",
+    "Men's Shirts",
+    "Men's T-shirts & Polos",
+    "Men's Pants & Jeans",
+    "Men's Shorts",
+    "Men's Suits & Blazers",
+    "Men's Activewear",
+    "Men's Coats & Jackets",
+    "Men's Sweaters & Hoodies",
+    "Men's Underwear & Sleepwear",
+    "Men's Swimwear",
+    "Men's Formal Wear",
+    "Men's Big & Tall",
+    
+    // Footwear
     "Footwear",
-    "Accessories",
-    "Home & Kitchen",
-    "Beauty",
-    "Sports",
-    "Books",
-    "Toys",
-    "Other",
+    "Women's Shoes",
+    "Men's Shoes",
+    "Kids' Shoes",
+    "Athletic Shoes",
+    "Boots",
+    "Sandals",
+    "Formal Shoes",
+    "Slippers",
+    
   ]
 
   const handleMainImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
