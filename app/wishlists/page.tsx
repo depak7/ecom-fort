@@ -86,6 +86,7 @@ export default async function WishlistPage() {
                 price: product.price.toString(),
                 store: product.store.name,
                 storeId: product.storeId,
+                productImage:product.productImage,
                 category: "shirt",
                 image: product.variants[0]?.variantImage || "",
               }}
