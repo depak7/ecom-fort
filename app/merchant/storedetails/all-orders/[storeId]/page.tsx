@@ -48,7 +48,7 @@ export default async function AllOrdersPage({ params }: OrdersPageProps) {
         userName: item.order.user?.name || "Unknown User",
         createdAt: item.order.createdAt,
         updatedAt: item.order.updatedAt,
-        address: await getFullAddress(item.order.Address),
+        address: await getFullAddress(item.order.AddressId),
         items: [],
       })
     }
@@ -66,9 +66,9 @@ export default async function AllOrdersPage({ params }: OrdersPageProps) {
   }
 
 
-  async function getFullAddress(addressId: string) {
+  async function getFullAddress(addressId) {
     const address = await prisma.address.findUnique({
-      where: { id: parseInt(addressId) },
+      where: { id: addressId },
     });
   
     return address
