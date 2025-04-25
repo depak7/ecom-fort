@@ -127,7 +127,7 @@ export default function CreateStoreForm() {
           identityProof: null,
           businessProof: null,
         })
-        router.push('/storedetails')
+        router.push('/merchant/storedetails')
       } else {
         setError(result.error || "Failed to create store")
       }

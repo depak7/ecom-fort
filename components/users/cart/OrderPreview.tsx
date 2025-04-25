@@ -250,7 +250,6 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
       
       <p>If you have any questions or need additional information, please reply to this email.</p>
       
-      <a href="#" class="button">View Order Details</a>
     </div>
     
     <div class="footer">
