@@ -28,5 +28,9 @@ export  const BaseButton = styled(Button)<CustomButtonProps>(({ theme, width, cu
   '&:hover': {
     backgroundColor: theme.palette.grey[800],
   },
+  '&.Mui-disabled': {
+    backgroundColor: theme.palette.grey[300], // Change background when disabled
+    color: theme.palette.text.disabled, // Change text color when disabled
+  },
 }));
 
