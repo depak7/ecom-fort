@@ -46,7 +46,6 @@ import banner from '@/components/assets/users/banner.jpg'
 
 
 export default function ProfilePage({ user, storeDetails, orders }) {
-    console.log(orders)
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
     const [tabValue, setTabValue] = useState(0)
@@ -179,7 +178,7 @@ export default function ProfilePage({ user, storeDetails, orders }) {
                                 </Box>
                             )}
                         </Grid>
-                        <Grid
+                        {/* <Grid
                             item
                             xs={12}
                             sm={2}
@@ -229,7 +228,7 @@ export default function ProfilePage({ user, storeDetails, orders }) {
                                     Edit Profile
                                 </Button>
                             )}
-                        </Grid>
+                        </Grid> */}
                     </Grid>
                 </Paper>
 

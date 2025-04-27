@@ -270,6 +270,10 @@ export default function ProductForm({ storeId }: { storeId: string }) {
       }
     }
 
+    if (variants.some(variant => variant.additionalImages.length === 0)) {
+      newErrors.variants = "At least one additional image is required for each variant";
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }

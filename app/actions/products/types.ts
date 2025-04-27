@@ -2,6 +2,7 @@ export interface ProductResponse {
     product: {
       id: string;
       name: string;
+      brand:string | null,
       description: string;
       price: any;
       storeId: string;

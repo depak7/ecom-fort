@@ -43,7 +43,6 @@ export default function ProductDetails({
   isWishlisted,
   userId,
 }: ProductResponse) {
-  console.log(product)
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
   const [inWishlist, setInWishlist] = useState(isWishlisted);
   const [isPending, setIsPending] = useState(false);
@@ -58,7 +57,7 @@ export default function ProductDetails({
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState<number | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
-  const [selectedSizeId, setSelectedSizeId] = useState<number | null>( selectedVariant.sizes[0].id); 
+  const [selectedSizeId, setSelectedSizeId] = useState<number | null>(selectedVariant.sizes[0].id);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewSummary, setReviewSummary] = useState<any>(null);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
@@ -73,7 +72,7 @@ export default function ProductDetails({
     try {
       const reviewsResult = await getProductReviews(product.id);
       const summaryResult = await getProductReviewSummary(product.id);
-      
+
       if (reviewsResult.success) {
         setReviews(reviewsResult.reviews || []);
       }
@@ -119,17 +118,13 @@ export default function ProductDetails({
         setReviewText("");
         setReviewRating(null);
         setShowReviewForm(false);
-        fetchReviews(); 
+        fetchReviews();
       } else {
         errorToast(result.error || "Failed to submit review");
       }
     } catch (error) {
       errorToast("An error occurred while submitting the review");
     }
-  };
-
-  const handleSeeAllReviews = () => {
-    console.log("See all reviews");
   };
 
   const handleSizeChange = (
@@ -139,7 +134,7 @@ export default function ProductDetails({
     if (newSize !== null) {
       setSelectedSize(newSize);
       const selectedSizeObj = selectedVariant.sizes.find(size => size.size === newSize);
-      setSelectedSizeId(selectedSizeObj ? selectedSizeObj.id : null); 
+      setSelectedSizeId(selectedSizeObj ? selectedSizeObj.id : null);
     }
   };
 
@@ -180,9 +175,9 @@ export default function ProductDetails({
       return;
     }
     try {
-      const res = await addToCart(userId, product.id, quantity,selectedVariant.id,selectedSizeId?selectedSizeId:0);
-      res.success?successToast("Product added to cart successfully!"): errorToast("Soory something went wrong")
-       
+      const res = await addToCart(userId, product.id, quantity, selectedVariant.id, selectedSizeId ? selectedSizeId : 0);
+      res.success ? successToast("Product added to cart successfully!") : errorToast("Soory something went wrong")
+
     } catch (error) {
       console.error("Error adding to cart:", error);
       errorToast("Soory something went wrong")
@@ -202,22 +197,22 @@ export default function ProductDetails({
         }}
       >
         <Box sx={{ flex: 1, width: '100%' }}>
-          <Box sx={{ 
-            position: 'relative', 
-            width: '100%', 
+          <Box sx={{
+            position: 'relative',
+            width: '100%',
             height: { xs: 300, sm: 400, md: 500 },
             mb: 2
           }}>
-            <Image 
-              src={mainImage} 
-              alt={product.name} 
+            <Image
+              src={mainImage}
+              alt={product.name}
               fill
               style={{ objectFit: 'cover' }}
             />
           </Box>
-          <Box sx={{ 
-            display: "flex", 
-            gap: 2, 
+          <Box sx={{
+            display: "flex",
+            gap: 2,
             mt: 2,
             overflowX: 'auto',
             pb: 1,
@@ -250,23 +245,40 @@ export default function ProductDetails({
           </Box>
         </Box>
 
-        <Box sx={{ 
+        <Box sx={{
           flex: 1,
           px: { xs: 2, md: 0 }
         }}>
-              <Typography 
-            variant="h5" 
-            component="p" 
-            fontWeight={700} 
+          <Typography
+            variant="h5"
+            component="p"
+            fontWeight={700}
             gutterBottom
             sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}
           >
             {product.name}
           </Typography>
-          <Typography 
-            variant="h5" 
-            component="p" 
-            fontWeight={700} 
+          {product.brand && (
+            <Box display={"flex"} flexDirection={"row"} gap={0.5} alignItems={"center"}>
+              <Typography variant="body1" gutterBottom>
+                Brand :
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {product.brand}
+              </Typography>
+            </Box>)}
+          <Box display={"flex"} flexDirection={"column"}>
+            <Typography variant="body1" gutterBottom>
+              About the Product
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {product.description}
+            </Typography>
+          </Box>
+          <Typography
+            variant="h6"
+            component="p"
+            fontWeight={700}
             gutterBottom
             sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}
           >
@@ -304,15 +316,15 @@ export default function ProductDetails({
           </Box>
 
           <Box sx={{ my: 3 }}>
-            <Typography 
-              variant="h6" 
-              fontWeight={700} 
+            <Typography
+              variant="h6"
+              fontWeight={700}
               gutterBottom
               sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}
             >
               Select Size
             </Typography>
-            <Box sx={{ 
+            <Box sx={{
               display: 'flex',
               flexWrap: 'wrap',
               gap: 1,
@@ -323,7 +335,7 @@ export default function ProductDetails({
                 exclusive
                 onChange={handleSizeChange}
                 aria-label="shoe size"
-                sx={{ 
+                sx={{
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: 1,
@@ -340,7 +352,7 @@ export default function ProductDetails({
                     key={size.id}
                     value={size.size}
                     aria-label={size.size}
-                    sx={{ 
+                    sx={{
                       minWidth: '60px',
                       height: '40px',
                       p: 1
@@ -353,7 +365,7 @@ export default function ProductDetails({
             </Box>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
-            <Typography  fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
+            <Typography fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
               Quantity :
             </Typography>
             <Select
@@ -404,7 +416,7 @@ export default function ProductDetails({
                   {reviewSummary && (
                     <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Box>
-                        <Typography variant= {isMobile?"body1":"h6" } gutterBottom>
+                        <Typography variant={isMobile ? "body1" : "h6"} gutterBottom>
                           Overall Rating: {reviewSummary.averageRating}/5
                         </Typography>
                         <Rating value={reviewSummary.averageRating} precision={0.1} readOnly />
@@ -417,9 +429,9 @@ export default function ProductDetails({
                           variant="contained"
                           onClick={handleShowReviewForm}
                           customSize={isMobile ? "small" : "medium"}
-                          sx={{ 
-                            backgroundColor: 'black', 
-                            color: 'white', 
+                          sx={{
+                            backgroundColor: 'black',
+                            color: 'white',
                             ml: 2,
                             fontSize: isMobile ? '0.75rem' : 'inherit',
                             py: isMobile ? 0.5 : 1,
@@ -456,7 +468,7 @@ export default function ProductDetails({
                     <Typography variant="body2" sx={{ textAlign: 'center', py: 2 }}>
                       No reviews yet. Be the first to review this product!
                     </Typography>
-                    )}
+                  )}
                 </>
               )}
             </AccordionDetails>
@@ -464,18 +476,18 @@ export default function ProductDetails({
         </Box>
       </Box>
       <Dialog open={showReviewForm} onClose={handleShowReviewForm} maxWidth="md" fullWidth>
-        <DialogTitle sx={{fontWeight:700}}>Submit Review</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700 }}>Submit Review</DialogTitle>
         <DialogContent>
           <Typography variant="body1">Please provide your review:</Typography>
           <StyledTextField
             value={reviewText}
             onChange={(e) => setReviewText(e.target.value)}
             multiline
-            rows={isMobile?2:4}
+            rows={isMobile ? 2 : 4}
             fullWidth
           />
           <Box sx={{ mt: 2 }}>
-            <Typography variant={isMobile?"body1":"h6"}>Select Rating:</Typography>
+            <Typography variant={isMobile ? "body1" : "h6"}>Select Rating:</Typography>
             <Rating
               value={reviewRating}
               onChange={(event, newValue) => {
@@ -485,7 +497,7 @@ export default function ProductDetails({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleShowReviewForm} sx={{color:"grey"}}>Cancel</Button>
+          <Button onClick={handleShowReviewForm} sx={{ color: "grey" }}>Cancel</Button>
           <Button onClick={handleReviewSubmit} color="inherit">Submit</Button>
         </DialogActions>
       </Dialog>
