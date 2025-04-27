@@ -64,6 +64,7 @@ export default function ProductDetails({
 
   const { errorToast, successToast } = UseCustomToast();
 
+  console.log(product)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -185,6 +186,10 @@ export default function ProductDetails({
   };
 
   const hasUserReviewed = reviews.some(review => review.userId === userId);
+
+  const selectedSizeObj = selectedVariant.sizes.find(size => size.size === selectedSize);
+  const isOutOfStock = selectedSizeObj?.stock === 0;
+  const isLowStock = selectedSizeObj?.stock && selectedSizeObj.stock > 0 && selectedSizeObj.stock < 5;
 
   return (
     <Box sx={{ maxWidth: 1600, margin: "auto", padding: { xs: 0, md: 1 } }}>
@@ -334,7 +339,7 @@ export default function ProductDetails({
                 value={selectedSize}
                 exclusive
                 onChange={handleSizeChange}
-                aria-label="shoe size"
+                aria-label="size selection"
                 sx={{
                   display: 'flex',
                   flexWrap: 'wrap',
@@ -352,6 +357,7 @@ export default function ProductDetails({
                     key={size.id}
                     value={size.size}
                     aria-label={size.size}
+                    disabled={size.stock === 0}
                     sx={{
                       minWidth: '60px',
                       height: '40px',
@@ -364,6 +370,16 @@ export default function ProductDetails({
               </ToggleButtonGroup>
             </Box>
           </Box>
+          {!isOutOfStock && isLowStock && (
+            <Typography color="error" sx={{ mb: 1 }}>
+              Only {selectedSizeObj?.stock} left in stock - Order fast!
+            </Typography>
+          )}
+          {isOutOfStock && (
+            <Typography color="error" sx={{ mb: 1 }}>
+              This size is currently out of stock
+            </Typography>
+          )}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
             <Typography fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
               Quantity :
@@ -400,7 +416,13 @@ export default function ProductDetails({
             >
               {inWishlist ? "Remove from Favorites" : "Add to Favorites"}
             </OutlinedButton>
-            <BaseButton sx={{ borderRadius: "50px" }} onClick={handleAddtoCart}>Add to Bag</BaseButton>
+            <BaseButton
+              sx={{ borderRadius: "50px" }}
+              onClick={handleAddtoCart}
+              disabled={isOutOfStock}
+            >
+              {isOutOfStock ? "Out of Stock" : "Add to Bag"}
+            </BaseButton>
           </Box>
           <Accordion sx={{ mt: 4, boxShadow: "none" }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
