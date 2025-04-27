@@ -279,8 +279,10 @@ export default async function StorePage() {
 
     const totalRevenue = ordersData.success
       ? ordersData.orders?.reduce((acc: number, order: any) => {
-        if (order.status === 'DELIVERED') {
-          const orderTotal = order.items.reduce(
+        const deliveredItems = order.items.filter((item: any) => item.orderStatus === 'DELIVERED');
+        
+        if (deliveredItems.length > 0) {
+          const orderTotal = deliveredItems.reduce(
             (sum: number, item: any) => sum + Number(item.price) * item.quantity,
             0
           );

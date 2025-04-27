@@ -28,9 +28,11 @@ import {
   Search as SearchIcon,
   FilterList as FilterListIcon,
   Refresh as RefreshIcon,
-  Place as PlaceIcon
+  Place as PlaceIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 // Define types for our data structure
 interface Address {
@@ -77,6 +79,7 @@ interface OrdersTableProps {
 }
 
 export default function OrdersTable({ initialOrders, onStatusChange }: OrdersTableProps) {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -167,9 +170,19 @@ export default function OrdersTable({ initialOrders, onStatusChange }: OrdersTab
   return (
     <Paper elevation={3} sx={{ overflow: 'hidden', borderRadius: 2 }}>
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eaeaea' }}>
-        <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
-          All Orders ({orders.length})
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton 
+            onClick={() => router.back()}
+            sx={{ 
+              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+            All Orders ({orders.length})
+          </Typography>
+        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <TextField
             placeholder="Search orders..."
