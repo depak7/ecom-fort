@@ -44,6 +44,7 @@ export default function StoreCard({ store }: IProps) {
     >
       <CardMedia
         sx={{
+          width: "100%", 
           height: isMobile ? 100 : isTablet ? 120 : 150,
           position: "relative",
           borderBottom: "1px solid #eee",
@@ -53,7 +54,7 @@ export default function StoreCard({ store }: IProps) {
           src={store.logo || "/placeholder.svg?height=200&width=350"}
           alt={store.name}
           layout="fill"
-          objectFit="contain"
+          objectFit="cover"
         />
       </CardMedia>
 
