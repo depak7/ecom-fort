@@ -37,6 +37,25 @@ export async function addOrders({ userId, address, stores }: any) {
       },
     });
 
+    for (const store of stores) {
+      for (const item of store.items) {
+        await prisma.variantSize.updateMany({
+          where: {
+            variant: {
+              productId: item.product.id,
+              color: item.variant.color
+            },
+            size: item.size.name
+          },
+          data: {
+            stock: {
+              decrement: item.quantity
+            }
+          }
+        });
+      }
+    }
+
     await prisma.cartItem.deleteMany({
       where: {
         cart: {
@@ -52,15 +71,15 @@ export async function addOrders({ userId, address, stores }: any) {
       },
     })
 
-    const user=await prisma.user.findUnique({
-      where:{
-        id:userId
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId
       }
     })
 
-    const shippingAddress=await prisma.address.findUnique({
-      where:{
-        id:address?.id
+    const shippingAddress = await prisma.address.findUnique({
+      where: {
+        id: address?.id
       }
     })
 
@@ -72,16 +91,15 @@ export async function addOrders({ userId, address, stores }: any) {
       orderId: order.id,
       userName: user?.name,
       userEmail: user?.email,
-      shippingAddress, 
+      storeOwnerEmail: order.items[0].store.email,
+      shippingAddress,
       orderedItems: order.items.map((item: any) => ({
         productName: item.product.name,
         quantity: item.quantity,
         price: item.price,
-        size:item.size,
+        size: item.size,
         storeName: item.store.name,
-        productImage: item.product.variants && item.product.variants.length > 0
-          ? item.product.variants[0]?.variantImage?.url
-          : '', 
+        productImage: item.product.productImage,
       })),
       totalAmount: Math.round(order.items.reduce((total: number, item: any) => total + parseFloat(item.price.toString()) * item.quantity, 0)),  // Round total amount to nearest integer
     };
@@ -135,51 +153,51 @@ export async function getOrderById(orderId: string) {
 
 export async function getGroupedOrdersByStore(storeId: string | null) {
   try {
-    if(storeId!=null){
-    const orders = await prisma.order.findMany({
-      where: {
-        items: {
-          some: {
-            storeId: storeId,
+    if (storeId != null) {
+      const orders = await prisma.order.findMany({
+        where: {
+          items: {
+            some: {
+              storeId: storeId,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        user: true,
-        items: {
-          where: {
-            storeId: storeId, // only include this store's items
-          },
-          include: {
-            product: true,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        include: {
+          user: true,
+          items: {
+            where: {
+              storeId: storeId, // only include this store's items
+            },
+            include: {
+              product: true,
+            },
           },
         },
-      },
-    });
-    return {
-      success: true,
-      orders: orders.map(order => ({
-        orderId: order.id,
-        createdAt: order.createdAt,
-        address: order.AddressId,
-        user: order.user,
-        items: order.items.map(item => ({
-          product: item.product,
-          quantity: item.quantity,
-          price: item.price,
-          orderStatus: item.orderStatus,
-        })),
-      }))
-    };    
+      });
+      return {
+        success: true,
+        orders: orders.map(order => ({
+          orderId: order.id,
+          createdAt: order.createdAt,
+          address: order.AddressId,
+          user: order.user,
+          items: order.items.map(item => ({
+            product: item.product,
+            quantity: item.quantity,
+            price: item.price,
+            orderStatus: item.orderStatus,
+          })),
+        }))
+      };
+    }
   }
-}
   catch (error) {
     console.log(error)
   }
-  return {success:false};
+  return { success: false };
 }
 
 export async function updateOrderStatus(orderId: string, itemId: number, newStatus: string) {

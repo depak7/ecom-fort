@@ -89,7 +89,6 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
    
       if (success) {
         console.log(order)
-        console.log("Sending email...");
         await sendEmailToSeller(order)
         successToast('Order Placed')
         route.push(`/order-placed/${order?.orderId}`)
@@ -106,7 +105,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
 
   const sendEmailToSeller = async (order: any) => {
     const emailContent = {
-      to:cartStores[0].storeOwnerMailId,
+      to:order.storeOwnerEmail,
       subject: `New Order from ${order.userName}`,
       html: `
        <!DOCTYPE html>

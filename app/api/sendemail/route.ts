@@ -4,12 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const { to, subject, html } = await req.json(); 
-    console.log("Email request" + to)
+    console.log("Email request" + to.toString())
     if (!to || !subject || !html) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
-    console.log("Email request" + to)
-
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {

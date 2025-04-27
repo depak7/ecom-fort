@@ -20,6 +20,8 @@ export default async function PlaceOrder() {
   const  { addresses }=await getDefaultUserAddresses(userId?userId:"");
   const userAddress = addresses || {}; 
 
+  console.log(stores)
+
   return (
     <>
     <OrderPreview stores={stores} totalPrice={totalPrice}  totalQuantity={totalQuantity} address={userAddress} userId={userId|| ""}/>

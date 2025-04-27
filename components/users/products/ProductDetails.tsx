@@ -64,7 +64,6 @@ export default function ProductDetails({
 
   const { errorToast, successToast } = UseCustomToast();
 
-  console.log(product)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
