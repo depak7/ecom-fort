@@ -327,6 +327,7 @@ export async function getProductsByStoreId(storeId: string,sort:string, userId?:
         store: true,
         category: true,
         description: true,
+        productImage:true,
         name: true,
         storeId: true,
         price: true,
