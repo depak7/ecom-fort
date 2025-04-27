@@ -152,7 +152,6 @@ export async function getAllProducts(userId?: string) {
 
 
 export async function getProductById(productId: string, userId?: string) {
-  console.log(userId)
   try {
     const product = await readOnlyPrisma.product.findUnique({
       where: { id: productId },

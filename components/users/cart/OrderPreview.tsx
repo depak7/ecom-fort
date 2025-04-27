@@ -29,7 +29,6 @@ import { removeFromCart } from '@/app/actions/cart/action'
 import UseCustomToast from '@/components/ui/useCustomToast'
 import { addOrders } from '@/app/actions/order/action'
 import { useRouter } from 'next/navigation'
-import { text } from 'stream/consumers'
 
 interface CartItem {
   id: number
@@ -57,6 +56,7 @@ interface Store {
   name: string
   items: CartItem[]
   phoneNumber: string
+  storeOwnerMailId:string
 }
 
 interface ShoppingCartProps {
@@ -90,9 +90,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
       if (success) {
         console.log(order)
         console.log("Sending email...");
-       const res= await sendEmailToSeller(order)
-       console.log(res)
-        console.log("Mail send ");
+        await sendEmailToSeller(order)
         successToast('Order Placed')
         route.push(`/order-placed/${order?.orderId}`)
       } else {
@@ -107,9 +105,8 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
   }
 
   const sendEmailToSeller = async (order: any) => {
-    console.log(order)
     const emailContent = {
-      to:order.userEmail,  // Replace with seller's email from your database
+      to:cartStores[0].storeOwnerMailId,
       subject: `New Order from ${order.userName}`,
       html: `
        <!DOCTYPE html>
@@ -233,7 +230,7 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
               <td>${item.size}</td>
               <td>${item.quantity}</td>
               <td>₹${item.price}</td>
-              <td><img src="${item.image}" alt="${item.productName}" width="100" /></td>
+              <td><img src="${item.productImage}" alt="${item.productName}" width="100" /></td>
             </tr>
           `).join('')}
         </tbody>

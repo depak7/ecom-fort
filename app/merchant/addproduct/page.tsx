@@ -8,7 +8,7 @@ export default async  function AddProduct(){
 
     const session = await getServerSession(authOptions);
     const userid=session?.user.id;
-    const {storeId,storeName}=await checkUserHasStore(userid||"");
+    const {storeId}=await checkUserHasStore(userid||"");
 
     return(
         <>

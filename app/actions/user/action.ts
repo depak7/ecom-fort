@@ -1,6 +1,6 @@
 'use server'
 
-import  prisma  from "@/database/index";
+import prisma from "@/database/index";
 import { generateUniqueId } from "@/database/uniqueID";
 import bcrypt from "bcryptjs";
 
@@ -16,7 +16,7 @@ export async function registerUser(name: string, email: string, password: string
     }
 
     // Hash the password
-    const id=await generateUniqueId();
+    const id = await generateUniqueId();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the user
@@ -36,15 +36,18 @@ export async function registerUser(name: string, email: string, password: string
   }
 }
 
-export async function getUserById(userId:string) {
-  try {
-    // Check if user already exists
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-    return { success: true,user};
-  } catch (error) {
-    console.error("Registration error:", error);
-    return { success: false };
+export async function getUserById(userId: string | null | undefined) {
+  if (userId) {
+    try {
+      // Check if user already exists
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+      return { success: true, user };
+    } catch (error) {
+      console.error("Registration error:", error);
+      return { success: false };
+    }
   }
+  return { success: false }
 }

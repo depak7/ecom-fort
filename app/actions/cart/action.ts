@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import prisma from "@/database/index";
 import { getStoreById } from "../store/action";
+import { getUserById } from "../user/action";
 
 export async function addToCart(
   userId: string,
@@ -436,8 +437,11 @@ export async function getCartItemsByStore(userId: string) {
 
       const storeDetails = await getStoreById(storeId)
 
+      const storeOwnerMailId=await getUserById(storeDetails.success?storeDetails.store?.ownerId: null)
+
       const storeData = storesMap.get(storeId) || {
         id: storeId,
+        storeOwnerMailId,
         phoneNumber: storeDetails.store?.phoneNumber || "",
         name: item.product.store.name,
         items: [],
