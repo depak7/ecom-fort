@@ -27,7 +27,9 @@ import {
   CircularProgress,
   Badge,
   Stack,
-  Alert
+  Alert,
+  Button,
+  Backdrop
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -38,9 +40,10 @@ import {
   Category as CategoryIcon,
   AttachMoney as PriceIcon,
   Add as AddIcon,
-  CurrencyRupeeOutlined
+  CurrencyRupeeOutlined,
+  Delete as DeleteIcon
 } from "@mui/icons-material";
-import { updateProduct } from "@/app/actions/products/action";
+import { updateProduct, deleteProduct } from "@/app/actions/products/action";
 import { BaseButton } from "@/components/users/buttons/BaseButton";
 import { OutlinedButton } from "@/components/styledcomponents/StyledElements";
 
@@ -74,31 +77,20 @@ interface MerchantProductCardProps {
   products: Product[] | undefined;
 }
 
-const allowedSizes = {
-  shoes: [
-    "UK-7", "UK-7.5", "UK-8", "UK-8.5", 
-    "UK-9", "UK-9.5", "UK-10", "UK-10.5", 
-    "UK-11", "UK-11.5", "UK-12"
-  ],
-  clothing: [
-    "XS", "S", "M", "L", "XL", "XXL"
-  ]
-};
-
 export default function MerchantProductCard({
   products,
 }: MerchantProductCardProps) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [activeVariant, setActiveVariant] = useState(0);
-  const [newSize, setNewSize] = useState<string>(
-    editingProduct?.category === 'shoes' ? "UK-7" : "S"
-  );
+  const [newSize, setNewSize] = useState<string>("");
   const [newStock, setNewStock] = useState<number>(0);
   const [openAddSizeDialog, setOpenAddSizeDialog] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState({ type: "", message: "" });
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(false)
   const handleEditClick = (product: Product) => {
     setEditingProduct(JSON.parse(JSON.stringify(product)));
     setOpenDialog(true);
@@ -180,7 +172,7 @@ export default function MerchantProductCard({
         availableSizes: Array.from(allSizes)
       });
       
-      setNewSize(editingProduct.category === 'shoes' ? "UK-7" : "S");
+      setNewSize("");
       setNewStock(0);
       setOpenAddSizeDialog(false);
       setUpdateMessage({ type: "success", message: "Size added successfully" });
@@ -201,9 +193,41 @@ export default function MerchantProductCard({
 
   const isValidNewSize = newSize && newStock >= 0;
 
+  const handleDeleteClick = (product: Product) => {
+    setProductToDelete(product);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (productToDelete) {
+      setDeleteDialogOpen(false)
+      setIsLoading(true);
+      try {
+        const result = await deleteProduct(productToDelete.id);
+        if (result.success) {
+          setUpdateMessage({ type: "success", message: "Product deleted successfully" });
+          setDeleteDialogOpen(false);
+        } else {
+          setUpdateMessage({ type: "error", message: result.error || "Failed to delete product" });
+        }
+      } catch (error) {
+        setUpdateMessage({ type: "error", message: "Failed to delete product" });
+      }
+      finally{
+        setIsLoading(false)
+      }
+    }
+  };
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
+      <Backdrop
+        sx={{ color: 'blue', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
         <InventoryIcon sx={{ mr: 2, color: "primary.main" }} />
         <Typography variant="h5" fontWeight={700}>
           Manage Products
@@ -340,8 +364,22 @@ export default function MerchantProductCard({
                 </Box>
               </CardContent>
               
-              <Box sx={{ p: 2, pt: 0 }}>
-                <BaseButton customSize="small" onClick={() => handleEditClick(product)}><EditIcon sx={{ mr: 1 }} /> Edit Product</BaseButton>
+              <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
+                <BaseButton customSize="small" onClick={() => handleEditClick(product)}>
+                  <EditIcon sx={{ mr: 1 }} /> Edit Product
+                </BaseButton>
+                <BaseButton 
+                  customSize="small" 
+                  onClick={() => handleDeleteClick(product)}
+                  sx={{ 
+                    backgroundColor: 'error.main',
+                    '&:hover': {
+                      backgroundColor: 'error.dark',
+                    }
+                  }}
+                >
+                  <DeleteIcon sx={{ mr: 1 }} /> Delete
+                </BaseButton>
               </Box>
             </Card>
           </Grid>
@@ -584,38 +622,23 @@ export default function MerchantProductCard({
         </DialogTitle>
         <DialogContent sx={{ pt: 3 }}>
           <Stack spacing={3}>
-            <Select
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Size"
+              type="text"
+              fullWidth
               value={newSize}
               onChange={(e) => setNewSize(e.target.value)}
-              fullWidth
-            
-              size="small"
-              label="Size"
-            >
-              {editingProduct?.category === 'Shoes' 
-                ? allowedSizes.shoes.map((size) => (
-                    <MenuItem key={size} value={size}>
-                      {size}
-                    </MenuItem>
-                  ))
-                : allowedSizes.clothing.map((size) => (
-                    <MenuItem key={size} value={size}>
-                      {size}
-                    </MenuItem>
-                  ))
-              }
-            </Select>
-            
+              placeholder="Enter size (e.g., 2.5m, XL, 10)"
+            />
             <TextField
-              label="Stock Quantity"
+              margin="dense"
+              label="Stock"
               type="number"
-              value={newStock}
-              onChange={(e) => setNewStock(parseInt(e.target.value, 10) || 0)}
               fullWidth
-              size="small"
-              InputProps={{
-                endAdornment: <Typography variant="body2" color="gray">units</Typography>
-              }}
+              value={newStock}
+              onChange={(e) => setNewStock(Number(e.target.value))}
             />
           </Stack>
         </DialogContent>
@@ -636,7 +659,7 @@ export default function MerchantProductCard({
           
           <IconButton
             onClick={handleAddSize}
-            disabled={!isValidNewSize}
+            disabled={!newSize || newStock < 0}
             sx={{ 
               borderRadius: 1,
               backgroundColor: "black",
@@ -654,6 +677,31 @@ export default function MerchantProductCard({
             <AddIcon sx={{ mr: 0.5 }} />
             <Typography variant="button">Add Size</Typography>
           </IconButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete Product</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{productToDelete?.name}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

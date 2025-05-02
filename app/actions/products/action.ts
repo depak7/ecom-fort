@@ -94,18 +94,72 @@ export async function createProduct(data: ProductFormData) {
 
 export async function deleteProduct(productId: string) {
   try {
+    // Step 1: Find all variant IDs of the product
+    const variants = await prisma.productVariant.findMany({
+      where: { productId },
+      select: { id: true },
+    });
+    const variantIds = variants.map(v => v.id);
+
+    // Step 2: Delete VariantSize
+    await prisma.variantSize.deleteMany({
+      where: {
+        variantId: { in: variantIds },
+      },
+    });
+
+    // Step 3: Delete ProductImage
+    await prisma.productImage.deleteMany({
+      where: {
+        variantId: { in: variantIds },
+      },
+    });
+
+    // Step 4: Delete cart and wishlist items tied to variants
+    await prisma.cartItem.deleteMany({
+      where: {
+        OR: [
+          { productVariantId: { in: variantIds } },
+          { productId },
+        ],
+      },
+    });
+    await prisma.wishlistItem.deleteMany({
+      where: {
+        OR: [
+          { productVariantId: { in: variantIds } },
+          { productId },
+        ],
+      },
+    });
+
+    // Step 5: Delete ProductVariants
+    await prisma.productVariant.deleteMany({
+      where: { productId },
+    });
+
+    // Step 6: Delete order items and reviews related to product
+    await prisma.orderItem.deleteMany({
+      where: { productId },
+    });
+    await prisma.review.deleteMany({
+      where: { productId },
+    });
+
+    // Step 7: Delete the Product
     const product = await prisma.product.delete({
       where: { id: productId },
       include: { store: true },
     });
 
-    revalidatePath(`/store/${product.store.id}`);
-    return { success: true, message: "Product deleted successfully" };
+    revalidatePath(`/merchant/storedetails`);
+    return { success: true, message: "Product and all related data deleted successfully" };
   } catch (error) {
-    console.error("Failed to delete product:", error);
-    return { success: false, error: "Failed to delete product" };
+    console.error("Failed to delete product deeply:", error);
+    return { success: false, error: "Failed to delete product and related data" };
   }
 }
+
 
 
 export async function getAllProducts(userId?: string) {
@@ -397,4 +451,5 @@ export async function updateProduct(productData: any) {
     return { success: false, error: "Failed to update product" };
   }
 }
+
 

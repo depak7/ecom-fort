@@ -20,7 +20,7 @@ export default async function Page({ params }: ProductPageProps) {
   const response =userId?await getProductById(id,userId):await getProductById(id)
 
 
-  const similarProduct = await getSimilarProductsByCategory(response.product?.category || "clothes");
+  const similarProduct =userId?await getSimilarProductsByCategory(response.product?.category || "clothes"):await getSimilarProductsByCategory(response.product?.category || "clothes",userId);
 
   if (!response || !response.product) {
     return <div>Product not found</div>;

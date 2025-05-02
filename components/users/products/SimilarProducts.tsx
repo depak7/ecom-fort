@@ -58,7 +58,7 @@ export default function SimilarProducts({ product }: ProductProps) {
           mt: 3,
         }}
       >
-        <IconButton
+        {/* <IconButton
           onClick={handlePrev}
           disabled={currentIndex === 0}
           sx={{ color: "black" }}
@@ -72,7 +72,7 @@ export default function SimilarProducts({ product }: ProductProps) {
           sx={{ color: "black" }}
         >
           <ArrowForwardIos />
-        </IconButton>
+        </IconButton> */}
       </Box>
     </Box>
   );
