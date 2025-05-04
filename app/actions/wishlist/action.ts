@@ -94,6 +94,7 @@ export async function getWishlistedItems(userId: string) {
         category: true,
         description: true,
         name: true,
+        productImage:true,
         storeId: true,
         price: true,
         variants: {

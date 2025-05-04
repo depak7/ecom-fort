@@ -87,7 +87,7 @@ export default async function WishlistPage() {
                 store: product.store.name,
                 storeId: product.storeId,
                 productImage:product.productImage,
-                category: "shirt",
+                category:product.category,
                 image: product.variants[0]?.variantImage || "",
               }}
               isWishlisted={product.isWishlisted || false}
