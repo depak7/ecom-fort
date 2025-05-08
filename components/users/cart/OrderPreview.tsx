@@ -88,9 +88,9 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
       })
    
       if (success) {
-        console.log(order)
+        successToast('Order Placed..')
         await sendEmailToSeller(order)
-        successToast('Order Placed')
+        await sendEmailToCustomer(order)
         route.push(`/order-placed/${order?.orderId}`)
       } else {
         errorToast('Failed to place order')
@@ -102,6 +102,179 @@ export default function OrderPreview({ stores, userId, totalQuantity, totalPrice
       setIsLoading(false)
     }
   }
+
+  const sendEmailToCustomer = async (order: any) => {
+    const emailContent = {
+      to: order.userEmail,
+      subject: `Order Confirmation from Ecom Fort - Order ID: ${order.orderId}`,
+      html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Order Confirmation</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          }
+          .navbar {
+            background-color: #000000;
+            padding: 15px 20px;
+            text-align: center;
+          }
+          .logo-placeholder img {
+            width: 150px; /* Adjust logo size */
+          }
+          .content {
+            padding: 20px;
+          }
+          .header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+          }
+          .footer {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          table, th, td {
+            border: 1px solid #ddd;
+          }
+          th, td {
+            padding: 10px;
+            text-align: left;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+          .highlight {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-left: 4px solid #000;
+            margin: 15px 0;
+          }
+          .button {
+            display: inline-block;
+            background-color: #000;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+          }
+          .important {
+            color: #d9534f;
+            font-weight: bold;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="navbar">
+            <div class="logo-placeholder">
+              <img src="https://i.ibb.co/Vccqnv69/ecom-fort.png" alt="Ecom Fort Logo" />
+            </div>
+          </div>
+  
+          <div class="content">
+            <div class="header">
+              <h1>Order Confirmation</h1>
+              <p>Thank you for shopping with Ecom Fort. Your order has been successfully placed. Please find the details of your order below.</p>
+            </div>
+  
+            <h2>Order Details</h2>
+            <p><strong>Order ID:</strong> ${order.orderId}</p>
+            <p><strong>User Name:</strong> ${order.userName}</p>
+            <p><strong>Email:</strong> ${order.userEmail}</p>
+            <p><strong>Shipping Address:</strong> ${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state}, ${order.shippingAddress.postalCode}, ${order.shippingAddress.country}</p>
+            <p><strong>Phone:</strong> ${order.shippingAddress.phoneNumber}</p>
+            <p><strong>Alternate Phone:</strong> ${order.shippingAddress.alternatePhoneNumber || 'N/A'}</p>
+  
+            <h3>Ordered Products:</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Size</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Image</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.orderedItems.map((item) => `
+                  <tr>
+                    <td>${item.productName}</td>
+                    <td>${item.size}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.price}</td>
+                    <td><img src="${item.productImage}" alt="${item.productName}" width="100" /></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+  
+            <h3>Total Amount: ₹${order.totalAmount}</h3>
+  
+            <div class="highlight">
+              <p><span class="important">Action Required:</span> The seller will contact you regarding payment details. Please wait for their communication and proceed with the payment as instructed.</p>
+              <p>If you have any queries, feel free to reply to this email, and we will assist you further.</p>
+            </div>
+  
+            <p>Thank you for your order with Ecom Fort.</p>
+  
+            <p>If you have any questions or need additional information, please reply to this email.</p>
+          </div>
+  
+          <div class="footer">
+            <p>© 2024 Ecom Fort. All rights reserved.</p>
+            <p>This is an automated notification.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+      `,
+    };
+  
+    try {
+      const response = await fetch('/api/sendemail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailContent),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to send email to customer');
+      }
+  
+      console.log('Email sent successfully to customer');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+  
 
   const sendEmailToSeller = async (order: any) => {
     const emailContent = {
