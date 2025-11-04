@@ -12,26 +12,14 @@ export async function GET(req: NextRequest) {
 
   try {
     // Query stores based on the provided search query
-    const stores = await prisma.store.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } },
-        ],
-      },
-      select: {
-        id: true,
-        name: true,
-        logo: true,
-        description: true,
-        city: true,
-        address: true,
-        mapLink: true,
-        ownerId: true,
-        bannerImage: true,
-        offerDescription: true,
-      },
-    })
+    const stores = await prisma.$queryRawUnsafe(`
+      SELECT 
+        id, name, logo, description, city, address, "mapLink", "ownerId", "bannerImage", "offerDescription"
+      FROM "Store"
+      WHERE to_tsvector('english', name || ' ' || description) @@ plainto_tsquery('english', ${query})
+      ORDER BY ts_rank(to_tsvector('english', name || ' ' || description), plainto_tsquery('english', ${query})) DESC
+      LIMIT 20;
+    `)
 
     // Query products based on the search query and optional userId for wishlist status
     const products = await prisma.product.findMany({
