@@ -6,9 +6,6 @@ import { getCartItemsByStore, getDefaultUserAddresses } from '@/app/actions/cart
 import OrderPreview from '@/components/users/cart/OrderPreview'
 
 
-
-
-
 export default async function PlaceOrder() {
 
 
