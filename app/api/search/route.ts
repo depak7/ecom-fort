@@ -71,6 +71,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ stores, productsWithWishlistStatus })
   } catch (error) {
     console.error(error)
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ status:false , message: 'Internal server error' }, { status: 500 })
   }
 }

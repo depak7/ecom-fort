@@ -49,7 +49,7 @@ export default function SignIn() {
         });
 
         if (response.ok) {
-          successToast("Password reset link sent to your email");
+          successToast("Check your email for password reset link");
           router.push("/signin");
         } else {
           errorToast("Failed to send reset link");

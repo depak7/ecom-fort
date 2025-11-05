@@ -6,6 +6,14 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token) {
+    const isApiRequest = req.nextUrl.pathname.startsWith("/api");
+
+    if (isApiRequest) {
+      return new NextResponse(
+        JSON.stringify({ status: false, message: "Unauthorized access" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
     const signInUrl=(new URL('/signin', req.url));
     signInUrl.searchParams.set('callbackUrl', req.nextUrl.pathname)
     return NextResponse.redirect(signInUrl)
@@ -15,5 +23,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/stores/:path*', '/api/products/:path*'],
+  matcher: ['/api/stores/:path*', '/api/products/:path*' , '/api/admin/:path*' , '/api/search/:path*' , '/api/sendemail/:path*'],
 };

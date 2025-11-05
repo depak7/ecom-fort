@@ -36,8 +36,10 @@ export default function SearchResults() {
       fetch(`/api/search?query=${encodeURIComponent(query)}&userId=${''}`)
         .then(response => response.json())
         .then(data => {
-          setSearchResults(data)
-          setIsLoading(false)
+          if(data.status){
+            setSearchResults(data)
+            setIsLoading(false)
+          }
         })
         .catch(error => {
           console.error('Error fetching search results:', error)
