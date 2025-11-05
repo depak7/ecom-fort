@@ -52,8 +52,6 @@ export default function SearchResults() {
     setActiveTab(newValue)
   }
 
-  const hasResults = searchResults.stores.length > 0 || searchResults.productsWithWishlistStatus.length > 0
-
   const hasStores = searchResults.stores.length > 0
   const hasProducts = searchResults.productsWithWishlistStatus.length > 0
 
@@ -141,7 +139,7 @@ export default function SearchResults() {
                         store: product.store.name,
                         storeId: product.storeId,
                         productImage:product.productImage,
-                        category: "shirt",
+                        category: product.category,
                         image: product.variants[0]?.variantImage || "", 
                       }}
                       isWishlisted={product.isWishlisted || false}
