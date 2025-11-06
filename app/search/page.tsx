@@ -33,7 +33,7 @@ export default function SearchResults() {
   useEffect(() => {
     if (query) {
       setIsLoading(true)
-      fetch(`/api/search?query=${encodeURIComponent(query)}&userId=${''}`)
+      fetch(`/api/search?query=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(data => {
           if(data.status){

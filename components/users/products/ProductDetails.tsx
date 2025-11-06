@@ -260,7 +260,7 @@ export default function ProductDetails({
             gutterBottom
             sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}
           >
-            {product.name}
+            {product.name.toLocaleUpperCase()}
           </Typography>
           {product.brand && (
             <Box display={"flex"} flexDirection={"row"} gap={0.5} alignItems={"center"}>

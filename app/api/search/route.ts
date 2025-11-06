@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/database/index'
 import axios from "axios";
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import crypto from "crypto"
+
+const EXTERNAL_AI_API =
+  "https://ai-product-search-service.livelyocean-b0186b38.southindia.azurecontainerapps.io/api/products/image-search"
+
+
+let tokenMap= new Map<string, any>()
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const query = searchParams.get('query')
-  const userId = searchParams.get('userId')
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   if (!query) {
     return NextResponse.json({ message: 'Query parameter is required' }, { status: 400 })
@@ -64,7 +74,7 @@ export async function GET(req: NextRequest) {
           storeId: true,
           price: true,
           variants: { select: { variantImage: true } },
-          productImage:true,
+          productImage: true,
           wishlistItems: userId
             ? {
               where: { wishlist: { userId } },
@@ -82,7 +92,7 @@ export async function GET(req: NextRequest) {
           description: true,
           category: true,
           price: true,
-          productImage:true,
+          productImage: true,
           variants: { select: { variantImage: true } },
           store: true,
           wishlistItems: userId
@@ -111,7 +121,7 @@ export async function GET(req: NextRequest) {
     }));
 
     return NextResponse.json({
-      status:true,
+      status: true,
       stores,
       productsWithWishlistStatus,
       count: productsWithWishlistStatus.length,
@@ -121,5 +131,114 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error(error)
     return NextResponse.json({ status: false, message: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    const userId = session?.user?.id
+
+    const contentType = req.headers.get("content-type") || ""
+
+    // CASE 1: Image upload (multipart)
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData()
+
+      const res = await fetch(EXTERNAL_AI_API, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!res.ok) {
+        console.error("AI service error:", await res.text())
+        return NextResponse.json({ success: false, error: "AI search failed" }, { status: 500 })
+      }
+
+      const data = await res.json()
+      const productIds = (data?.results || []).map((r: any) => r?.metadata?.product_id).filter(Boolean)
+      const scores = (data?.results || []).map((r: any) => r?.score || 0)
+
+      if (!productIds.length) {
+        return NextResponse.json({ success: false, message: "No matching products found" })
+      }
+
+      const token = crypto.randomUUID()
+      tokenMap.set(token, { productIds, scores })
+      return NextResponse.json({ success: true, token })
+    }
+
+    // CASE 2: Token lookup (JSON)
+    if (contentType.includes("application/json")) {
+      const { token } = await req.json()
+      if (!token) {
+        return NextResponse.json({ success: false, message: "Invalid request" }, { status: 400 })
+      }
+
+      const stored = tokenMap.get(token)
+      if (!stored) {
+        return NextResponse.json({ success: false, message: "Token expired or invalid" }, { status: 404 })
+      }
+
+      const { productIds, scores } = stored
+
+      if(!readOnlyPrisma){
+        console.log("read replica is undefined")
+        return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+
+      }
+      let products = await readOnlyPrisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          category: true,
+          price: true,
+          productImage: true,
+          variants: { select: { variantImage: true } },
+          store: true,
+          wishlistItems: userId
+            ? {
+              where: { wishlist: { userId } },
+              select: { id: true },
+            }
+            : false,
+        },
+      });
+
+   
+      const ordered = productIds
+        .map((id: string, index: number) => {
+          const product = products.find((p: any) => p.id === id)
+          return product ? { ...product, aiScore: scores?.[index] ?? null } : null
+        })
+        .filter(Boolean)
+        .sort((a, b) => (b?.aiScore ?? 0) - (a?.aiScore ?? 0))
+
+       ordered.sort((a, b) => b?.aiScore - a?.aiScore);
+
+
+        const productsWithWishlistStatus = ordered.map((p) => ({
+          ...p,
+          isWishlisted: userId ? p.wishlistItems?.length > 0 : false,
+        }));
+    
+        return NextResponse.json({
+          status: true,
+          productsWithWishlistStatus,
+          count: productsWithWishlistStatus.length,
+          source: productIds.length ? "ai" : "fallback",
+        });
+    }
+
+    // Fallback: unsupported content type
+    return NextResponse.json(
+      { success: false, message: "Unsupported content type" },
+      { status: 400 },
+    )
+  } catch (error) {
+    console.error("Error in image-search by ids", error)
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
   }
 }

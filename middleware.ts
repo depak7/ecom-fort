@@ -18,7 +18,6 @@ export async function middleware(req: NextRequest) {
     signInUrl.searchParams.set('callbackUrl', req.nextUrl.pathname)
     return NextResponse.redirect(signInUrl)
   }
-
   return NextResponse.next();
 }
 

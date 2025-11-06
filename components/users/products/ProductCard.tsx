@@ -145,7 +145,7 @@ export default function ProductCard({
           noWrap
           fontWeight={700}
         >
-          {product.name}
+          {product.name.toLocaleUpperCase()}
         </Typography>
 
         <Typography  fontWeight={700} variant={isMobile ? "body2" : "body1"}>
