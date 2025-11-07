@@ -204,13 +204,7 @@ export async function POST(req: NextRequest) {
           { status: 500 }
         )
       }
-
-      if (!readOnlyPrisma) {
-        console.log("read replica is undefined")
-        return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
-
-      }
-      let products = await readOnlyPrisma.product.findMany({
+      let products = await prisma.product.findMany({
         where: { id: { in: productIds } },
         select: {
           id: true,
