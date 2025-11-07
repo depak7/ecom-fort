@@ -4,12 +4,20 @@ import axios from "axios";
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import crypto from "crypto"
+import { Redis } from '@upstash/redis'
+
+const redis = Redis.fromEnv();
+
+interface SearchToken {
+  productIds: string[]
+  scores: number[]
+}
 
 const EXTERNAL_AI_API =
   "https://ai-product-search-service.livelyocean-b0186b38.southindia.azurecontainerapps.io/api/products/image-search"
 
 
-let tokenMap= new Map<string, any>()
+
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -164,25 +172,40 @@ export async function POST(req: NextRequest) {
       }
 
       const token = crypto.randomUUID()
-      tokenMap.set(token, { productIds, scores })
+      await redis.set(token, JSON.stringify({ productIds, scores }))
+      await redis.expire(token, 300)
       return NextResponse.json({ success: true, token })
     }
 
     // CASE 2: Token lookup (JSON)
     if (contentType.includes("application/json")) {
+
       const { token } = await req.json()
       if (!token) {
-        return NextResponse.json({ success: false, message: "Invalid request" }, { status: 400 })
+        return NextResponse.json(
+          { success: false, message: "Invalid request" },
+          { status: 400 }
+        )
       }
 
-      const stored = tokenMap.get(token)
+      const stored = await redis.get<SearchToken>(token)
       if (!stored) {
-        return NextResponse.json({ success: false, message: "Token expired or invalid" }, { status: 404 })
+        return NextResponse.json(
+          { success: false, message: "Token expired or invalid" },
+          { status: 404 }
+        )
       }
-
+     
       const { productIds, scores } = stored
 
-      if(!readOnlyPrisma){
+      if (!productIds || productIds === undefined || !scores || scores === undefined) {
+        return NextResponse.json(
+          { success: false, message: "Malformed token data" },
+          { status: 500 }
+        )
+      }
+
+      if (!readOnlyPrisma) {
         console.log("read replica is undefined")
         return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
 
@@ -207,29 +230,26 @@ export async function POST(req: NextRequest) {
         },
       });
 
-   
       const ordered = productIds
         .map((id: string, index: number) => {
-          const product = products.find((p: any) => p.id === id)
-          return product ? { ...product, aiScore: scores?.[index] ?? null } : null
+          const product = products.find((p) => p.id === id)
+          if (!product) return null
+          return { ...product, aiScore: scores[index] ?? 0 }
         })
-        .filter(Boolean)
-        .sort((a, b) => (b?.aiScore ?? 0) - (a?.aiScore ?? 0))
-
-       ordered.sort((a, b) => b?.aiScore - a?.aiScore);
+        .filter((p): p is NonNullable<typeof p> => p !== null)
+        .sort((a, b) => (b.aiScore ?? 0) - (a.aiScore ?? 0))
 
 
-        const productsWithWishlistStatus = ordered.map((p) => ({
-          ...p,
-          isWishlisted: userId ? p.wishlistItems?.length > 0 : false,
-        }));
-    
-        return NextResponse.json({
-          status: true,
-          productsWithWishlistStatus,
-          count: productsWithWishlistStatus.length,
-          source: productIds.length ? "ai" : "fallback",
-        });
+      const productsWithWishlistStatus = ordered.map((p) => ({
+        ...p,
+        isWishlisted: userId ? p != null && p.wishlistItems?.length > 0 : false,
+      }));
+
+      return NextResponse.json({
+        status: true,
+        productsWithWishlistStatus,
+        count: productsWithWishlistStatus.length
+      });
     }
 
     // Fallback: unsupported content type

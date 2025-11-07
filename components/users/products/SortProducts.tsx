@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  Typography
+} from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 
 interface SortProductsProps {
@@ -32,30 +38,24 @@ const SortProducts = ({ onSortChange }: SortProductsProps) => {
 
   return (
     <Box display="flex" alignItems="center">
-         <IconButton onClick={handleClick}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        padding: 0, // Ensure there's no extra padding
-      }}
-    >
-      <Typography variant="body2" color="black" sx={{ mr: 1 }}>
-        Sort By
-      </Typography>
-      <ExpandMoreOutlinedIcon />
-    </IconButton>
+      <Button
+        onClick={handleClick}
+        endIcon={<ExpandMoreOutlinedIcon />}
+        sx={{
+          textTransform: "none",
+          color: "black",
+          "&:hover": { backgroundColor: "transparent" },
+        }}
+      >
+        <Typography variant="body2">Sort By</Typography>
+      </Button>
+
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
       >
         {sortOptions.map((option) => (
           <MenuItem

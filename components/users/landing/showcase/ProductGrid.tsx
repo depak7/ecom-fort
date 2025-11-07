@@ -13,8 +13,6 @@ export default async function ProductGrid() {
   const userId = session?.user?.id;
   const productsResponse = userId ? await getAllProducts(userId) : await getAllProducts();
   const visibleProducts =3;
-
-  console.log(productsResponse)
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, textAlign: "center" }}>
       <Typography variant="h6" fontWeight="bold" mb={2}>
