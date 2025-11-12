@@ -17,8 +17,6 @@ const EXTERNAL_AI_API =
   "https://ai-product-search-service.livelyocean-b0186b38.southindia.azurecontainerapps.io/api/products/image-search"
 
 
-
-
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const query = searchParams.get('query')
@@ -75,7 +73,14 @@ export async function GET(req: NextRequest) {
         },
         select: {
           id: true,
-          store: true,
+          store: {
+            select: {
+              id: true,
+              name: true,
+              logo: true,
+              description: true,
+            },
+          },
           category: true,
           description: true,
           name: true,
@@ -102,7 +107,14 @@ export async function GET(req: NextRequest) {
           price: true,
           productImage: true,
           variants: { select: { variantImage: true } },
-          store: true,
+          store: {
+            select: {
+              id: true,
+              name: true,
+              logo: true,
+              description: true,
+            },
+          },
           wishlistItems: userId
             ? {
               where: { wishlist: { userId } },
@@ -214,7 +226,14 @@ export async function POST(req: NextRequest) {
           price: true,
           productImage: true,
           variants: { select: { variantImage: true } },
-          store: true,
+          store: {
+            select: {
+              id: true,
+              name: true,
+              logo: true,
+              description: true,
+            },
+          },
           wishlistItems: userId
             ? {
               where: { wishlist: { userId } },
