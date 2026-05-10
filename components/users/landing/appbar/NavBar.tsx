@@ -13,7 +13,7 @@ import {
   AccountCircle as AccountCircleIcon,
   Login as LoginIcon,
   Logout as LogoutIcon,
-  ImageSearch as ImageSearchIcon,
+  // ImageSearch as ImageSearchIcon, // image search UI disabled
   Close as CloseIcon,
   LocalShipping as LogoIcon,
 } from "@mui/icons-material"
@@ -23,8 +23,8 @@ import { useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { TypographyButton } from "@/components/styledcomponents/StyledElements"
 import { checkUserHasStore } from "@/app/actions/store/action"
-import UseCustomToast from "@/components/ui/useCustomToast"
-import ImageCropModal from "@/components/users/landing/appbar/ImageCropModel"
+// import UseCustomToast from "@/components/ui/useCustomToast"
+// import ImageCropModal from "@/components/users/landing/appbar/ImageCropModel"
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import Image from "next/image";
 import logo from "@/components/assets/users/ecom-fort.png";
@@ -49,12 +49,13 @@ export default function NavBar() {
   const [storeId, setStoreId] = useState<string>("")
   const [hasStore, setHasStore] = useState<boolean>(false)
   const [isDrawerOpen, setDrawerOpen] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [cropMode, setCropMode] = useState(false)
-  const { errorToast, successToast } = UseCustomToast()
+  // Image search by upload (disabled)
+  // const [isUploading, setIsUploading] = useState(false)
+  // const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  // const [cropMode, setCropMode] = useState(false)
+  // const { errorToast, successToast } = UseCustomToast() // only used by image search modal (disabled)
   const [currentPath, setCurrentPath] = useState<string>("")
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false)
+  // const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const userId = session?.user.id
   const isMobile = useMediaQuery("(max-width:600px)")
@@ -98,15 +99,15 @@ export default function NavBar() {
     setDrawerOpen(false)
   }
 
-  const handleImageUploadClick = () => {
-    setIsImageModalOpen(true)
-  }
+  // const handleImageUploadClick = () => {
+  //   setIsImageModalOpen(true)
+  // }
 
-  const closeImageModal = () => {
-    setIsImageModalOpen(false)
-    setSelectedImage(null)
-    setCropMode(false)
-  }
+  // const closeImageModal = () => {
+  //   setIsImageModalOpen(false)
+  //   setSelectedImage(null)
+  //   setCropMode(false)
+  // }
 
   const renderStoreButton = () => {
     if (!isHydrated || !isUserLoggedIn) return null
@@ -233,7 +234,8 @@ export default function NavBar() {
                 </Tooltip>
               )}
 
-              <Tooltip title="Search by image">
+              {/* Search by image (upload) — disabled */}
+              {/* <Tooltip title="Search by image">
                 <IconButton
                   onClick={handleImageUploadClick}
                   size="small"
@@ -246,7 +248,7 @@ export default function NavBar() {
                 >
                   <ImageSearchIcon fontSize="small" />
                 </IconButton>
-              </Tooltip>
+              </Tooltip> */}
             </Box>
 
             {/* Right Icons */}
@@ -414,13 +416,13 @@ export default function NavBar() {
         </Box>
       </Drawer>
 
-      {/* Image Search Modal */}
-      <ImageCropModal
+      {/* Image Search Modal — disabled */}
+      {/* <ImageCropModal
         isOpen={isImageModalOpen}
         onClose={closeImageModal}
         errorToast={errorToast}
         successToast={successToast}
-      />
+      /> */}
     </>
   )
 }
