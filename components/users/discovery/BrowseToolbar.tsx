@@ -1,0 +1,92 @@
+"use client"
+
+import React from "react"
+import {
+  Box,
+  Paper,
+  TextField,
+  InputAdornment,
+  Typography,
+  Container,
+} from "@mui/material"
+import { Search as SearchIcon } from "@mui/icons-material"
+import CityFilterChips from "./CityFilterChips"
+import { useLocation } from "@/components/users/location/LocationProvider"
+
+type BrowseToolbarProps = {
+  title: string
+  subtitle?: string
+  searchPlaceholder?: string
+  searchValue: string
+  onSearchChange: (value: string) => void
+  children?: React.ReactNode
+}
+
+export default function BrowseToolbar({
+  title,
+  subtitle,
+  searchPlaceholder = "Search…",
+  searchValue,
+  onSearchChange,
+  children,
+}: BrowseToolbarProps) {
+  const { selectedCity } = useLocation()
+
+  return (
+    <Box
+      sx={{
+        bgcolor: "#f8fafc",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        py: { xs: 2.5, md: 3 },
+        mb: 3,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Typography variant="h5" fontWeight={700} gutterBottom>
+          {title}
+        </Typography>
+        {subtitle && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {subtitle}
+            {selectedCity ? ` · Showing results in ${selectedCity}` : ""}
+          </Typography>
+        )}
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            borderRadius: 2.5,
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}
+        >
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              mb: 2,
+              "& .MuiOutlinedInput-root": { borderRadius: 2, bgcolor: "#f8fafc" },
+            }}
+          />
+
+          <CityFilterChips label="Filter by city" />
+
+          {children && <Box sx={{ mt: 2 }}>{children}</Box>}
+        </Paper>
+      </Container>
+    </Box>
+  )
+}

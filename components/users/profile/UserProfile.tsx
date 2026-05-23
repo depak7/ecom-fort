@@ -16,7 +16,6 @@ import {
     Button,
     Avatar,
     Chip,
-    Divider,
     TextField,
     List,
     ListItem,
@@ -25,7 +24,14 @@ import {
     AccordionSummary,
     AccordionDetails,
     useMediaQuery,
-    useTheme
+    useTheme,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
 } from "@mui/material"
 import {
     Edit as EditIcon,
@@ -43,11 +49,28 @@ import {
 import { format } from "date-fns";
 
 import banner from '@/components/assets/users/banner.jpg'
+import { useLocation } from '@/components/users/location/LocationProvider'
+
+function orderChipSx(statusRaw: string) {
+    const primary = (statusRaw || "").split(" · ")[0]?.toUpperCase() ?? ""
+    if (primary === "DELIVERED") return { bgcolor: "#2e7d32", color: "#fff" }
+    if (primary === "CANCELLED") return { bgcolor: "#c62828", color: "#fff" }
+    if (primary === "PENDING") return { bgcolor: "#ed6c02", color: "#fff" }
+    if (primary === "PROCESSING" || primary === "SHIPPED") return { bgcolor: "#0288d1", color: "#fff" }
+    if (primary === "UNKNOWN") return { bgcolor: "#757575", color: "#fff" }
+    return { bgcolor: "#546e7a", color: "#fff" }
+}
+
+function shortOrderId(id: string) {
+    if (!id) return "—"
+    return id.length > 16 ? `${id.slice(0, 8)}…${id.slice(-4)}` : id
+}
 
 
 export default function ProfilePage({ user, storeDetails, orders }) {
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+    const { selectedCity } = useLocation()
     const [tabValue, setTabValue] = useState(0)
     const [editProfile, setEditProfile] = useState(false)
     const [editedUser, setEditedUser] = useState({ ...user })
@@ -81,6 +104,10 @@ export default function ProfilePage({ user, storeDetails, orders }) {
             return "Invalid Date";
         }
     };
+
+    /** Orders tab is index 1 when "Store" exists, otherwise it is the only tab (index 0). */
+    const ordersTabIndex = storeDetails ? 1 : 0
+    const hasOrders = Array.isArray(orders) && orders.length > 0
 
     return (
         <Box sx={{ bgcolor: "#ffffff", minHeight: "100vh", py: 2 }}>
@@ -161,6 +188,13 @@ export default function ProfilePage({ user, storeDetails, orders }) {
                                     </Typography>
                                     <Typography variant="body1" color="text.secondary" gutterBottom>
                                         {user.email}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: { xs: "center", sm: "flex-start" } }}>
+                                        <LocationIcon sx={{ fontSize: 16 }} />
+                                        Browsing city: {selectedCity || "All cities"}
+                                        <Typography component="span" variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>
+                                            (change on home, stores, or products pages)
+                                        </Typography>
                                     </Typography>
                                     <Box sx={{ mt: 1 }}>
                                         <Chip
@@ -523,145 +557,210 @@ export default function ProfilePage({ user, storeDetails, orders }) {
                         </Box>
                     )}
                     {/* Orders Tab */}
-                    <Box sx={{ p: { xs: 2, sm: 3 }, display: tabValue === 1 ? "block" : "none" }}>
-                        {orders && orders.length > 0 ? (
-                            <>
-                                {/* Mobile-friendly order cards for small screens */}
-                                <Box sx={{ display: { xs: "block", md: "none" } }}>
-                                    {orders.map((order) => (
-                                        <Card key={order.orderId} sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-                                            <CardContent>
-                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                                                    <Typography variant="h6" color="text.primary">
-                                                        {order.orderId}
-                                                    </Typography>
-                                                    <Chip
-                                                        label={order.status}
-                                                        size="small"
-                                                        color={order.status === "Delivered" ? "success" : "primary"}
-                                                        sx={{
-                                                            bgcolor: order.status === "Delivered" ? "#4caf50" : "#00acc1",
-                                                            color: "white",
-                                                            fontWeight: 500,
-                                                        }}
-                                                    />
-                                                </Box>
-
-                                                <Typography variant="body2" color="text.secondary" gutterBottom>
-                                                    Date: {formatDate(order.date)}
+                    <Box sx={{ p: { xs: 2, sm: 3 }, display: tabValue === ordersTabIndex ? "block" : "none" }}>
+                        {hasOrders ? (
+                            <Stack spacing={2.5}>
+                                {orders.map((order) => (
+                                    <Card
+                                        key={order.orderId}
+                                        elevation={0}
+                                        sx={{
+                                            border: "1px solid",
+                                            borderColor: "divider",
+                                            borderRadius: 2,
+                                            overflow: "hidden",
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                px: 2,
+                                                py: 1.5,
+                                                display: "flex",
+                                                flexWrap: "wrap",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                gap: 1,
+                                                bgcolor: "rgba(0, 172, 193, 0.06)",
+                                                borderBottom: "1px solid",
+                                                borderColor: "divider",
+                                            }}
+                                        >
+                                            <Box sx={{ minWidth: 0 }}>
+                                                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                                                    ORDER
                                                 </Typography>
-
-                                                <Divider sx={{ my: 1.5 }} />
-
-                                                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                                                    Items:
+                                                <Typography
+                                                    variant="subtitle1"
+                                                    fontWeight={700}
+                                                    sx={{ fontFamily: "ui-monospace, monospace", wordBreak: "break-all" }}
+                                                >
+                                                    {shortOrderId(order.orderId)}
                                                 </Typography>
-
-                                                {order.items.map((item, index) => (
-                                                    <Box key={index} sx={{ mb: 1 }}>
-                                                        <Typography variant="body2">
-                                                            {item.quantity}x {item.name} -
-                                                            ₹{item.price}
-                                                        </Typography>
-                                                    </Box>
-                                                ))}
-
-                                                <Divider sx={{ my: 1.5 }} />
-
-                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                    <Typography variant="subtitle1" fontWeight="bold">
-                                                        Total:
-                                                    </Typography>
-                                                    <Typography variant="subtitle1" fontWeight="bold" color="#00acc1">
-
-                                                        ₹{order.total}
-                                                    </Typography>
-                                                </Box>
-                                            </CardContent>
-
-                                        </Card>
-                                    ))}
-                                </Box>
-
-                                {/* Desktop table view for larger screens */}
-                                <Box sx={{ display: { xs: "none", md: "block" } }}>
-                                    <Paper sx={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-                                        <Box sx={{ p: 2, borderBottom: "1px solid rgba(0,0,0,0.1)" }}>
-                                            <Grid container sx={{ fontWeight: "bold" }}>
-                                                <Grid item xs={2}>
-                                                    <Typography variant="subtitle1">Order ID</Typography>
-                                                </Grid>
-                                                <Grid item xs={2}>
-                                                    <Typography variant="subtitle1">Date</Typography>
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography variant="subtitle1">Items</Typography>
-                                                </Grid>
-                                                <Grid item xs={2}>
-                                                    <Typography variant="subtitle1">Total</Typography>
-                                                </Grid>
-                                                <Grid item xs={3}>
-                                                    <Typography variant="subtitle1">Status</Typography>
-                                                </Grid>
-                                            </Grid>
+                                                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                                                    {order.orderId}
+                                                </Typography>
+                                            </Box>
+                                            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+                                                <Chip
+                                                    label={order.statusLabel}
+                                                    size="small"
+                                                    sx={{ ...orderChipSx(order.status), fontWeight: 600 }}
+                                                />
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {order.itemCount} {order.itemCount === 1 ? "item" : "items"}
+                                                </Typography>
+                                            </Stack>
                                         </Box>
 
-                                        {orders.map((order, index) => (
+                                        <CardContent sx={{ pt: 2 }}>
+                                            <Grid container spacing={2} sx={{ mb: 2 }}>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                                                        PLACED
+                                                    </Typography>
+                                                    <Typography variant="body2">{formatDate(order.createdAt)}</Typography>
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                                                        LAST UPDATED
+                                                    </Typography>
+                                                    <Typography variant="body2">{formatDate(order.updatedAt)}</Typography>
+                                                </Grid>
+                                            </Grid>
+
+                                            {order.address ? (
+                                                <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                                                    <Typography variant="caption" color="text.secondary" fontWeight={600} gutterBottom display="block">
+                                                        SHIP TO
+                                                    </Typography>
+                                                    <Typography variant="body2" fontWeight={600}>
+                                                        {order.address.name}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {order.address.street}, {order.address.city}, {order.address.state}{" "}
+                                                        {order.address.postalCode}, {order.address.country}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                                        Phone: {order.address.phoneNumber}
+                                                        {order.address.alternatePhoneNumber
+                                                            ? ` · Alt: ${order.address.alternatePhoneNumber}`
+                                                            : ""}
+                                                    </Typography>
+                                                </Paper>
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                                    Shipping address (ID {order.addressId}) is not available.
+                                                </Typography>
+                                            )}
+
+                                            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
+                                                Order items
+                                            </Typography>
+                                            <TableContainer sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
+                                                <Table size="small">
+                                                    <TableHead>
+                                                        <TableRow sx={{ bgcolor: "rgba(0,0,0,0.03)" }}>
+                                                            <TableCell>Product</TableCell>
+                                                            <TableCell>Store</TableCell>
+                                                            <TableCell align="center">Size</TableCell>
+                                                            <TableCell align="right">Qty</TableCell>
+                                                            <TableCell align="right">Unit ₹</TableCell>
+                                                            <TableCell align="right">Line ₹</TableCell>
+                                                            <TableCell align="right">Status</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {order.items.length === 0 ? (
+                                                            <TableRow>
+                                                                <TableCell colSpan={7}>
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        No line items on this order.
+                                                                    </Typography>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ) : (
+                                                            order.items.map((item) => (
+                                                                <TableRow key={item.id} hover>
+                                                                    <TableCell>
+                                                                        <Stack direction="row" spacing={1} alignItems="center">
+                                                                            {item.productImage ? (
+                                                                                <Box
+                                                                                    component="img"
+                                                                                    src={item.productImage}
+                                                                                    alt=""
+                                                                                    sx={{
+                                                                                        width: 40,
+                                                                                        height: 40,
+                                                                                        flexShrink: 0,
+                                                                                        borderRadius: 1,
+                                                                                        objectFit: "cover",
+                                                                                        border: "1px solid",
+                                                                                        borderColor: "divider",
+                                                                                    }}
+                                                                                />
+                                                                            ) : null}
+                                                                            <Box sx={{ minWidth: 0 }}>
+                                                                                <Typography variant="body2" fontWeight={600}>
+                                                                                    {item.name}
+                                                                                </Typography>
+                                                                                <Typography variant="caption" color="text.secondary">
+                                                                                    ID {item.productId}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        </Stack>
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Typography variant="body2">{item.storeName}</Typography>
+                                                                        <Typography variant="caption" color="text.secondary">
+                                                                            {item.storeId}
+                                                                        </Typography>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">{item.size ?? "—"}</TableCell>
+                                                                    <TableCell align="right">{item.quantity}</TableCell>
+                                                                    <TableCell align="right">{item.unitPrice}</TableCell>
+                                                                    <TableCell align="right" sx={{ fontWeight: 600 }}>
+                                                                        {item.lineTotal}
+                                                                    </TableCell>
+                                                                    <TableCell align="right">
+                                                                        <Chip
+                                                                            label={item.statusLabel}
+                                                                            size="small"
+                                                                            sx={{ ...orderChipSx(item.status), fontWeight: 600 }}
+                                                                        />
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ))
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+
                                             <Box
-                                                key={order.orderId}
                                                 sx={{
-                                                    p: 2,
-                                                    borderBottom: index < orders.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none",
-                                                    "&:hover": { bgcolor: "rgba(0,0,0,0.02)" },
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center",
+                                                    mt: 2,
+                                                    pt: 2,
+                                                    borderTop: "2px solid",
+                                                    borderColor: "divider",
                                                 }}
                                             >
-                                                <Grid container alignItems="center">
-                                                    <Grid item xs={2}>
-                                                        <Typography variant="body2">{order.orderId}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={2}>
-                                                        <Typography variant="body2">{formatDate(order.date)}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={3}>
-                                                        {order.items.map((item, idx) => (
-                                                            <Typography key={idx} variant="body2" sx={{ mb: 0.5 }}>
-                                                                {item.quantity}x {item.name}
-                                                            </Typography>
-                                                        ))}
-                                                    </Grid>
-                                                    <Grid item xs={2}>
-                                                        <Typography variant="body2" fontWeight="medium" color="#00acc1">
-
-                                                            ₹{order.total}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={2}>
-                                                        <Chip
-                                                            label={order.status}
-                                                            size="small"
-                                                            color={order.status === "Delivered" ? "success" : "primary"}
-                                                            sx={{
-                                                                bgcolor: order.status === "Delivered" ? "#4caf50" : "#00acc1",
-                                                                color: "white",
-                                                                fontWeight: 500,
-                                                            }}
-                                                        />
-                                                    </Grid>
-
-                                                </Grid>
+                                                <Typography variant="subtitle1" fontWeight={700}>
+                                                    Order total
+                                                </Typography>
+                                                <Typography variant="h6" fontWeight={800} color="#00838f">
+                                                    ₹{order.total}
+                                                </Typography>
                                             </Box>
-                                        ))}
-                                    </Paper>
-                                </Box>
-                            </>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Stack>
                         ) : (
                             <Box sx={{ textAlign: "center", py: 4 }}>
-                                <ShoppingBagIcon sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
-                                <Typography variant="h6" color="text.secondary">
-                                    No orders found
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    You haven&apos;t placed any orders yet
+                                <Typography variant="body1" color="text.secondary">
+                                    You have not placed any order yet.
                                 </Typography>
                             </Box>
                         )}

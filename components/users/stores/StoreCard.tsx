@@ -8,7 +8,9 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Chip,
 } from "@mui/material";
+import { LocationOn as LocationIcon } from "@mui/icons-material";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -67,6 +69,15 @@ export default function StoreCard({ store }: IProps) {
         >
           {store.name}
         </Typography>
+        {store.city && (
+          <Chip
+            icon={<LocationIcon sx={{ fontSize: 14 }} />}
+            label={store.city}
+            size="small"
+            variant="outlined"
+            sx={{ mb: 1, maxWidth: "100%" }}
+          />
+        )}
         <Typography
           variant="body2"
           color="text.secondary"

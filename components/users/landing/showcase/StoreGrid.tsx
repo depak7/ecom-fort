@@ -1,78 +1,108 @@
 "use client"
 
-import { Grid, Box, Typography, IconButton } from "@mui/material";
-import { ArrowForwardIos, ArrowBackIos } from "@mui/icons-material";
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import StoreCard from "../../stores/StoreCard";
-import { BaseButton } from "../../buttons/BaseButton";
+import { Grid, Box, Typography, Button } from "@mui/material"
+import React, { useState, useEffect, useMemo } from "react"
+import Link from "next/link"
+import { ArrowForward as ArrowForwardIcon } from "@mui/icons-material"
+import StoreCard from "../../stores/StoreCard"
+import { useLocation } from "@/components/users/location/LocationProvider"
 
 interface Store {
-  id: string;
-  name: string;
-  logo: string | null;
-  city: string;
-  address:string;
-  description: string;
+  id: string
+  name: string
+  logo: string | null
+  city: string
+  address: string
+  description: string
 }
 
 interface StoreGridProps {
-  stores: Store[]; // Expecting an array of stores
+  stores: Store[]
 }
 
 export default function StoreGrid({ stores }: StoreGridProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleStores, setVisibleStores] = useState(3);
+  const [visibleStores, setVisibleStores] = useState(3)
+  const { selectedCity, isHydrated } = useLocation()
 
-  // Add useEffect to handle window resize
+  const displayStores = useMemo(() => {
+    if (!isHydrated || !selectedCity) return stores
+    return stores.filter(
+      (store) => store.city.toLowerCase() === selectedCity.toLowerCase()
+    )
+  }, [stores, selectedCity, isHydrated])
+
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 600) { // md breakpoint
-        setVisibleStores(2);
-      } else {
-        setVisibleStores(3);
-      }
-    };
-
-    // Initial check
-    handleResize();
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
+      setVisibleStores(window.innerWidth < 600 ? 2 : 3)
+    }
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   return (
-    <Box sx={{ p: 3, textAlign: "center" }}>
-      <Typography variant="h6" fontWeight="bold" mb={2}>
-        SHOP BY STORES
-      </Typography>
-      <Grid container spacing={2} justifyContent="center">
-        {stores
-          .slice(currentIndex, currentIndex + visibleStores)
-          .map((store) => (
-            <Grid item xs={10} sm={6} md={3} key={store.id}>
-              <StoreCard store={store} />
-            </Grid>
-            
-          ))}
-      </Grid>
+    <Box sx={{ bgcolor: "#fff", py: { xs: 4, md: 5 } }}>
+      <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, md: 3 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={700} color="#0f172a">
+              Featured stores
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {selectedCity ? `Curated picks in ${selectedCity}` : "Popular local sellers"}
+            </Typography>
+          </Box>
+          <Button
+            component={Link}
+            href="/stores"
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              color: "#0f172a",
+              flexShrink: 0,
+              "&:hover": { bgcolor: "rgba(15,23,42,0.04)" },
+            }}
+          >
+            View all
+          </Button>
+        </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          mt: 3,
-        }}
-      >
-        <Link href="/stores" passHref>
-          <BaseButton>View All</BaseButton>
-        </Link>
+        {displayStores.length === 0 ? (
+          <Box
+            sx={{
+              textAlign: "center",
+              py: 5,
+              px: 2,
+              borderRadius: 2,
+              bgcolor: "#f8fafc",
+              border: "1px dashed #e2e8f0",
+            }}
+          >
+            <Typography variant="body1" color="text.secondary">
+              {selectedCity
+                ? `No stores in ${selectedCity} yet. Try another city above.`
+                : "No stores available right now."}
+            </Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={2.5}>
+            {displayStores.slice(0, visibleStores).map((store) => (
+              <Grid item xs={12} sm={6} md={4} key={store.id}>
+                <StoreCard store={store} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
     </Box>
-  );
+  )
 }

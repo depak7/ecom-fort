@@ -1,41 +1,22 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from "react"
-import { Box, Typography, IconButton, Slider, styled, useMediaQuery, useTheme } from "@mui/material"
+import { Box, Typography, IconButton, useMediaQuery, useTheme } from "@mui/material"
 import Image from "next/image"
-import Link from "next/link"
-import { BaseButton } from "../../buttons/BaseButton"
 import { ChevronLeft, ChevronRight } from "@mui/icons-material"
 
 import leftImage from "@/components/assets/users/bnr1.jpg"
 import rightImage from "@/components/assets/users/bnr2.jpg"
 
 const carouselImages = [
-  { src: leftImage, alt: "Clothing" },
-  { src: rightImage, alt: "Shoes" },
+  { src: leftImage, alt: "Clothing collection" },
+  { src: rightImage, alt: "Shoes collection" },
 ]
-
-const StyledSlider = styled(Slider)(({ theme }) => ({
-  "& .MuiSlider-thumb": {
-    display: "none",
-  },
-  "& .MuiSlider-track": {
-    display: "none",
-  },
-  "& .MuiSlider-rail": {
-    display: "none",
-  },
-}))
 
 export default function TitleCard() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
-
-  const handleSlideChange = (event: Event, newValue: number | number[]) => {
-    setCurrentSlide(newValue as number)
-  }
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
   const handlePrevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : carouselImages.length - 1))
@@ -46,99 +27,98 @@ export default function TitleCard() {
   }, [])
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      handleNextSlide()
-    }, 3000)
-
+    const interval = setInterval(handleNextSlide, 5000)
     return () => clearInterval(interval)
   }, [handleNextSlide])
 
   return (
-    <Box sx={{ textAlign: "center", backgroundColor: "white" }}>
+    <Box sx={{ bgcolor: "#0f172a", position: "relative" }}>
       <Box
         sx={{
           position: "relative",
           width: "100%",
-          height: "auto",
-          aspectRatio: isMobile ? "2/1" : isTablet ? "2 / 1" : "4 / 1.20",
+          aspectRatio: { xs: "16/9", sm: "21/9", md: "3/1" },
+          maxHeight: { md: 340 },
+          overflow: "hidden",
         }}
       >
-       <Image
+        <Image
           src={carouselImages[currentSlide].src}
           alt={carouselImages[currentSlide].alt}
           fill
-          style={{ objectFit: "fill"}} 
+          style={{ objectFit: "cover" }}
           priority
         />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.1) 50%, transparent 100%)",
+          }}
+        />
+
         {!isMobile && (
           <>
             <IconButton
               onClick={handlePrevSlide}
+              aria-label="Previous slide"
               sx={{
                 position: "absolute",
-                left: 5,
+                left: 16,
                 top: "50%",
                 transform: "translateY(-50%)",
-                bgcolor: "rgba(255, 255, 255, 0.7)",
-                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.9)" },
+                bgcolor: "rgba(255,255,255,0.9)",
+                "&:hover": { bgcolor: "#fff" },
               }}
             >
               <ChevronLeft />
             </IconButton>
             <IconButton
               onClick={handleNextSlide}
+              aria-label="Next slide"
               sx={{
                 position: "absolute",
-                right: 5,
+                right: 16,
                 top: "50%",
                 transform: "translateY(-50%)",
-                bgcolor: "rgba(255, 255, 255, 0.7)",
-                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.9)" },
+                bgcolor: "rgba(255,255,255,0.9)",
+                "&:hover": { bgcolor: "#fff" },
               }}
             >
               <ChevronRight />
             </IconButton>
           </>
         )}
-        <StyledSlider
-          value={currentSlide}
-          onChange={handleSlideChange}
-          min={0}
-          max={carouselImages.length - 1}
-          step={1}
-          sx={{
-            position: "absolute",
-            bottom: 10,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "80%",
-          }}
-        />
-      </Box>
-
-      <Box sx={{ marginTop: { xs: 2, sm: 3, md: 4 }, padding: { xs: 1, sm: 2 } }}>
-        <Typography variant={isMobile ? "h6" : "h4"} fontWeight="bold">
-          UNLEASH YOUR STYLE
-        </Typography>
-        <Typography variant={isMobile ? "body2" : "subtitle1"} sx={{ marginTop: 1, color: "gray" }}>
-          Top Clothing & Shoes from Every Store handpicked for you!
-        </Typography>
 
         <Box
           sx={{
-            marginTop: { xs: 1, sm: 2 },
+            position: "absolute",
+            bottom: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: { xs: 1, sm: 2 },
+            gap: 1,
           }}
         >
-          <Link href="/stores" passHref>
-            <BaseButton customSize="small"  sx={{ borderRadius: 15, width: { xs: "100%", sm: "auto" } }}>Explore Stores</BaseButton>
-          </Link>
-          <Link href="/products" passHref>
-            <BaseButton customSize="small" sx={{ borderRadius: 15, width: { xs: "100%", sm: "auto" } }}>Explore Products</BaseButton>
-          </Link>
+          {carouselImages.map((_, i) => (
+            <Box
+              key={i}
+              component="button"
+              type="button"
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => setCurrentSlide(i)}
+              sx={{
+                width: currentSlide === i ? 24 : 8,
+                height: 8,
+                borderRadius: 999,
+                border: "none",
+                p: 0,
+                cursor: "pointer",
+                bgcolor: currentSlide === i ? "#fff" : "rgba(255,255,255,0.45)",
+                transition: "all 0.25s ease",
+              }}
+            />
+          ))}
         </Box>
       </Box>
     </Box>

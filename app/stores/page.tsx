@@ -1,20 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Grid,
   Typography,
   Box,
-  IconButton,
   Menu,
   MenuItem,
-  useMediaQuery,
-  useTheme,
+  Button,
 } from "@mui/material";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 
 import StoreCard from "@/components/users/stores/StoreCard";
+import BrowseToolbar from "@/components/users/discovery/BrowseToolbar";
 import { getAllStores } from "../actions/store/action";
+import { useLocation } from "@/components/users/location/LocationProvider";
 
 interface Store {
   id: string;
@@ -26,113 +26,97 @@ interface Store {
 }
 
 export default function AvailableStores() {
-  const [stores, setStores] = useState<Store[]>([]);
-  const [filteredStores, setFilteredStores] = useState<Store[]>([]);
-  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+  const [allStores, setAllStores] = useState<Store[]>([]);
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<string>();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [sortBy, setSortBy] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const { selectedCity, isHydrated } = useLocation();
+
+  const fetchStores = useCallback(async (sort = "", city: string | null = selectedCity) => {
+    const { stores } = await getAllStores(sort, city);
+    setAllStores((stores as Store[]) || []);
+  }, [selectedCity]);
 
   useEffect(() => {
-    fetchStores();
-  }, []);
-``
-  const fetchStores = async (sort = '') => {
-    const { stores } = await getAllStores(sort);
-    setStores(stores as Store[]);
-    setFilteredStores(stores as Store[]);
-  };
+    if (isHydrated) {
+      fetchStores(sortBy, selectedCity);
+    }
+  }, [isHydrated, selectedCity, sortBy, fetchStores]);
 
-  const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setFilterAnchorEl(event.currentTarget);
-  };
-
-  const handleSortClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setSortAnchorEl(event.currentTarget);
-  };
-
-  const handleFilterClose = () => {
-    setFilterAnchorEl(null);
-  };
-
-  const handleSortClose = () => {
-    setSortAnchorEl(null);
-  };
-
-  const handleCityFilter = (city: string) => {
-    setSelectedCity(city);
-    fetchStores(sortBy);
-    handleFilterClose();
-  };
+  const filteredStores = useMemo(() => {
+    if (!searchQuery.trim()) return allStores;
+    const q = searchQuery.trim().toLowerCase();
+    return allStores.filter(
+      (store) =>
+        store.name.toLowerCase().includes(q) ||
+        store.description?.toLowerCase().includes(q) ||
+        store.city?.toLowerCase().includes(q)
+    );
+  }, [allStores, searchQuery]);
 
   const handleSort = (sortOption: string) => {
     setSortBy(sortOption);
-    fetchStores(sortOption);
-    handleSortClose();
+    setSortAnchorEl(null);
   };
 
   return (
-    <Box sx={{ maxWidth: 1600, margin: "auto", padding: 2 }}>
-      <Typography
-        variant={isMobile?"body2":"h6"}
-        component="h1"
-        gutterBottom
-        align="center"
-        fontWeight={"bold"}
-        sx={{ mb: 2 }}
+    <Box sx={{ pb: 4 }}>
+      <BrowseToolbar
+        title="Stores"
+        subtitle="Browse approved stores in your area"
+        searchPlaceholder="Search stores by name, city, or description…"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
       >
-        SHOP TOP STORES IN ONE SEAMLESS
-        EXPERIENCE!
-      </Typography>
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <Typography variant="body1" component="h2" fontWeight={"bold"}>
-          SHOP BY STORES
-        </Typography>
-        <Box display={"flex"} gap={2}>
-
-          <Box display={"flex"} alignItems={"center"}>
-            <Typography variant="body2">Sort By</Typography>
-            <IconButton sx={{ color: "black" }} aria-label="sort" onClick={handleSortClick}>
-              <ExpandMoreOutlinedIcon />
-            </IconButton>
-          </Box>
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            size="small"
+            endIcon={<ExpandMoreOutlinedIcon />}
+            onClick={(e) => setSortAnchorEl(e.currentTarget)}
+            sx={{ textTransform: "none", color: "text.secondary" }}
+          >
+            Sort
+          </Button>
+          <Menu
+            anchorEl={sortAnchorEl}
+            open={Boolean(sortAnchorEl)}
+            onClose={() => setSortAnchorEl(null)}
+          >
+            <MenuItem onClick={() => handleSort("name")}>Store name</MenuItem>
+            <MenuItem onClick={() => handleSort("city")}>City</MenuItem>
+          </Menu>
         </Box>
-      </Box>
-      <Menu
-        anchorEl={sortAnchorEl}
-        open={Boolean(sortAnchorEl)}
-        onClose={handleSortClose}
-      >
-        <MenuItem sx={{fontSize:"15px"}}  onClick={() => handleSort('name')}>Storename</MenuItem>
-        <MenuItem sx={{fontSize:"15px"}}  onClick={() => handleSort('city')}>City</MenuItem>
-      </Menu>
+      </BrowseToolbar>
 
-      <Grid container spacing={3}>
-        {filteredStores.map((store: Store) => (
-          <Grid item xs={12} sm={6} md={4} key={store.id} padding={3}>
-            <StoreCard
-              store={{
-                id: store.id,
-                name: store.name,
-                logo: store.logo,
-                city: store.city,
-                address: store.address,
-                description: store.description,
-              }}
-            />
-          </Grid>
-        ))}
-      </Grid>
+      <Box sx={{ maxWidth: 1200, margin: "auto", px: 2 }}>
+        {filteredStores.length === 0 ? (
+          <Box textAlign="center" py={6}>
+            <Typography variant="h6" gutterBottom>
+              No stores found
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {searchQuery.trim()
+                ? "Try a different search term or clear your city filter."
+                : selectedCity
+                  ? `No approved stores in ${selectedCity} yet.`
+                  : "No stores available at the moment."}
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {filteredStores.length} store{filteredStores.length !== 1 ? "s" : ""} found
+            </Typography>
+            <Grid container spacing={3}>
+              {filteredStores.map((store) => (
+                <Grid item xs={12} sm={6} md={4} key={store.id}>
+                  <StoreCard store={store} />
+                </Grid>
+              ))}
+            </Grid>
+          </>
+        )}
+      </Box>
     </Box>
   );
 }

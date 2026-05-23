@@ -3,6 +3,7 @@ import prisma from '@/database/index'
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { Redis } from '@upstash/redis'
+import { Prisma } from '@prisma/client'
 
 const redis = Redis.fromEnv();
 
@@ -11,14 +12,13 @@ interface SearchToken {
   scores: number[]
 }
 
-// AI image search (disabled — DB-only mode)
-// const EXTERNAL_AI_API =
-//   "https://ai-product-search-service.livelyocean-b0186b38.southindia.azurecontainerapps.io/api/products/image-search"
-
-
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const query = searchParams.get('query')
+  const city = searchParams.get('city')
+  const category = searchParams.get('category')
+  const sort = searchParams.get('sort') || 'relevance'
+  const type = searchParams.get('type') || 'all'
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 
@@ -27,78 +27,127 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const stores = await prisma.$queryRaw`
-    SELECT 
-      id, name, logo, description, city, address, "mapLink", "ownerId", "bannerImage", "offerDescription"
-    FROM "Store"
-    WHERE to_tsvector('english', name || ' ' || description)
-          @@ plainto_tsquery('english', ${query})
-    ORDER BY ts_rank(
-            to_tsvector('english', name || ' ' || description),
-            plainto_tsquery('english', ${query})
-          ) DESC
-    LIMIT 20;
-  `
+    let stores: unknown[] = []
 
-    // --- AI text search (commented out; direct DB search only) ---
-    // const aiResponse = await axios.post(
-    //   "https://ai-product-search-service.livelyocean-b0186b38.southindia.azurecontainerapps.io/api/products/text-search",
-    //   new URLSearchParams({ query, top_k: "50" }),
-    // );
-    // const aiResults = aiResponse.data?.results || [];
-    // const idToScoreMap = new Map(
-    //   aiResults
-    //     .filter((r: any) => r?.metadata?.product_id)
-    //     .map((r: any) => [r.metadata.product_id, r.score]),
-    // );
-    // const productIds = Array.from(idToScoreMap.keys()).filter(
-    //   (id): id is string => typeof id === "string" && id.trim().length > 0,
-    // );
-    // if (productIds.length) { ... fetch by id, sort by aiScore ... }
+    if (type === 'all' || type === 'stores') {
+      if (city) {
+        stores = await prisma.$queryRaw`
+          SELECT 
+            id, name, logo, description, city, address, "mapLink", "ownerId", "bannerImage", "offerDescription"
+          FROM "Store"
+          WHERE "isApproved" = true
+            AND LOWER(city) = LOWER(${city})
+            AND to_tsvector('english', name || ' ' || description)
+                  @@ plainto_tsquery('english', ${query})
+          ORDER BY ts_rank(
+                  to_tsvector('english', name || ' ' || description),
+                  plainto_tsquery('english', ${query})
+                ) DESC
+          LIMIT 20;
+        `
+      } else {
+        stores = await prisma.$queryRaw`
+          SELECT 
+            id, name, logo, description, city, address, "mapLink", "ownerId", "bannerImage", "offerDescription"
+          FROM "Store"
+          WHERE "isApproved" = true
+            AND to_tsvector('english', name || ' ' || description)
+                  @@ plainto_tsquery('english', ${query})
+          ORDER BY ts_rank(
+                  to_tsvector('english', name || ' ' || description),
+                  plainto_tsquery('english', ${query})
+                ) DESC
+          LIMIT 20;
+        `
+      }
+    }
 
-    const products = await prisma.product.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { description: { contains: query, mode: "insensitive" } },
-        ],
-      },
-      select: {
-        id: true,
-        store: {
-          select: {
-            id: true,
-            name: true,
-            logo: true,
-            description: true,
+    let productsWithWishlistStatus: Array<Record<string, unknown>> = []
+
+    if (type === 'all' || type === 'products') {
+      const productWhere: Prisma.ProductWhereInput = {
+        AND: [
+          {
+            store: {
+              isApproved: true,
+              ...(city ? { city: { equals: city, mode: 'insensitive' } } : {}),
+            },
           },
-        },
-        category: true,
-        description: true,
-        name: true,
-        storeId: true,
-        price: true,
-        variants: { select: { variantImage: true } },
-        productImage: true,
-        wishlistItems: userId
-          ? {
-            where: { wishlist: { userId } },
-            select: { id: true },
-          }
-          : false,
-      },
-    });
+          {
+            OR: [
+              { name: { contains: query, mode: 'insensitive' } },
+              { description: { contains: query, mode: 'insensitive' } },
+              { category: { contains: query, mode: 'insensitive' } },
+              { store: { name: { contains: query, mode: 'insensitive' } } },
+            ],
+          },
+          ...(category
+            ? [{ category: { equals: category, mode: 'insensitive' as const } }]
+            : []),
+        ],
+      }
 
-    // ✅ Add wishlist status
-    const productsWithWishlistStatus = products.map((p) => ({
-      ...p,
-      isWishlisted: userId ? p.wishlistItems?.length > 0 : false,
-    }));
+      let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: 'desc' }
+      if (sort === 'price-low-high') {
+        orderBy = { price: 'asc' }
+      } else if (sort === 'price-high-low') {
+        orderBy = { price: 'desc' }
+      } else if (sort === 'new-arrivals') {
+        orderBy = { createdAt: 'desc' }
+      }
+
+      const products = await prisma.product.findMany({
+        where: productWhere,
+        orderBy,
+        take: 50,
+        select: {
+          id: true,
+          store: {
+            select: {
+              id: true,
+              name: true,
+              logo: true,
+              description: true,
+              city: true,
+            },
+          },
+          category: true,
+          description: true,
+          name: true,
+          storeId: true,
+          price: true,
+          variants: { select: { variantImage: true } },
+          productImage: true,
+          wishlistItems: userId
+            ? {
+              where: { wishlist: { userId } },
+              select: { id: true },
+            }
+            : false,
+        },
+      });
+
+      productsWithWishlistStatus = products.map((p) => ({
+        ...p,
+        isWishlisted: userId ? (p.wishlistItems?.length ?? 0) > 0 : false,
+      }));
+    }
+
+    const categories = await prisma.product.findMany({
+      where: {
+        category: { not: null },
+        store: { isApproved: true },
+      },
+      select: { category: true },
+      distinct: ['category'],
+      orderBy: { category: 'asc' },
+    });
 
     return NextResponse.json({
       status: true,
       stores,
       productsWithWishlistStatus,
+      categories: categories.map((c) => c.category).filter(Boolean),
       count: productsWithWishlistStatus.length,
       source: "db",
     });
@@ -116,9 +165,8 @@ export async function POST(req: NextRequest) {
 
     const contentType = req.headers.get("content-type") || ""
 
-    // CASE 1: Image upload (multipart) — AI image search disabled; DB-only mode has no vision pipeline here.
     if (contentType.includes("multipart/form-data")) {
-      await req.formData() // consume body
+      await req.formData()
       return NextResponse.json(
         {
           success: false,
@@ -126,17 +174,8 @@ export async function POST(req: NextRequest) {
         },
         { status: 503 },
       );
-      // --- Previous AI image search (commented out) ---
-      // const formData = await req.formData()
-      // const res = await fetch(EXTERNAL_AI_API, { method: "POST", body: formData })
-      // if (!res.ok) { ... }
-      // const data = await res.json()
-      // const productIds = (data?.results || []).map((r: any) => r?.metadata?.product_id).filter(Boolean)
-      // const scores = (data?.results || []).map((r: any) => r?.score || 0)
-      // ...
     }
 
-    // CASE 2: Token lookup (JSON)
     if (contentType.includes("application/json")) {
 
       const { token } = await req.json()
@@ -212,7 +251,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Fallback: unsupported content type
     return NextResponse.json(
       { success: false, message: "Unsupported content type" },
       { status: 400 },

@@ -215,45 +215,175 @@ export async function updateOrderStatus(orderId: string, itemId: number, newStat
 }
 
 
-export async function getOrderDetailsByUserId(userId: string) {
+/** Plain JSON shape for client components (no Prisma Decimal / Date objects). */
+export type ProfileOrderAddress = {
+  id: number
+  name: string
+  phoneNumber: string
+  alternatePhoneNumber: string
+  street: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+}
+
+export type ProfileOrderLine = {
+  id: number
+  productId: string
+  name: string
+  productImage: string | null
+  quantity: number
+  unitPrice: string
+  lineTotal: string
+  size: string | null
+  status: string
+  statusLabel: string
+  storeId: string
+  storeName: string
+}
+
+export type ProfileOrder = {
+  orderId: string
+  createdAt: string
+  updatedAt: string
+  addressId: number
+  address: ProfileOrderAddress | null
+  items: ProfileOrderLine[]
+  /** Sum of line quantities */
+  itemCount: number
+  /** Sum of line totals (rupees, two decimals) */
+  total: string
+  /** Raw status token(s), e.g. PENDING or PENDING · SHIPPED */
+  status: string
+  /** Human-readable for chips / headers */
+  statusLabel: string
+}
+
+function moneyFromDecimal(price: unknown): number {
+  if (typeof price === 'number') return price
+  if (price && typeof price === 'object' && 'toString' in price) {
+    return parseFloat((price as { toString: () => string }).toString())
+  }
+  return parseFloat(String(price))
+}
+
+function formatMoney2(n: number): string {
+  if (Number.isNaN(n)) return '0.00'
+  return n.toFixed(2)
+}
+
+function humanizeOrderStatus(s: string): string {
+  const t = (s || '').trim()
+  if (!t) return '—'
+  return t
+    .split(' · ')
+    .map((part) => {
+      const p = part.trim()
+      if (!p) return part
+      return p.charAt(0) + p.slice(1).toLowerCase().replace(/_/g, ' ')
+    })
+    .join(' · ')
+}
+
+export async function getOrderDetailsByUserId(userId: string): Promise<ProfileOrder[]> {
   const orders = await prisma.order.findMany({
     where: { userId },
+    orderBy: { createdAt: 'desc' },
     select: {
       id: true,
       createdAt: true,
+      updatedAt: true,
       AddressId: true,
+      total: true,
       items: {
         select: {
-          product: {
-            select: { name: true },
-          },
+          id: true,
           quantity: true,
           price: true,
           orderStatus: true,
+          size: true,
+          productId: true,
+          storeId: true,
+          product: { select: { id: true, name: true, productImage: true } },
+          store: { select: { id: true, name: true } },
         },
       },
     },
   })
 
-  if (!orders || orders.length === 0) return []
+  if (!orders.length) return []
 
-  return orders.map(order => {
-    const total = order.items.reduce((acc, item) => {
-      return acc + Number(item.price) * item.quantity
-    }, 0)
+  const addressIds = Array.from(new Set(orders.map((o) => o.AddressId)))
+  const addresses = await prisma.address.findMany({
+    where: { id: { in: addressIds } },
+  })
+  const addrById = new Map(addresses.map((a) => [a.id, a]))
+
+  return orders.map((order) => {
+    const items: ProfileOrderLine[] = order.items.map((item) => {
+      const unit = moneyFromDecimal(item.price)
+      const line = unit * item.quantity
+      const st = String(item.orderStatus)
+      return {
+        id: item.id,
+        productId: item.productId,
+        name: item.product?.name ?? 'Product unavailable',
+        productImage: item.product?.productImage ?? null,
+        quantity: item.quantity,
+        unitPrice: formatMoney2(unit),
+        lineTotal: formatMoney2(line),
+        size: item.size,
+        status: st,
+        statusLabel: humanizeOrderStatus(st),
+        storeId: item.storeId,
+        storeName: item.store?.name ?? '—',
+      }
+    })
+
+    const computedFromLines = items.reduce((acc, row) => acc + parseFloat(row.lineTotal), 0)
+    const storedTotal = order.total != null ? Number(order.total) : NaN
+    const totalNum =
+      items.length > 0
+        ? computedFromLines
+        : !Number.isNaN(storedTotal)
+          ? storedTotal
+          : 0
+
+    const statuses = order.items.map((i) => String(i.orderStatus))
+    const unique = Array.from(new Set(statuses))
+    const status =
+      unique.length === 0 ? 'UNKNOWN' : unique.length === 1 ? unique[0] : unique.join(' · ')
+    const statusLabel = humanizeOrderStatus(status)
+
+    const addr = addrById.get(order.AddressId)
+    const address: ProfileOrderAddress | null = addr
+      ? {
+          id: addr.id,
+          name: addr.name,
+          phoneNumber: addr.phoneNumber,
+          alternatePhoneNumber: addr.alternatePhoneNumber,
+          street: addr.street,
+          city: addr.city,
+          state: addr.state,
+          postalCode: addr.postalCode,
+          country: addr.country,
+        }
+      : null
+
+    const itemCount = items.reduce((sum, row) => sum + row.quantity, 0)
 
     return {
       orderId: order.id,
-      date: order.createdAt,
-      address: order.AddressId,
-      items: order.items.map(item => ({
-        name: item.product.name,
-        quantity: item.quantity,
-        price: item.price,
-        status: item.orderStatus,
-      })),
-      total: total.toFixed(2),
-      status: order.items.length > 0 ? order.items[0].orderStatus : "Unknown",
+      createdAt: order.createdAt.toISOString(),
+      updatedAt: order.updatedAt.toISOString(),
+      addressId: order.AddressId,
+      address,
+      items,
+      itemCount,
+      total: formatMoney2(totalNum),
+      status,
+      statusLabel,
     }
   })
 }

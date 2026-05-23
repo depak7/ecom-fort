@@ -127,7 +127,22 @@ export async function createStore(formData: FormData) {
 
 // actions/store/action.ts
 
-export async function getAllStores(sortBy?: string) {
+export async function getDistinctCities() {
+  try {
+    const rows = await readOnlyPrisma.store.findMany({
+      where: { isApproved: true },
+      select: { city: true },
+      distinct: ['city'],
+      orderBy: { city: 'asc' },
+    })
+    return rows.map((r) => r.city).filter(Boolean)
+  } catch (error) {
+    console.error('Failed to retrieve cities:', error)
+    return []
+  }
+}
+
+export async function getAllStores(sortBy?: string, city?: string | null) {
   try {
     let orderBy = {};
     if (sortBy === 'name') {
@@ -138,8 +153,11 @@ export async function getAllStores(sortBy?: string) {
 
     const stores = await readOnlyPrisma.store.findMany({
       orderBy,
-      where:{
+      where: {
         isApproved: true,
+        ...(city
+          ? { city: { equals: city, mode: 'insensitive' as const } }
+          : {}),
       },
       select: {
         id: true,

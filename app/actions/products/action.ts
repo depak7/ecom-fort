@@ -162,9 +162,19 @@ export async function deleteProduct(productId: string) {
 
 
 
-export async function getAllProducts(userId?: string) {
+export async function getAllProducts(userId?: string, city?: string | null) {
   try {
     const products = await readOnlyPrisma.product.findMany({
+      where: city
+        ? {
+            store: {
+              isApproved: true,
+              city: { equals: city, mode: 'insensitive' },
+            },
+          }
+        : {
+            store: { isApproved: true },
+          },
       select: {
         id: true,
         store: true,
@@ -201,6 +211,24 @@ export async function getAllProducts(userId?: string) {
   } catch (error) {
     console.error("Failed to fetch all products:", error);
     return { success: false, error: "Failed to fetch products" };
+  }
+}
+
+export async function getDistinctCategories() {
+  try {
+    const rows = await readOnlyPrisma.product.findMany({
+      where: {
+        category: { not: null },
+        store: { isApproved: true },
+      },
+      select: { category: true },
+      distinct: ['category'],
+      orderBy: { category: 'asc' },
+    });
+    return rows.map((r) => r.category).filter((c): c is string => Boolean(c));
+  } catch (error) {
+    console.error('Failed to retrieve categories:', error);
+    return [];
   }
 }
 
