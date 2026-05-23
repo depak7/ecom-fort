@@ -72,7 +72,12 @@ export default function SignIn() {
       console.error(result.error);
     } else {
       successToast("login Successfull");
-      router.push("/");
+      const callbackUrl = searchParams.get("callbackUrl");
+      const safeCallback =
+        callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "/";
+      router.push(safeCallback);
     }
   };
 

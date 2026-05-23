@@ -54,7 +54,7 @@ const ProductListWrapper = ({ initialProducts, userId }: ProductListWrapperProps
     <Box sx={{ pb: 4 }}>
       <BrowseToolbar
         title="Products"
-        subtitle="Shop from local stores near you"
+        subtitle="Shop from stores in your city"
         searchPlaceholder="Search products by name, category, or store…"
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}

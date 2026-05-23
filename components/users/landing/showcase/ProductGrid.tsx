@@ -31,7 +31,7 @@ export default function ProductGrid() {
   }, [userId, selectedCity, isHydrated])
 
   return (
-    <Box sx={{ bgcolor: "#f8fafc", py: { xs: 4, md: 5 } }}>
+    <Box sx={{ bgcolor: "#fff", py: { xs: 4, md: 5 }, borderTop: "1px solid #f3f4f6" }}>
       <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, md: 3 } }}>
         <Box
           sx={{
@@ -43,10 +43,10 @@ export default function ProductGrid() {
           }}
         >
           <Box>
-            <Typography variant="h5" fontWeight={700} color="#0f172a">
+            <Typography variant="h5" fontWeight={700} color="#111827">
               Featured products
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            <Typography variant="body2" sx={{ mt: 0.5, color: "#6b7280" }}>
               {selectedCity
                 ? `Trending in ${selectedCity}`
                 : "Fresh picks from nearby stores"}
@@ -59,9 +59,11 @@ export default function ProductGrid() {
             sx={{
               textTransform: "none",
               fontWeight: 600,
-              color: "#0f172a",
+              color: "#374151",
               flexShrink: 0,
-              "&:hover": { bgcolor: "rgba(15,23,42,0.04)" },
+              border: "1px solid #e5e7eb",
+              borderRadius: 2,
+              "&:hover": { bgcolor: "#f9fafb", borderColor: "#d1d5db" },
             }}
           >
             View all
@@ -74,9 +76,9 @@ export default function ProductGrid() {
               textAlign: "center",
               py: 5,
               px: 2,
-              borderRadius: 2,
+              borderRadius: 1,
               bgcolor: "#fff",
-              border: "1px dashed #e2e8f0",
+              border: "1px dashed #ccc",
             }}
           >
             <Typography variant="body1" color="text.secondary">

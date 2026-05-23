@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { createStore } from "@/app/actions/store/action"
 import {
   Box,
@@ -89,6 +89,12 @@ export default function CreateStoreForm() {
   const router=useRouter()
 
   const { data: session, status } = useSession()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace(`/signin?callbackUrl=${encodeURIComponent("/merchant/addstore")}`)
+    }
+  }, [status, router])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -189,16 +195,7 @@ export default function CreateStoreForm() {
 
   // Redirect if not logged in
   if (status === "unauthenticated") {
-    return (
-      <Box sx={{ textAlign: "center", py: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          Please login to create a store
-        </Typography>
-        <Button variant="contained" href="/auth/signin" sx={{ mt: 2 }}>
-          Login
-        </Button>
-      </Box>
-    )
+    return <CircularProgress sx={{ display: "block", mx: "auto", my: 8 }} />
   }
 
 

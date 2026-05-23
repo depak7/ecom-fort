@@ -67,7 +67,7 @@ const AboutUs = () => {
         {/* Welcome Section */}
         <AboutSection title="Welcome to Ecom-Fort">
           <Typography variant="body1" paragraph>
-            We are the ultimate marketplace designed to bridge the gap between local store owners and online shoppers.
+            We are the ultimate marketplace designed to bridge the gap between store owners in your city and online shoppers.
           </Typography>
         </AboutSection>
         
@@ -81,7 +81,7 @@ const AboutUs = () => {
         {/* Meet the Founder */}
         <AboutSection title="Meet the Founder">
           <Typography variant="body1" paragraph>
-            <strong>Deepak S</strong>, the founder of Ecom-Fort, is a passionate software developer based in Bangalore, India. Deepak envisioned a platform where local shop owners—from clothing boutiques to shoe stores—could sell their products online effortlessly.
+            <strong>Deepak S</strong>, the founder of Ecom-Fort, is a passionate software developer based in Bangalore, India. Deepak envisioned a platform where shop owners in every city—from clothing boutiques to shoe stores—could sell their products online effortlessly.
           </Typography>
         </AboutSection>
         

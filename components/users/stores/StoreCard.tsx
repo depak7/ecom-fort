@@ -103,9 +103,9 @@ export default function StoreCard({ store }: IProps) {
             size={isMobile ? "small" : "medium"}
             variant="contained"
             sx={{
-              bgcolor: "#00ABE0",
+              bgcolor: "#374151",
               "&:hover": {
-                bgcolor: "#0098c7",
+                bgcolor: "#1f2937",
               },
               width: isMobile ? "100%" : "auto",
             }}

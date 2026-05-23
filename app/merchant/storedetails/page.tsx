@@ -11,8 +11,8 @@ import { getGroupedOrdersByStore } from "@/app/actions/order/action";
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import EditIcon from '@mui/icons-material/Edit';
 import Link from 'next/link'
+import { redirect } from "next/navigation"
 import oops from '@/components/assets/users/oops.jpg'
-import unauthorized from '@/components/assets/users/unauthorized.jpg'
 
 interface Store {
   address: string;
@@ -54,22 +54,7 @@ export default async function StorePage() {
 
 
   if (!userId) {
-    return (
-      <Container maxWidth="md" sx={{ py: 8 }}>
-        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <Image
-            src={unauthorized} // Add an appropriate image
-            alt="Unauthorized"
-            width={300}
-            height={300}
-            style={{ marginBottom: '2rem' }}
-          />
-          <Typography variant="h5" gutterBottom>
-            Please login to access your store dashboard
-          </Typography>
-        </Paper>
-      </Container>
-    );
+    redirect("/signin?callbackUrl=/merchant/storedetails")
   }
 
   const storeDetails = await checkUserHasStore(userId);

@@ -63,7 +63,7 @@ const TermsAndConditions = () => {
         {/* Introduction */}
         <TermsSection title="1. Introduction">
           <Typography variant="body1" paragraph>
-            Welcome to Ecom-Fort, a marketplace platform that connects users with local stores. By using Ecom-Fort, you agree to the following terms and conditions.
+            Welcome to Ecom-Fort, a marketplace platform that connects users with stores in their city. By using Ecom-Fort, you agree to the following terms and conditions.
           </Typography>
         </TermsSection>
         

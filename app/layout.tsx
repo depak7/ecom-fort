@@ -47,7 +47,12 @@ export default function RootLayout({
         <Providers>
           <AppRouterCacheProvider>
             <NavBar />
-            <Toolbar />
+            <Toolbar
+              sx={{
+                bgcolor: "#f7f7f8",
+                minHeight: { xs: 56, sm: 64 },
+              }}
+            />
             {children}
             <Analytics />
           </AppRouterCacheProvider>

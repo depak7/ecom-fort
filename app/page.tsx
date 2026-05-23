@@ -1,6 +1,5 @@
 import ProductGrid from "@/components/users/landing/showcase/ProductGrid"
 import StoreGrid from "@/components/users/landing/showcase/StoreGrid"
-import TitleCard from "@/components/users/landing/showcase/TitleCard"
 import DiscoveryPanel from "@/components/users/discovery/DiscoveryPanel"
 import { getAllStores } from "./actions/store/action"
 import Footer from "@/components/users/landing/appbar/footer"
@@ -20,8 +19,7 @@ export default async function Home() {
   const stores: Store[] = res.stores || []
 
   return (
-    <Box sx={{ bgcolor: "#fff", minHeight: "100vh" }}>
-      <TitleCard />
+    <Box sx={{ bgcolor: "#f7f7f8", minHeight: "100vh" }}>
       <DiscoveryPanel />
       <StoreGrid stores={stores} />
       <ProductGrid />

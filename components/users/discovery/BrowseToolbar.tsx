@@ -35,19 +35,18 @@ export default function BrowseToolbar({
   return (
     <Box
       sx={{
-        bgcolor: "#f8fafc",
-        borderBottom: "1px solid",
-        borderColor: "divider",
+        bgcolor: "#f7f7f8",
+        borderBottom: "1px solid #e5e7eb",
         py: { xs: 2.5, md: 3 },
         mb: 3,
       }}
     >
       <Container maxWidth="lg">
-        <Typography variant="h5" fontWeight={700} gutterBottom>
+        <Typography variant="h5" fontWeight={700} gutterBottom color="#111827">
           {title}
         </Typography>
         {subtitle && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 2, color: "#6b7280" }}>
             {subtitle}
             {selectedCity ? ` · Showing results in ${selectedCity}` : ""}
           </Typography>
@@ -57,10 +56,9 @@ export default function BrowseToolbar({
           elevation={0}
           sx={{
             p: { xs: 2, sm: 2.5 },
-            borderRadius: 2.5,
-            border: "1px solid",
-            borderColor: "divider",
-            bgcolor: "background.paper",
+            borderRadius: 1,
+            border: "1px solid #e5e5e5",
+            bgcolor: "#fff",
           }}
         >
           <TextField
@@ -72,13 +70,17 @@ export default function BrowseToolbar({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon color="action" fontSize="small" />
+                  <SearchIcon sx={{ color: "#999", fontSize: 20 }} />
                 </InputAdornment>
               ),
             }}
             sx={{
               mb: 2,
-              "& .MuiOutlinedInput-root": { borderRadius: 2, bgcolor: "#f8fafc" },
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 1,
+                bgcolor: "#fafafa",
+                "&.Mui-focused fieldset": { borderColor: "#000" },
+              },
             }}
           />
 
