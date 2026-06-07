@@ -14,7 +14,7 @@ const inter = Inter({ subsets: ["latin"] });
 const GA_MEASUREMENT_ID = "G-JSHPCHG02T";
 
 export const metadata: Metadata = {
-  title: "Ecom-Fort",
+  title: "Ecomfort",
   description: "Styles from your City",
 };
 

@@ -66,7 +66,7 @@ const Footer = () => {
                 '&:hover': { color: '#1f2937' },
               }}
             >
-              Ecom-Fort
+              EcomFort
             </Typography>
             <Typography
               variant="body2"
@@ -152,13 +152,13 @@ const Footer = () => {
               <Stack direction="row" spacing={1} alignItems="center">
                 <LanguageIcon sx={{ fontSize: 18, color: '#9ca3af' }} />
                 <Link
-                  href="https://ecom-fort.vercel.app"
+                  href="https://ecomfort.shop"
                   target="_blank"
                   rel="noopener noreferrer"
                   underline="none"
                   sx={linkSx}
                 >
-                  ecom-fort.vercel.app
+                  ecomfort.shop
                 </Link>
               </Stack>
             </Stack>
