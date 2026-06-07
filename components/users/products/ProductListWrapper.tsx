@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Box, Grid, Typography, Button, Menu, MenuItem } from '@mui/material';
-import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
+import { Box, Grid, Typography } from '@mui/material';
 import ProductCard from './ProductCard';
+import SortProducts, { PRODUCT_SORT_OPTIONS } from './SortProducts';
 import BrowseToolbar from '@/components/users/discovery/BrowseToolbar';
 import { useLocation } from '@/components/users/location/LocationProvider';
 
@@ -15,7 +15,6 @@ interface ProductListWrapperProps {
 const ProductListWrapper = ({ initialProducts, userId }: ProductListWrapperProps) => {
   const [products, setProducts] = useState(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const { selectedCity, isHydrated } = useLocation();
 
   const fetchProducts = useCallback(async (sortBy = 'new-arrivals') => {
@@ -46,7 +45,6 @@ const ProductListWrapper = ({ initialProducts, userId }: ProductListWrapperProps
   }, [products, searchQuery]);
 
   const handleSort = async (sortBy: string) => {
-    setSortAnchorEl(null);
     await fetchProducts(sortBy);
   };
 
@@ -60,19 +58,12 @@ const ProductListWrapper = ({ initialProducts, userId }: ProductListWrapperProps
         onSearchChange={setSearchQuery}
       >
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button
-            size="small"
-            endIcon={<ExpandMoreOutlinedIcon />}
-            onClick={(e) => setSortAnchorEl(e.currentTarget)}
-            sx={{ textTransform: 'none', color: 'text.secondary' }}
-          >
-            Sort
-          </Button>
-          <Menu anchorEl={sortAnchorEl} open={Boolean(sortAnchorEl)} onClose={() => setSortAnchorEl(null)}>
-            <MenuItem onClick={() => handleSort('new-arrivals')}>New arrivals</MenuItem>
-            <MenuItem onClick={() => handleSort('price-low-high')}>Price: low to high</MenuItem>
-            <MenuItem onClick={() => handleSort('price-high-low')}>Price: high to low</MenuItem>
-          </Menu>
+          <SortProducts
+            label="Sort products"
+            options={PRODUCT_SORT_OPTIONS}
+            defaultValue="new-arrivals"
+            onSortChange={handleSort}
+          />
         </Box>
       </BrowseToolbar>
 

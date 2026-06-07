@@ -1,17 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  Grid,
-  Typography,
-  Box,
-  Menu,
-  MenuItem,
-  Button,
-} from "@mui/material";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import { Grid, Typography, Box } from "@mui/material";
 
 import StoreCard from "@/components/users/stores/StoreCard";
+import SortProducts, { STORE_SORT_OPTIONS } from "@/components/users/products/SortProducts";
 import BrowseToolbar from "@/components/users/discovery/BrowseToolbar";
 import { getAllStores } from "../actions/store/action";
 import { useLocation } from "@/components/users/location/LocationProvider";
@@ -27,7 +20,6 @@ interface Store {
 
 export default function AvailableStores() {
   const [allStores, setAllStores] = useState<Store[]>([]);
-  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const [sortBy, setSortBy] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedCity, isHydrated } = useLocation();
@@ -56,7 +48,6 @@ export default function AvailableStores() {
 
   const handleSort = (sortOption: string) => {
     setSortBy(sortOption);
-    setSortAnchorEl(null);
   };
 
   return (
@@ -69,22 +60,13 @@ export default function AvailableStores() {
         onSearchChange={setSearchQuery}
       >
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            size="small"
-            endIcon={<ExpandMoreOutlinedIcon />}
-            onClick={(e) => setSortAnchorEl(e.currentTarget)}
-            sx={{ textTransform: "none", color: "text.secondary" }}
-          >
-            Sort
-          </Button>
-          <Menu
-            anchorEl={sortAnchorEl}
-            open={Boolean(sortAnchorEl)}
-            onClose={() => setSortAnchorEl(null)}
-          >
-            <MenuItem onClick={() => handleSort("name")}>Store name</MenuItem>
-            <MenuItem onClick={() => handleSort("city")}>City</MenuItem>
-          </Menu>
+          <SortProducts
+            label="Sort stores"
+            options={STORE_SORT_OPTIONS}
+            value={sortBy}
+            defaultValue=""
+            onSortChange={handleSort}
+          />
         </Box>
       </BrowseToolbar>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Box,
   Button,
@@ -8,22 +8,61 @@ import {
 } from "@mui/material"
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined"
 
-interface SortProductsProps {
-  onSortChange: (sort: string) => void
+export type SortOption = {
+  value: string
+  label: string
 }
 
-const sortOptions = [
+export const PRODUCT_SORT_OPTIONS: SortOption[] = [
   { value: "new-arrivals", label: "New arrivals" },
   { value: "price-low-high", label: "Price: low to high" },
   { value: "price-high-low", label: "Price: high to low" },
 ]
 
-const SortProducts = ({ onSortChange }: SortProductsProps) => {
+export const STORE_SORT_OPTIONS: SortOption[] = [
+  { value: "", label: "Default" },
+  { value: "name", label: "Store name" },
+  { value: "city", label: "City" },
+]
+
+export const SEARCH_SORT_OPTIONS: SortOption[] = [
+  { value: "relevance", label: "Relevance" },
+  { value: "new-arrivals", label: "New arrivals" },
+  { value: "price-low-high", label: "Price: low to high" },
+  { value: "price-high-low", label: "Price: high to low" },
+]
+
+interface SortProductsProps {
+  label: string
+  options: SortOption[]
+  onSortChange: (sort: string) => void
+  value?: string
+  defaultValue?: string
+}
+
+const SortProducts = ({
+  label,
+  options,
+  onSortChange,
+  value,
+  defaultValue,
+}: SortProductsProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [selectedSort, setSelectedSort] = useState("new-arrivals")
+  const [internalSort, setInternalSort] = useState(
+    defaultValue ?? options[0]?.value ?? ""
+  )
+
+  const selectedSort = value !== undefined ? value : internalSort
+
+  useEffect(() => {
+    if (value !== undefined) return
+    if (defaultValue !== undefined) setInternalSort(defaultValue)
+  }, [defaultValue, value])
 
   const selectedLabel =
-    sortOptions.find((o) => o.value === selectedSort)?.label ?? "New arrivals"
+    options.find((o) => o.value === selectedSort)?.label ??
+    options[0]?.label ??
+    ""
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -34,7 +73,7 @@ const SortProducts = ({ onSortChange }: SortProductsProps) => {
   }
 
   const handleSort = (sortBy: string) => {
-    setSelectedSort(sortBy)
+    if (value === undefined) setInternalSort(sortBy)
     onSortChange(sortBy)
     handleClose()
   }
@@ -76,7 +115,7 @@ const SortProducts = ({ onSortChange }: SortProductsProps) => {
             mr: 0.25,
           }}
         >
-          Sort:
+          {label}:
         </Typography>
         <Typography
           component="span"
@@ -98,21 +137,19 @@ const SortProducts = ({ onSortChange }: SortProductsProps) => {
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: {
-              mt: 0.75,
-              borderRadius: 1.5,
-              border: "1px solid #e5e7eb",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-              minWidth: 180,
-            },
+        PaperProps={{
+          sx: {
+            mt: 0.75,
+            borderRadius: 1.5,
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+            minWidth: 180,
           },
         }}
       >
-        {sortOptions.map((option) => (
+        {options.map((option) => (
           <MenuItem
-            key={option.value}
+            key={option.value || "default"}
             onClick={() => handleSort(option.value)}
             selected={selectedSort === option.value}
             sx={{

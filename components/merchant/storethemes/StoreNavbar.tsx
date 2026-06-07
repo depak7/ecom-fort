@@ -18,7 +18,7 @@ import {
   Search as SearchIcon,
   LocationOn as LocationIcon,
 } from "@mui/icons-material"
-import SortProducts from "@/components/users/products/SortProducts"
+import SortProducts, { PRODUCT_SORT_OPTIONS } from "@/components/users/products/SortProducts"
 
 type StoreNavbarProps = {
   storeName: string
@@ -95,7 +95,12 @@ export default function StoreNavbar({
             )}
           </Box>
           <Box sx={{ flexShrink: 0 }}>
-            <SortProducts onSortChange={onSortChange} />
+            <SortProducts
+              label="Sort products"
+              options={PRODUCT_SORT_OPTIONS}
+              defaultValue="new-arrivals"
+              onSortChange={onSortChange}
+            />
           </Box>
         </Box>
 

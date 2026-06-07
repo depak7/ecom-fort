@@ -11,10 +11,12 @@ import {
   CardContent,
   CardMedia,
   IconButton,
+  Link,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
@@ -55,6 +57,16 @@ export default function ProductCard({
 
     const formattedName = product.name.replace(/\s+/g, "-").toLowerCase();
     router.push(`/products/${formattedName}/${product.id}`);
+  };
+
+  const storePageHref =
+    product.storeId && product.store
+      ? `/stores/${product.storeId}/${encodeURIComponent(product.store)}`
+      : null;
+
+  const handleStoreClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (storePageHref) router.push(storePageHref);
   };
 
   const handleWishlistToggle = useCallback(
@@ -148,9 +160,57 @@ export default function ProductCard({
           {product.name.toLocaleUpperCase()}
         </Typography>
 
-        <Typography  fontWeight={700} variant={isMobile ? "body2" : "body1"}>
-          Store : {product.store}
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            mt: 0.25,
+            minWidth: 0,
+          }}
+        >
+          <StorefrontOutlinedIcon
+            sx={{ fontSize: 15, color: "#9ca3af", flexShrink: 0 }}
+          />
+          {storePageHref ? (
+            <Link
+              component="button"
+              type="button"
+              onClick={handleStoreClick}
+              underline="hover"
+              sx={{
+                fontSize: isMobile ? "0.8125rem" : "0.875rem",
+                fontWeight: 600,
+                color: "#6b7280",
+                textAlign: "left",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: "100%",
+                p: 0,
+                border: "none",
+                bgcolor: "transparent",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                "&:hover": { color: "#374151" },
+              }}
+            >
+              {product.store}
+            </Link>
+          ) : (
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{
+                fontSize: isMobile ? "0.8125rem" : "0.875rem",
+                fontWeight: 600,
+                color: "#6b7280",
+              }}
+            >
+              {product.store}
+            </Typography>
+          )}
+        </Box>
 
         <Typography
           variant={isMobile ? "body2" : "body1"}

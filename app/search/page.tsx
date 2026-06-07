@@ -22,6 +22,7 @@ import StoreCard from '@/components/users/stores/StoreCard'
 import ProductCard from '@/components/users/products/ProductCard'
 import { BaseButton } from '@/components/users/buttons/BaseButton'
 import BrowseToolbar from '@/components/users/discovery/BrowseToolbar'
+import SortProducts, { SEARCH_SORT_OPTIONS } from '@/components/users/products/SortProducts'
 import { useLocation } from '@/components/users/location/LocationProvider'
 
 type SearchResults = {
@@ -29,13 +30,6 @@ type SearchResults = {
   productsWithWishlistStatus: any[]
   categories?: string[]
 }
-
-const SORT_OPTIONS = [
-  { value: 'relevance', label: 'Relevance' },
-  { value: 'new-arrivals', label: 'New arrivals' },
-  { value: 'price-low-high', label: 'Price: low to high' },
-  { value: 'price-high-low', label: 'Price: high to low' },
-]
 
 export default function SearchResults() {
   const searchParams = useSearchParams()
@@ -189,21 +183,13 @@ export default function SearchResults() {
               </Select>
             </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 160 }}>
-              <InputLabel id="search-sort-label">Sort</InputLabel>
-              <Select
-                labelId="search-sort-label"
-                value={sort}
-                label="Sort"
-                onChange={(e) => setSort(e.target.value)}
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <SortProducts
+              label="Sort results"
+              options={SEARCH_SORT_OPTIONS}
+              value={sort}
+              defaultValue="relevance"
+              onSortChange={setSort}
+            />
           </Box>
 
           <BaseButton
