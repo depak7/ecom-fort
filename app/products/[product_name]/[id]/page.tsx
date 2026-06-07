@@ -3,6 +3,7 @@ import ProductDetails from "@/components/users/products/ProductDetails";
 import SimilarProducts from "@/components/users/products/SimilarProducts";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
+import { Box, Typography } from "@mui/material";
 
 interface ProductPageProps {
   params: {
@@ -23,7 +24,16 @@ export default async function Page({ params }: ProductPageProps) {
   const similarProduct =userId?await getSimilarProductsByCategory(response.product?.category || "clothes"):await getSimilarProductsByCategory(response.product?.category || "clothes",userId);
 
   if (!response || !response.product) {
-    return <div>Product not found</div>;
+    return (
+      <Box sx={{ textAlign: "center", py: 8, px: 2 }}>
+        <Typography variant="h6" gutterBottom color="#111827">
+          Product not found
+        </Typography>
+        <Typography variant="body2" color="#6b7280">
+          This product may have been removed or the link is incorrect.
+        </Typography>
+      </Box>
+    );
   }
 
   const similarProducts = similarProduct.products?.filter(p => p.id !== response.product.id).map(p => ({

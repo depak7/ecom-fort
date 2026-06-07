@@ -27,6 +27,8 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import { useRouter } from "next/navigation";
 import { BaseButton } from "../buttons/BaseButton";
 import { ProductResponse } from "@/app/actions/products/types";
 import {
@@ -63,6 +65,8 @@ export default function ProductDetails({
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
 
   const { errorToast, successToast } = UseCustomToast();
+  const router = useRouter();
+  const storePageHref = `/stores/${product.storeId}/${encodeURIComponent(product.store.name)}`;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -176,11 +180,11 @@ export default function ProductDetails({
     }
     try {
       const res = await addToCart(userId, product.id, quantity, selectedVariant.id, selectedSizeId ? selectedSizeId : 0);
-      res.success ? successToast("Product added to cart successfully!") : errorToast("Soory something went wrong")
+      res.success ? successToast("Product added to cart successfully!") : errorToast("Sorry, something went wrong")
 
     } catch (error) {
       console.error("Error adding to cart:", error);
-      errorToast("Soory something went wrong")
+      errorToast("Sorry, something went wrong")
     }
   };
 
@@ -230,7 +234,8 @@ export default function ProductDetails({
                 sx={{
                   minWidth: 60,
                   height: 60,
-                  border: img.url == mainImage ? "2px solid black" : "none",
+                  border: img.url == mainImage ? "2px solid #374151" : "1px solid #e5e7eb",
+                  borderRadius: 1,
                   cursor: "pointer",
                   flexShrink: 0
                 }}
@@ -255,27 +260,54 @@ export default function ProductDetails({
         }}>
           <Typography
             variant="h5"
-            component="p"
+            component="h1"
             fontWeight={700}
             gutterBottom
-            sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}
+            sx={{ fontSize: { xs: "1.25rem", md: "1.5rem" }, color: "#111827", lineHeight: 1.25 }}
           >
-            {product.name.toLocaleUpperCase()}
+            {product.name}
           </Typography>
-          {product.brand && (
-            <Box display={"flex"} flexDirection={"row"} gap={0.5} alignItems={"center"}>
-              <Typography variant="body1" gutterBottom>
-                Brand :
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {product.brand}
-              </Typography>
-            </Box>)}
-          <Box display={"flex"} flexDirection={"column"}>
-            <Typography variant="body1" gutterBottom>
-              About the Product
+
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              mb: 1.5,
+              cursor: "pointer",
+              maxWidth: "100%",
+            }}
+            onClick={() => router.push(storePageHref)}
+          >
+            <StorefrontOutlinedIcon sx={{ fontSize: 16, color: "#9ca3af", flexShrink: 0 }} />
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                color: "#6b7280",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                "&:hover": { color: "#374151" },
+              }}
+            >
+              {product.store.name}
             </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+          </Box>
+
+          {product.brand && (
+            <Typography variant="body2" sx={{ color: "#6b7280", mb: 1.5 }}>
+              Brand · {product.brand}
+            </Typography>
+          )}
+          <Box display={"flex"} flexDirection={"column"}>
+            <Typography variant="subtitle2" fontWeight={600} sx={{ color: "#374151", mb: 0.5 }}>
+              About this product
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#6b7280", lineHeight: 1.6 }} gutterBottom>
               {product.description}
             </Typography>
           </Box>
@@ -286,7 +318,7 @@ export default function ProductDetails({
             gutterBottom
             sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}
           >
-            MRP : ₹ {product.price}
+            ₹ {product.price}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
             incl. of taxes
@@ -303,7 +335,8 @@ export default function ProductDetails({
                     width: 60,
                     height: 60,
                     border:
-                      variant === selectedVariant ? "2px solid black" : "none",
+                      variant === selectedVariant ? "2px solid #374151" : "1px solid #e5e7eb",
+                    borderRadius: 1,
                     cursor: "pointer",
                   }}
                   onClick={() => setSelectedVariant(variant)}

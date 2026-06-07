@@ -37,9 +37,13 @@ export default function SimilarProducts({ product }: ProductProps) {
   };
 
   return (
-    <Box>
-      <Typography variant="h6" fontWeight={"bold"} sx={{ mt: 4, mb: 2 }}>
-        Similar Products
+    <Box sx={{ px: { xs: 2, md: 0 }, maxWidth: 1600, mx: "auto", pb: 4 }}>
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mt: 4, mb: 2, color: "#111827", fontSize: { xs: "1.125rem", md: "1.25rem" } }}
+      >
+        Similar products
       </Typography>
       <Grid container spacing={3}>
         {products && products
