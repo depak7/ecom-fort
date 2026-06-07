@@ -2,6 +2,7 @@
 
 import StoreGridWrapper from "@/components/users/stores/StoreGridWrapper";
 import { authOptions } from "@/lib/auth";
+import { decodeRouteParam } from "@/lib/decodeRouteParam";
 import { getServerSession } from "next-auth";
 
 interface PageProps {
@@ -15,8 +16,8 @@ export default async function StoreDetails({ params }: PageProps) {
 
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
-  const storeId=params.store_id
-  const storeName=params.store_name
+  const storeId = params.store_id
+  const storeName = decodeRouteParam(params.store_name)
 
 
   return (

@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Box,
   Button,
   Card,
   CardActions,
@@ -8,11 +9,10 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-  Chip,
 } from "@mui/material";
-import { LocationOn as LocationIcon } from "@mui/icons-material";
 import Image from "next/image";
 import Link from "next/link";
+import StoreCityLabel from "./StoreCityLabel";
 
 interface IProps {
   store: {
@@ -36,20 +36,26 @@ export default function StoreCard({ store }: IProps) {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        border: "1px solid #ccc",
+        border: "1px solid #e5e7eb",
         boxShadow: "none",
         maxWidth: isMobile ? "95%" : isTablet ? "300px" : "350px",
         margin: "auto",
-        borderRadius: "8px",
+        borderRadius: 2,
         overflow: "hidden",
+        bgcolor: "#fff",
+        transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+        "&:hover": {
+          borderColor: "#d1d5db",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+        },
       }}
     >
       <CardMedia
         sx={{
-          width: "100%", 
+          width: "100%",
           height: isMobile ? 100 : isTablet ? 120 : 150,
           position: "relative",
-          borderBottom: "1px solid #eee",
+          borderBottom: "1px solid #f3f4f6",
         }}
       >
         <Image
@@ -60,28 +66,26 @@ export default function StoreCard({ store }: IProps) {
         />
       </CardMedia>
 
-      <CardContent sx={{ flexGrow: 1, padding: isMobile ? 1: 2 }}>
+      <CardContent sx={{ flexGrow: 1, px: 2, pt: 2, pb: 1.5 }}>
         <Typography
           gutterBottom
           variant={isMobile ? "subtitle1" : "h6"}
           component="div"
           noWrap
+          sx={{ color: "#111827", fontWeight: 700, mb: 0.75 }}
         >
           {store.name}
         </Typography>
         {store.city && (
-          <Chip
-            icon={<LocationIcon sx={{ fontSize: 14 }} />}
-            label={store.city}
-            size="small"
-            variant="outlined"
-            sx={{ mb: 1, maxWidth: "100%" }}
-          />
+          <Box sx={{ mb: 1.25 }}>
+            <StoreCityLabel city={store.city} />
+          </Box>
         )}
         <Typography
           variant="body2"
-          color="text.secondary"
           sx={{
+            color: "#6b7280",
+            lineHeight: 1.55,
             display: "-webkit-box",
             WebkitLineClamp: 3,
             WebkitBoxOrient: "vertical",
@@ -95,15 +99,21 @@ export default function StoreCard({ store }: IProps) {
       <CardActions
         sx={{
           justifyContent: "flex-end",
-          padding: isMobile ? 2 : 3,
+          px: 2,
+          pb: 2,
+          pt: 0,
         }}
       >
         <Link href={`/stores/${store.id}/${encodeURIComponent(store.name)}`} passHref>
           <Button
             size={isMobile ? "small" : "medium"}
             variant="contained"
+            disableElevation
             sx={{
               bgcolor: "#374151",
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 1.5,
               "&:hover": {
                 bgcolor: "#1f2937",
               },

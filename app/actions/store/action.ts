@@ -200,6 +200,8 @@ export async function getStoreById(storeId: string | null) {
         description: true,
         phoneNumber:true,
         city: true,
+        state: true,
+        pincode: true,
         address: true,
         mapLink: true,
         ownerId: true,
