@@ -13,9 +13,36 @@ import Footer from "@/components/users/landing/appbar/footer";
 const inter = Inter({ subsets: ["latin"] });
 const GA_MEASUREMENT_ID = "G-JSHPCHG02T";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://ecomfort.shop";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Ecomfort",
   description: "Styles from your City",
+  applicationName: "Ecomfort",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Ecomfort",
+    description: "Styles from your City",
+    siteName: "Ecomfort",
+    type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        alt: "Ecom-Fort logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Ecomfort",
+    description: "Styles from your City",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({

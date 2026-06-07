@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
         // ✅ Generate secure token (placeholder here, use JWT or UUID in prod)
         const resetToken = Math.random().toString(36).substring(2, 15);
-        const resetLink = `https://ecom-fort.vercel.app/reset-password?token=${resetToken}`;
+        const resetLink = `https://ecomfort.shop/reset-password?token=${resetToken}`;
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
 
 
